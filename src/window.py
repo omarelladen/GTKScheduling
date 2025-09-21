@@ -84,7 +84,7 @@ class Window(Gtk.Window):
             length = task.duration * scale_rect
             num_pos = 0 if task_num >= 10 else pb_line_x0/4
             color = dict_colors[task.color_num]
-            # self.list_rect_progress_bar.append(Rectangle(num_pos, pb_height + pb_line_y0 + pb_lines_dist*(task_num-1), 0, 0, f"Line {task_num}"))
+            self.list_rect_progress_bar.append(Rectangle(num_pos, pb_height + pb_line_y0 + pb_lines_dist*(task_num-1), 0, 0, f"Line {task_num}", color))
             pb_offset = pb_line_x0
             self.list_rect_progress_bar.append(Rectangle(pb_offset - (length-pb_dist), pb_line_y0 + pb_lines_dist*(task_num-1), length-pb_dist, pb_height, task_num, color))
             pb_offset += length
