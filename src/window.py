@@ -11,13 +11,21 @@ class Window(Gtk.Window):
     def __init__(self, 
         icon_file: str = '',
         app = None,
-        num_tasks = 0,
+        list_tasks = [],
     ):
         super().__init__()
 
         self.app = app
 
-        self.num_tasks = num_tasks
+        self.list_tasks = list_tasks
+
+        self.dict_colors = {
+            1: (1.0, 0.0, 0.0),
+            2: (0.0, 0.0, 1.0),
+            3: (0.0, 1.0, 0.0),
+            4: (1.0, 1.0, 0.0),
+            5: (0.5, 0.0, 1.0),
+        }
 
         # Icon
         try:
@@ -63,14 +71,6 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
-        self.dict_colors = {
-            1: (1.0, 0.0, 0.0),
-            2: (0.0, 0.0, 1.0),
-            3: (0.0, 1.0, 0.0),
-            4: (1.0, 1.0, 0.0),
-            5: (0.5, 0.0, 1.0),
-        }
-
         # Create Progress Bars Rectangles
         self.scale_rect = 10
         self.pb_line_x0 = 14 + self.scale_rect  # initial x
@@ -80,7 +80,7 @@ class Window(Gtk.Window):
         self.pb_dist = 0  #1  # distance between 2 bars
         self.list_rect_progress_bar = []
         self.pb_offset = self.pb_line_x0  # inial offset that will be incremented with time (+= 1*scale_rect)
-        for task_num in range(1, self.num_tasks + 1):
+        for task_num in range(1, len(self.list_tasks) + 1):
             num_pos = 0 if task_num >= 10 else self.pb_line_x0/4
             self.list_rect_progress_bar.append(Rectangle(num_pos,
                                                          self.pb_height + self.pb_line_y0 + self.pb_lines_dist*(task_num-1),
@@ -94,8 +94,6 @@ class Window(Gtk.Window):
         self.drawingarea_progress_bar.connect("button-press-event", self._on_click_progress_bar)
         self.drawingarea_progress_bar.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
         stack.add_titled(self.drawingarea_progress_bar, "bars", "Bars")
-
-
 
         # Stats Tab
         self.label_stats = Gtk.Label()
@@ -171,7 +169,12 @@ class Window(Gtk.Window):
             cr.fill()
 
     def _show_task_popover(self, rect, widget, event):
-        self.label_task.set_text(f"{rect.caption}")
+        self.label_task.set_text(f"id: {rect.caption}\n"
+                                 f"start time: {self.list_tasks[rect.caption-1].start_time}\n"
+                                 f"duration: {self.list_tasks[rect.caption-1].duration}\n"
+                                 f"priority: {self.list_tasks[rect.caption-1].priority}\n"
+                                 f"progress: {self.list_tasks[rect.caption-1].progress}\n"
+                                 f"state: {self.list_tasks[rect.caption-1].state}")
 
         e_x = event.x
         e_y = event.y
@@ -189,11 +192,10 @@ class Window(Gtk.Window):
             
     def _refresh_stats_label(self):
         self.label_stats.set_markup(
-            f"<big><b>Tasks:</b> {self.app.num_tasks}</big>\n"
+            f"<big><b>Tasks:</b> {len(self.list_tasks)}</big>\n"
             f"<big><b>CLK duration:</b> {self.app.clk_duration} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.quantum} CLKs</big>\n"
         )
-        
      
     def update_rect_time(self, current_task):
         # Create Progress Bars Rectangles
@@ -209,4 +211,5 @@ class Window(Gtk.Window):
                                                      color))
         self.pb_offset += (1 * self.scale_rect)
 
+        # Draw created rectangle
         self.drawingarea_progress_bar.queue_draw()

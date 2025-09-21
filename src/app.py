@@ -19,10 +19,10 @@ class App():
         self.num_tasks = len(self.list_tasks)
         self.time = 0
         self.current_task = self.list_tasks[0]
-        self.clk_duration = 200
+        self.clk_duration = 1000
        
         # Load GTK Window
-        self.win = Window(ICON_FILE, self, self.num_tasks)
+        self.win = Window(ICON_FILE, self, self.list_tasks)
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
         
@@ -36,9 +36,18 @@ class App():
     def tick(self):
         self.time += 1;
         print(f"Tick {self.time}", end='')
+
+        self.current_task.progress += 1
+        for task in self.list_tasks:
+            if task != self.current_task:
+                task.state = 'ready'
+        self.current_task.state = 'running'
+        
         self.win.update_rect_time(self.current_task)
+
+        # Change or not tasks
         if self.time % self.quantum == 0:
-            print(f" - Change to task {self.current_task.id}", end="")
+            print(f" - Change to task {self.current_task.id + 1}", end="")
             if self.current_task.id == self.num_tasks:
                 self.current_task = self.list_tasks[0]
             else:
