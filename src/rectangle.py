@@ -8,7 +8,7 @@ class Rectangle(Gdk.Rectangle):
         width: int = 0,
         height: int = 0,
         caption: int = 0,
-        color: tuple[float, float, float] = (0.0, 0.8, 0.0)
+        color: tuple[float, float, float] = (1, 1, 1)
     ):
         self.x = x
         self.y = y
