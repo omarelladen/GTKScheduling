@@ -2,25 +2,27 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-
 from timer import Timer
 from window import Window
+from task import Task
 
 # Include config variables
 exec(open('config').read())
 
 class App():
     def __init__(self):
-        
+
         # Scheduling parameters
+        self.setup_file_path = "tasks.txt"
+        self.alg_scheduling, self.quantum = self._setup_scheduling(self.setup_file_path)
+        self.list_tasks = self._setup_tasks(self.setup_file_path)
+        self.num_tasks = len(self.list_tasks)
         self.time = 0
-        self.quantum = 2
         self.current_task = 1
-        self.num_tasks = 5
         self.clk_duration = 200
        
         # Load GTK Window
-        self.win = Window(ICON_FILE, BAR_SIZES_FILE, self)
+        self.win = Window(ICON_FILE, self, self.list_tasks)
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
         
@@ -32,7 +34,7 @@ class App():
         Gtk.main_quit()
 
     def tick(self):
-        self.time+=1;
+        self.time += 1;
         print(f"Tick {self.time}", end='')
         self.win.update_rect_time(self.current_task)
         if self.time % self.quantum == 0:
@@ -45,3 +47,49 @@ class App():
         
     def run(self):
         Gtk.main()
+
+    def _setup_scheduling(self, file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            print(lines)
+
+            alg_scheduling = lines[0].split(";")[0]
+            print("Algorithm: ", alg_scheduling)
+        	
+            quantum = int(lines[0].split(";")[1])
+            print("Quantum: ", quantum)
+
+        return alg_scheduling, quantum
+
+    def _setup_tasks(self, file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        
+            list_tasks = []
+            for line in lines[1:]:            
+                task_id         = int(line.split(";")[0].replace("t", ""))
+                print("Id: ", task_id)
+                
+                task_color_num  = int(line.split(";")[1])
+                print("Color: ", task_color_num)
+                
+                task_start_time = int(line.split(";")[2])
+                print("Start time: ", task_start_time)
+                
+                task_duration   = int(line.split(";")[3])
+                print("Duration: ", task_duration)
+                
+                task_priority   = int(line.split(";")[4])
+                print("Priority: ", task_priority)
+
+                print("\n", end="")
+
+                task = Task(task_id,
+                            task_color_num,
+                            task_start_time,
+                            task_duration,
+                            task_priority)
+
+                list_tasks.append(task)
+                
+            return list_tasks

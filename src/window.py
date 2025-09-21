@@ -10,12 +10,14 @@ from rectangle import Rectangle
 class Window(Gtk.Window):
     def __init__(self, 
         icon_file: str = '',
-        bar_sizes_file: str = '',
-        app = None
+        app = None,
+        list_tasks = []
     ):
         super().__init__()
         
         self.app = app
+
+        self.list_tasks = list_tasks
 
         # Icon
         try:
@@ -61,25 +63,31 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
+        dict_colors = {
+            1: (1.0, 0.0, 0.0),
+            2: (0.0, 0.0, 1.0),
+            3: (0.0, 1.0, 0.0),
+            4: (1.0, 1.0, 0.0),
+            5: (0.5, 0.0, 1.0),
+        }
+
         # Create Progress Bars Rectangles
         pb_line_x0 = 14  # initial x
         pb_line_y0 = 20  # initial y
         pb_height = 10  # bar height
         pb_lines_dist = pb_height + 2  # distance between lines
         pb_dist = 1  # distance between 2 bars
+        scale_rect = 10
         self.list_rect_progress_bar = []
-        with open(bar_sizes_file, mode='r') as file:
-            reader = csv.reader(file)
-            for line in reader:
-                task_num = int(line[0])
-                chapter = int(line[1])
-                length = float(line[2])
-                
-                num_pos = 0 if task_num >= 10 else pb_line_x0/4
-                self.list_rect_progress_bar.append(Rectangle(num_pos, pb_height + pb_line_y0 + pb_lines_dist*(task_num-1), 0, 0, f"Line {task_num}"))
-                pb_offset = pb_line_x0
-                self.list_rect_progress_bar.append(Rectangle(pb_offset - (length-pb_dist), pb_line_y0 + pb_lines_dist*(task_num-1), length-pb_dist, pb_height, chapter))
-                pb_offset += length
+        for task in self.list_tasks:
+            task_num = task.id
+            length = task.duration * scale_rect
+            num_pos = 0 if task_num >= 10 else pb_line_x0/4
+            color = dict_colors[task.color_num]
+            # self.list_rect_progress_bar.append(Rectangle(num_pos, pb_height + pb_line_y0 + pb_lines_dist*(task_num-1), 0, 0, f"Line {task_num}"))
+            pb_offset = pb_line_x0
+            self.list_rect_progress_bar.append(Rectangle(pb_offset - (length-pb_dist), pb_line_y0 + pb_lines_dist*(task_num-1), length-pb_dist, pb_height, task_num, color))
+            pb_offset += length
 
         # Progress Bar Tab
         self.drawingarea_progress_bar = Gtk.DrawingArea()
