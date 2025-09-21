@@ -93,7 +93,7 @@ class Window(Gtk.Window):
         self.drawingarea_progress_bar.connect("draw", self._on_draw_progress_bar)
         self.drawingarea_progress_bar.connect("button-press-event", self._on_click_progress_bar)
         self.drawingarea_progress_bar.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
-        stack.add_titled(self.drawingarea_progress_bar, "bars", "Bars")
+        stack.add_titled(self.drawingarea_progress_bar, "diagram", "Diagram")
 
         # Stats Tab
         self.label_stats = Gtk.Label()
@@ -142,9 +142,9 @@ class Window(Gtk.Window):
         about = Gtk.AboutDialog(transient_for=self, modal=True)
 
         about.set_program_name("GTK Scheduling")
-        about.set_version("0.0.1")
-        about.set_comments("CPU Scheduling simulator")
-        about.set_website("https://github.com/omarelladen")
+        about.set_version("0.1.0")
+        about.set_comments("CPU scheduling simulator")
+        about.set_website("https://github.com/omarelladen/GTK-Scheduling")
         about.set_website_label("Repository")
         about.set_authors(["Omar El Laden"])
         about.set_license_type(Gtk.License.GPL_3_0)
