@@ -13,7 +13,7 @@ class App():
     def __init__(self):
 
         # Scheduling parameters
-        self.setup_file_path = "tasks.txt"
+        self.setup_file_path = TASKS_FILE
         self.alg_scheduling, self.quantum = self._setup_scheduling(self.setup_file_path)
         self.list_tasks = self._setup_tasks(self.setup_file_path)
         self.num_tasks = len(self.list_tasks)
@@ -28,7 +28,7 @@ class App():
         
         # Timer
         self.timer = Timer(self.clk_duration, self.tick)
-        self.timer.start()  # Inicia o timer
+        self.timer.start()
         
     def _on_destroy(self, window):
         Gtk.main_quit()

@@ -1,2 +1,2 @@
 ICON_FILE="imgs/icon.png";
-BAR_SIZES_FILE="data/bar_sizes.csv";
+TASKS_FILE="data/tasks";

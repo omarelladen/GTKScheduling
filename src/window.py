@@ -12,13 +12,11 @@ class Window(Gtk.Window):
         icon_file: str = '',
         app = None,
         num_tasks = 0,
-        # list_tasks = []
     ):
         super().__init__()
-        
+
         self.app = app
 
-        # self.list_tasks = list_tasks
         self.num_tasks = num_tasks
 
         # Icon
@@ -89,9 +87,6 @@ class Window(Gtk.Window):
                                                          0,
                                                          0,
                                                          f"Line {task_num}"))
-            # pb_offset = pb_line_x0
-            # self.list_rect_progress_bar.append(Rectangle(pb_offset - (length-pb_dist), pb_line_y0 + pb_lines_dist*(task_num-1), length-pb_dist, pb_height, task_num, color))
-            # pb_offset += length
 
         # Progress Bar Tab
         self.drawingarea_progress_bar = Gtk.DrawingArea()
@@ -107,16 +102,16 @@ class Window(Gtk.Window):
         self._refresh_stats_label()
         stack.add_titled(self.label_stats, "stats", "Statistics")
 
-        # Chapter Popover
-        self.popover_chapter = Gtk.Popover()
-        self.label_chapter = Gtk.Label()
-        self.popover_chapter.add(self.label_chapter)
+        # Task Popover
+        self.popover_task = Gtk.Popover()
+        self.label_task = Gtk.Label()
+        self.popover_task.add(self.label_task)
 
-        self.is_popover_chapter_active = False
+        self.is_popover_task_active = False
         self.cursor_x_at_popover = None
         self.cursor_y_at_popover = None
 
-        # All clicks will be checked to be able to hide the chapter popovers
+        # All clicks will be checked to be able to hide the task popovers
         self.connect("button-press-event", self._on_click_outside_popover)
 
         # Stack Switcher
@@ -128,11 +123,11 @@ class Window(Gtk.Window):
         outerbox.pack_start(stack, True, True, 0)
 
     def _on_click_outside_popover(self, widget, event):
-        if (self.is_popover_chapter_active == True and
+        if (self.is_popover_task_active == True and
             event.x != self.cursor_x_at_popover and
             event.y != self.cursor_y_at_popover):
-            self.is_popover_chapter_active = False
-            self.popover_chapter.hide()
+            self.is_popover_task_active = False
+            self.popover_task.hide()
 
     def _on_click_progress_bar(self, widget, event):
         if (event.type == Gdk.EventType.BUTTON_PRESS and
@@ -141,7 +136,7 @@ class Window(Gtk.Window):
                 if (rect.x <= event.x <= rect.x + rect.width and
                     rect.y <= event.y <= rect.y + rect.height and
                     isinstance(rect.caption, int)):
-                    self._show_chapter_popover(rect, widget, event)
+                    self._show_task_popover(rect, widget, event)
                     break
 
 
@@ -175,22 +170,22 @@ class Window(Gtk.Window):
 
             cr.fill()
 
-    def _show_chapter_popover(self, rect, widget, event):
-        self.label_chapter.set_text(f"{rect.caption}")
+    def _show_task_popover(self, rect, widget, event):
+        self.label_task.set_text(f"{rect.caption}")
 
         e_x = event.x
         e_y = event.y
 
         # Set popover position
-        self.popover_chapter.set_relative_to(widget)
-        self.popover_chapter.set_pointing_to(rect)
-        self.popover_chapter.set_position(Gtk.PositionType.TOP)
-        self.popover_chapter.show_all()
+        self.popover_task.set_relative_to(widget)
+        self.popover_task.set_pointing_to(rect)
+        self.popover_task.set_position(Gtk.PositionType.TOP)
+        self.popover_task.show_all()
 
         # Set current popover location and state so that it is gets hiden only by clicking outside this point
         self.cursor_x_at_popover = e_x
         self.cursor_y_at_popover = e_y
-        self.is_popover_chapter_active = True
+        self.is_popover_task_active = True
             
     def _refresh_stats_label(self):
         self.label_stats.set_markup(
@@ -215,9 +210,3 @@ class Window(Gtk.Window):
         self.pb_offset += (1 * self.scale_rect)
 
         self.drawingarea_progress_bar.queue_draw()
-
-        
-        # for rect in self.list_rect_progress_bar:
-        #     if "Line" not in str(rect.caption) and rect.caption == current_task:
-        #         rect.x += 10
-        #         self.drawingarea_progress_bar.queue_draw()
