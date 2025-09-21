@@ -18,11 +18,11 @@ class App():
         self.list_tasks = self._setup_tasks(self.setup_file_path)
         self.num_tasks = len(self.list_tasks)
         self.time = 0
-        self.current_task = 1
+        self.current_task = self.list_tasks[0]
         self.clk_duration = 200
        
         # Load GTK Window
-        self.win = Window(ICON_FILE, self, self.list_tasks)
+        self.win = Window(ICON_FILE, self, self.num_tasks)
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
         
@@ -38,12 +38,12 @@ class App():
         print(f"Tick {self.time}", end='')
         self.win.update_rect_time(self.current_task)
         if self.time % self.quantum == 0:
-            print(f" - Change to task {self.current_task}", end='')
-            if self.current_task == self.num_tasks:
-                self.current_task = 1
+            print(f" - Change to task {self.current_task.id}", end="")
+            if self.current_task.id == self.num_tasks:
+                self.current_task = self.list_tasks[0]
             else:
-                self.current_task += 1
-        print("\n", end='')
+                self.current_task = self.list_tasks[self.current_task.id]
+        print("\n", end="")
         
     def run(self):
         Gtk.main()
@@ -55,10 +55,10 @@ class App():
 
             alg_scheduling = lines[0].split(";")[0]
             print("Algorithm: ", alg_scheduling)
-        	
+    	
             quantum = int(lines[0].split(";")[1])
             print("Quantum: ", quantum)
-
+    
         return alg_scheduling, quantum
 
     def _setup_tasks(self, file_path):
@@ -91,5 +91,5 @@ class App():
                             task_priority)
 
                 list_tasks.append(task)
-                
+
             return list_tasks

@@ -11,13 +11,15 @@ class Window(Gtk.Window):
     def __init__(self, 
         icon_file: str = '',
         app = None,
-        list_tasks = []
+        num_tasks = 0,
+        # list_tasks = []
     ):
         super().__init__()
         
         self.app = app
 
-        self.list_tasks = list_tasks
+        # self.list_tasks = list_tasks
+        self.num_tasks = num_tasks
 
         # Icon
         try:
@@ -28,8 +30,8 @@ class Window(Gtk.Window):
             print(f'Failed to load icon from "{icon_file}"')
 
         # Window dimensions
-        self.set_size_request(580, 550)
-        self.set_resizable(False)
+        self.set_size_request(600, 300)
+        self.set_resizable(True)
         self.set_border_width(6)
 
         # Vertical Box
@@ -63,7 +65,7 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
-        dict_colors = {
+        self.dict_colors = {
             1: (1.0, 0.0, 0.0),
             2: (0.0, 0.0, 1.0),
             3: (0.0, 1.0, 0.0),
@@ -72,22 +74,24 @@ class Window(Gtk.Window):
         }
 
         # Create Progress Bars Rectangles
-        pb_line_x0 = 14  # initial x
-        pb_line_y0 = 20  # initial y
-        pb_height = 10  # bar height
-        pb_lines_dist = pb_height + 2  # distance between lines
-        pb_dist = 1  # distance between 2 bars
-        scale_rect = 10
+        self.scale_rect = 10
+        self.pb_line_x0 = 14 + self.scale_rect  # initial x
+        self.pb_line_y0 = 20  # initial y
+        self.pb_height = 10  # bar height
+        self.pb_lines_dist = self.pb_height + 2  # distance between lines
+        self.pb_dist = 0  #1  # distance between 2 bars
         self.list_rect_progress_bar = []
-        for task in self.list_tasks:
-            task_num = task.id
-            length = task.duration * scale_rect
-            num_pos = 0 if task_num >= 10 else pb_line_x0/4
-            color = dict_colors[task.color_num]
-            self.list_rect_progress_bar.append(Rectangle(num_pos, pb_height + pb_line_y0 + pb_lines_dist*(task_num-1), 0, 0, f"Line {task_num}", color))
-            pb_offset = pb_line_x0
-            self.list_rect_progress_bar.append(Rectangle(pb_offset - (length-pb_dist), pb_line_y0 + pb_lines_dist*(task_num-1), length-pb_dist, pb_height, task_num, color))
-            pb_offset += length
+        self.pb_offset = self.pb_line_x0  # inial offset that will be incremented with time (+= 1*scale_rect)
+        for task_num in range(1, self.num_tasks + 1):
+            num_pos = 0 if task_num >= 10 else self.pb_line_x0/4
+            self.list_rect_progress_bar.append(Rectangle(num_pos,
+                                                         self.pb_height + self.pb_line_y0 + self.pb_lines_dist*(task_num-1),
+                                                         0,
+                                                         0,
+                                                         f"Line {task_num}"))
+            # pb_offset = pb_line_x0
+            # self.list_rect_progress_bar.append(Rectangle(pb_offset - (length-pb_dist), pb_line_y0 + pb_lines_dist*(task_num-1), length-pb_dist, pb_height, task_num, color))
+            # pb_offset += length
 
         # Progress Bar Tab
         self.drawingarea_progress_bar = Gtk.DrawingArea()
@@ -197,7 +201,23 @@ class Window(Gtk.Window):
         
      
     def update_rect_time(self, current_task):
-        for rect in self.list_rect_progress_bar:
-            if "Line" not in str(rect.caption) and rect.caption == current_task:
-                rect.x += 10
-                self.drawingarea_progress_bar.queue_draw()
+        # Create Progress Bars Rectangles
+        task_num = current_task.id
+        length = 1 * self.scale_rect  # current_task.duration * self.scale_rect
+        num_pos = 0 if task_num >= 10 else self.pb_line_x0/4
+        color = self.dict_colors[current_task.color_num]
+        self.list_rect_progress_bar.append(Rectangle(self.pb_offset - (length-self.pb_dist),
+                                                     self.pb_line_y0 + self.pb_lines_dist*(task_num-1),
+                                                     length-self.pb_dist,
+                                                     self.pb_height,
+                                                     task_num,
+                                                     color))
+        self.pb_offset += (1 * self.scale_rect)
+
+        self.drawingarea_progress_bar.queue_draw()
+
+        
+        # for rect in self.list_rect_progress_bar:
+        #     if "Line" not in str(rect.caption) and rect.caption == current_task:
+        #         rect.x += 10
+        #         self.drawingarea_progress_bar.queue_draw()
