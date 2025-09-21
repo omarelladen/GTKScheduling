@@ -192,6 +192,7 @@ class Window(Gtk.Window):
             
     def _refresh_stats_label(self):
         self.label_stats.set_markup(
+            f"<big><b>Algorithm:</b> {self.app.alg_scheduling}</big>\n"
             f"<big><b>Tasks:</b> {len(self.list_tasks)}</big>\n"
             f"<big><b>CLK duration:</b> {self.app.clk_duration} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.quantum} CLKs</big>\n"
