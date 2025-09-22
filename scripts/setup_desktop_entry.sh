@@ -6,7 +6,7 @@ root_dir=$PWD
 
 
 echo "[Desktop Entry]
-Name=GTK Scheduling
+Name=GTKScheduling
 Comment=CPU scheduling simulator
 Exec=sh $root_dir/scripts/launcher.sh
 Type=Application

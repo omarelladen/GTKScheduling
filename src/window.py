@@ -47,7 +47,7 @@ class Window(Gtk.Window):
         # Menu Popover
         popover_menu = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        bt_about = Gtk.ModelButton(label="About GTK Scheduling")
+        bt_about = Gtk.ModelButton(label="About GTKScheduling")
         bt_about.connect("clicked", self._on_click_about)
         vbox.pack_start(bt_about, False, True, 10)
         vbox.show_all()
@@ -141,7 +141,7 @@ class Window(Gtk.Window):
     def _on_click_about(self, widget):
         about = Gtk.AboutDialog(transient_for=self, modal=True)
 
-        about.set_program_name("GTK Scheduling")
+        about.set_program_name("GTKScheduling")
         about.set_version("0.1.0")
         about.set_comments("CPU scheduling simulator")
         about.set_website("https://github.com/omarelladen/GTKScheduling")
