@@ -1,8 +1,8 @@
 <img height="64" src="imgs/icon.png" align="left"/>
 
-# GTK Scheduling (in development)
+# GTKScheduling (in development)
 
-GTK Scheduling is a simple GTK 3 app to simulate CPU scheduling.
+GTKScheduling is a simple GTK 3 based app to simulate CPU scheduling.
 
 <p align="center" width="100%">
 <img src="imgs/diagram.png">
@@ -10,7 +10,7 @@ GTK Scheduling is a simple GTK 3 app to simulate CPU scheduling.
 </p>
 
 ## Requirements
-This GTK 3 app uses [PyGObject](https://pygobject.gnome.org/), which is a Python package that provides bindings for GObject based libraries such as GTK, GStreamer, WebKitGTK, GLib, GIO and many more.
+This GTK 3 based app uses [PyGObject](https://pygobject.gnome.org/), which is a Python package that provides bindings for GObject based libraries such as GTK, GStreamer, WebKitGTK, GLib, GIO and many more.
 
 The dependencies usually come pre-installed on popular Linux distributions with GUI, such as Debian, Mint and Fedora, except on newer versions of Ubuntu - which might not come with the 'python3-gi-cairo' package by default.
 

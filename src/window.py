@@ -57,7 +57,7 @@ class Window(Gtk.Window):
         # Header Bar
         headerbar = Gtk.HeaderBar()
         headerbar.set_show_close_button(True)
-        headerbar.props.title = "GTK Scheduling"
+        headerbar.props.title = "GTKScheduling"
         self.set_titlebar(headerbar)
 
         # Menu Button
@@ -144,7 +144,7 @@ class Window(Gtk.Window):
         about.set_program_name("GTK Scheduling")
         about.set_version("0.1.0")
         about.set_comments("CPU scheduling simulator")
-        about.set_website("https://github.com/omarelladen/GTK-Scheduling")
+        about.set_website("https://github.com/omarelladen/GTKScheduling")
         about.set_website_label("Repository")
         about.set_authors(["Omar El Laden"])
         about.set_license_type(Gtk.License.GPL_3_0)
