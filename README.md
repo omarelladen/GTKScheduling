@@ -1,6 +1,6 @@
 <img height="64" src="imgs/icon.png" align="left"/>
 
-# GTK Scheduling
+# GTK Scheduling (in development)
 
 GTK Scheduling is a simple GTK 3 app to simulate CPU scheduling.
 
