@@ -5,12 +5,14 @@ class Task():
         color_num,
         start_time, 
         duration,
-        priority
+        priority,
+        state = '',
+        progress = 0,
     ):
         self.id = id
         self.color_num = color_num
         self.start_time = start_time
         self.duration = duration
         self.priority = priority
-        self.progress = 0
-        self.state = ''
+        self.state = state
+        self.progress = progress

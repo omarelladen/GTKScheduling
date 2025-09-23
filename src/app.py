@@ -12,9 +12,8 @@ exec(open('config').read())
 class App():
     def __init__(self):
         # Scheduling parameters
-        self.setup_file_path = TASKS_FILE
-        self.alg_scheduling, self.quantum = self._setup_scheduling(self.setup_file_path)
-        self.list_tasks = self._setup_tasks(self.setup_file_path)
+        self.alg_scheduling, self.quantum = self._setup_scheduling(TASKS_FILE)
+        self.list_tasks = self._setup_tasks(TASKS_FILE)
         self.num_tasks = len(self.list_tasks)
         self.time = 0
         self.current_task = self.list_tasks[0]
