@@ -71,7 +71,7 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
-        # Create Progress Bars Rectangles
+        # Create Bars Rectangles
         self.scale_rect = 10
         self.pb_line_x0 = 14 + self.scale_rect  # initial x
         self.pb_line_y0 = 20  # initial y
@@ -88,7 +88,7 @@ class Window(Gtk.Window):
                                                          0,
                                                          f"Line {task_num}"))
 
-        # Progress Bar Tab
+        # Bars Tab
         self.drawingarea_progress_bar = Gtk.DrawingArea()
         self.drawingarea_progress_bar.connect("draw", self._on_draw_progress_bar)
         self.drawingarea_progress_bar.connect("button-press-event", self._on_click_progress_bar)
@@ -201,7 +201,7 @@ class Window(Gtk.Window):
     def update_rect_time(self, current_task):
         # Create Progress Bars Rectangles
         task_num = current_task.id
-        length = 1 * self.scale_rect  # current_task.duration * self.scale_rect
+        length = 1 * self.scale_rect
         num_pos = 0 if task_num >= 10 else self.pb_line_x0/4
         color = self.dict_colors[current_task.color_num]
         self.list_rect_progress_bar.append(Rectangle(self.pb_offset - (length-self.pb_dist),
