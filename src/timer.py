@@ -5,8 +5,8 @@ from gi.repository import GLib
 class Timer:
     def __init__(self,
         interval_ms,
-        callback,  # function to call every tick
-        *args, **kwargs  # additional args for the callback
+        callback,
+        *args, **kwargs,  # additional args for the callback
     ):
         self.interval = interval_ms
         self.callback = callback
@@ -17,7 +17,7 @@ class Timer:
 
     def start(self):
         if not self.is_running:
-            self.timeout_id = GLib.timeout_add(self.interval, self._on_timeout)  # timeout_add_seconds()
+            self.timeout_id = GLib.timeout_add(self.interval, self._on_timeout)
             self.is_running = True
 
     def stop(self):
@@ -29,8 +29,4 @@ class Timer:
     def _on_timeout(self):
         """Internal callback that is called by the GLib every interval"""
         self.callback(*self.args, **self.kwargs)
-        return True  # retorns True to keep the timeout active
-
-#    def __del__(self):
-#        """When deleting the obj"""
-#        self.stop()
+        return True  # returns True to keep the timeout active

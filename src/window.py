@@ -5,6 +5,7 @@ import gi
 from gi.repository import Gtk, Gio, Gdk, GdkPixbuf
 
 from rectangle import Rectangle
+from task_record import TaskRecord
 
 
 class Window(Gtk.Window):
@@ -86,7 +87,7 @@ class Window(Gtk.Window):
                                                          self.pb_height + self.pb_line_y0 + self.pb_lines_dist*(task_num-1),
                                                          0,
                                                          0,
-                                                         f"Line {task_num}"))
+                                                         f"Line {task_num}"))  # gambiarra
 
         # Bars Tab
         self.drawingarea_progress_bar = Gtk.DrawingArea()
@@ -169,13 +170,11 @@ class Window(Gtk.Window):
             cr.fill()
 
     def _show_task_popover(self, rect, widget, event):
-        self.label_task.set_text(f"id: {rect.caption}\n"
-                                 f"start time: {self.list_tasks[rect.caption-1].start_time}\n"
-                                 f"duration: {self.list_tasks[rect.caption-1].duration}\n"
-                                 f"priority: {self.list_tasks[rect.caption-1].priority}\n"
-                                 f"progress: {self.list_tasks[rect.caption-1].progress}\n"
-                                 f"state: {self.list_tasks[rect.caption-1].state}")
-
+        self.label_task.set_markup(f"<b>id:</b> {rect.task_record.task.id}\n"
+                                   f"<b>start time:</b> {rect.task_record.task.start_time}\n"
+                                   f"<b>duration:</b> {rect.task_record.task.duration}\n"
+                                   f"<b>priority:</b> {rect.task_record.task.priority}\n"
+                                   f"<b>progress:</b> {rect.task_record.progress}")
         e_x = event.x
         e_y = event.y
 
@@ -209,7 +208,8 @@ class Window(Gtk.Window):
                                                      length-self.pb_dist,
                                                      self.pb_height,
                                                      task_num,
-                                                     color))
+                                                     color,
+                                                     TaskRecord(current_task, current_task.state, current_task.progress )))
         self.pb_offset += (1 * self.scale_rect)
 
         # Draw created rectangle

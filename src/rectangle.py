@@ -8,7 +8,8 @@ class Rectangle(Gdk.Rectangle):
         width,
         height,
         caption = '',
-        color: tuple[float, float, float] = (1, 1, 1)
+        color: tuple[float, float, float] = (1, 1, 1),
+        task_record = None,
     ):
         self.x = x
         self.y = y
@@ -17,3 +18,4 @@ class Rectangle(Gdk.Rectangle):
 
         self.caption = caption
         self.color = color
+        self.task_record = task_record

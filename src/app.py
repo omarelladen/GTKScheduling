@@ -58,8 +58,8 @@ class App():
     def _setup_scheduling(self, file_path):
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
-            alg_scheduling = lines[0].split(";")[0]
-            quantum = int(lines[0].split(";")[1])
+        alg_scheduling = lines[0].split(";")[0]
+        quantum = int(lines[0].split(";")[1])
     
         return alg_scheduling, quantum
 
@@ -67,20 +67,20 @@ class App():
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
         
-            list_tasks = []
-            for line in lines[1:]:            
-                task_id         = int(line.split(";")[0].replace("t", ""))                
-                task_color_num  = int(line.split(";")[1])                
-                task_start_time = int(line.split(";")[2])                
-                task_duration   = int(line.split(";")[3])                
-                task_priority   = int(line.split(";")[4])
+        list_tasks = []
+        for line in lines[1:]:            
+            task_id         = int(line.split(";")[0].replace("t", ""))                
+            task_color_num  = int(line.split(";")[1])                
+            task_start_time = int(line.split(";")[2])                
+            task_duration   = int(line.split(";")[3])                
+            task_priority   = int(line.split(";")[4])
 
-                task = Task(task_id,
-                            task_color_num,
-                            task_start_time,
-                            task_duration,
-                            task_priority)
+            task = Task(task_id,
+                        task_color_num,
+                        task_start_time,
+                        task_duration,
+                        task_priority)
 
-                list_tasks.append(task)
+            list_tasks.append(task)
 
-            return list_tasks
+        return list_tasks
