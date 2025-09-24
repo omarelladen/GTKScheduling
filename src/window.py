@@ -155,7 +155,7 @@ class Window(Gtk.Window):
 
     def _on_draw_text(self, widget, cr: cairo.Context):
         cr.set_source_rgb(1, 1, 1)
-        cr.set_font_size(12)
+        cr.set_font_size(10)
 
         for task_num, _ in enumerate(self.list_tasks, 1):
             # Calculate position - offset for single-digit task numbers
