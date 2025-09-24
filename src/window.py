@@ -1,6 +1,7 @@
 import os
 import csv
 
+import cairo
 import gi
 from gi.repository import Gtk, Gio, Gdk, GdkPixbuf
 
@@ -72,27 +73,23 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
-        # Create Bars Rectangles
+        # Rectangles position parameters
         self.scale_rect = 10
-        self.pb_line_x0 = 14 + self.scale_rect  # initial x
-        self.pb_line_y0 = 20  # initial y
-        self.pb_height = 10  # bar height
-        self.pb_lines_dist = self.pb_height + 2  # distance between lines
-        self.pb_dist = 0  #1  # distance between 2 bars
+        self.rect_line_x0 = 20 + self.scale_rect  # initial x
+        self.rect_line_y0 = 20  # initial y
+        self.rect_height = 10  # bar height
+        self.rect_lines_dist = self.rect_height + 2  # distance between lines
+        self.rect_dist = 0  #1  # distance between 2 bars
+        self.rect_offset = self.rect_line_x0  # initial offset that will be incremented with time (+= 1*scale_rect)
+
         self.list_rect_progress_bar = []
-        self.pb_offset = self.pb_line_x0  # inial offset that will be incremented with time (+= 1*scale_rect)
-        for task_num in range(1, len(self.list_tasks) + 1):
-            num_pos = 0 if task_num >= 10 else self.pb_line_x0/4
-            self.list_rect_progress_bar.append(Rectangle(num_pos,
-                                                         self.pb_height + self.pb_line_y0 + self.pb_lines_dist*(task_num-1),
-                                                         0,
-                                                         0,
-                                                         f"Line {task_num}"))  # gambiarra
+
 
         # Bars Tab
         self.drawingarea_progress_bar = Gtk.DrawingArea()
+        self.drawingarea_progress_bar.connect("draw", self._on_draw_text)
         self.drawingarea_progress_bar.connect("draw", self._on_draw_progress_bar)
-        self.drawingarea_progress_bar.connect("button-press-event", self._on_click_progress_bar)
+        self.drawingarea_progress_bar.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_progress_bar.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
         stack.add_titled(self.drawingarea_progress_bar, "diagram", "Diagram")
 
@@ -120,7 +117,7 @@ class Window(Gtk.Window):
 
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
-
+            
     def _on_click_outside_popover(self, widget, event):
         if (self.is_popover_task_active == True and
             event.x != self.cursor_x_at_popover and
@@ -128,13 +125,12 @@ class Window(Gtk.Window):
             self.is_popover_task_active = False
             self.popover_task.hide()
 
-    def _on_click_progress_bar(self, widget, event):
+    def _on_click_task_rect(self, widget, event):
         if (event.type == Gdk.EventType.BUTTON_PRESS and
             event.button == Gdk.BUTTON_PRIMARY):
             for rect in self.list_rect_progress_bar:
                 if (rect.x <= event.x <= rect.x + rect.width and
-                    rect.y <= event.y <= rect.y + rect.height and
-                    isinstance(rect.caption, int)):
+                    rect.y <= event.y <= rect.y + rect.height):
                     self._show_task_popover(rect, widget, event)
                     break
 
@@ -157,15 +153,24 @@ class Window(Gtk.Window):
         about.connect("response", lambda dialog, response: dialog.destroy())
         about.present()
 
+    def _on_draw_text(self, widget, cr: cairo.Context):
+        cr.set_source_rgb(1, 1, 1)
+        cr.set_font_size(12)
 
-    def _on_draw_progress_bar(self, widget, cr):
+        for task_num, _ in enumerate(self.list_tasks, 1):
+            # Calculate position - offset for single-digit task numbers
+            num_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
+            x_pos = num_pos
+            y_pos = self.rect_line_y0 + self.rect_lines_dist * (task_num - 1) + self.rect_height - 2
+
+            # Draw the task line label
+            cr.move_to(x_pos, y_pos)
+            cr.show_text(str(task_num))
+            
+    def _on_draw_progress_bar(self, widget, cr: cairo.Context):
         for rect in self.list_rect_progress_bar:
             cr.set_source_rgb(*rect.color)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
-
-            # Line indication
-            if isinstance(rect.caption, str) and "Line" in rect.caption:
-                cr.show_text(rect.caption.replace("Line ", ""))
 
             cr.fill()
 
@@ -201,16 +206,15 @@ class Window(Gtk.Window):
         # Create Progress Bars Rectangles
         task_num = current_task.id
         length = 1 * self.scale_rect
-        num_pos = 0 if task_num >= 10 else self.pb_line_x0/4
+        num_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
         color = self.dict_colors[current_task.color_num]
-        self.list_rect_progress_bar.append(Rectangle(self.pb_offset - (length-self.pb_dist),
-                                                     self.pb_line_y0 + self.pb_lines_dist*(task_num-1),
-                                                     length-self.pb_dist,
-                                                     self.pb_height,
-                                                     task_num,
+        self.list_rect_progress_bar.append(Rectangle(self.rect_offset - (length-self.rect_dist),
+                                                     self.rect_line_y0 + self.rect_lines_dist*(task_num-1),
+                                                     length-self.rect_dist,
+                                                     self.rect_height,
                                                      color,
                                                      TaskRecord(current_task, current_task.state, current_task.progress )))
-        self.pb_offset += (1 * self.scale_rect)
+        self.rect_offset += (1 * self.scale_rect)
 
         # Draw created rectangle
         self.drawingarea_progress_bar.queue_draw()
