@@ -10,6 +10,7 @@ class TaskRectangle(Gdk.Rectangle):
         color: tuple[float, float, float] = (1, 1, 1),
         task_record = None,
     ):
+        # Inherited:
         self.x = x
         self.y = y
         self.width = width
