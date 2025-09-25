@@ -1,7 +1,7 @@
 import gi
 from gi.repository import Gdk
 
-class Rectangle(Gdk.Rectangle):
+class TaskRectangle(Gdk.Rectangle):
     def __init__(self,
         x,
         y,

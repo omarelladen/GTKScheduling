@@ -6,7 +6,7 @@ class Task():
         start_time, 
         duration,
         priority,
-        state = '',
+        state = None,
         progress = 0,
     ):
         self.id = id

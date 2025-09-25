@@ -5,7 +5,7 @@ import cairo
 import gi
 from gi.repository import Gtk, Gio, Gdk, GdkPixbuf
 
-from rectangle import Rectangle
+from task_rectangle import TaskRectangle
 from task_record import TaskRecord
 
 
@@ -30,12 +30,13 @@ class Window(Gtk.Window):
         }
 
         # Icon
-        try:
-            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_path, 64, 64, True)
-            self.set_icon(self.pixbuf)
-        except:
-            self.pixbuf = None
-            print(f'Failed to load icon from "{icon_path}"')
+        if icon_path:
+            try:
+                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_path, 64, 64, True)
+                self.set_icon(self.pixbuf)
+            except:
+                self.pixbuf = None
+                print(f'Failed to load icon from "{icon_path}"')
 
         # Window dimensions
         self.set_size_request(600, 300)
@@ -73,7 +74,7 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
-        # Rectangles position parameters
+        # Task Rectangles position parameters
         self.scale_rect = 10
         self.rect_line_x0 = 20 + self.scale_rect  # initial x
         self.rect_line_y0 = 20  # initial y
@@ -203,12 +204,12 @@ class Window(Gtk.Window):
         )
      
     def update_rect_time(self, current_task):
-        # Create Progress Bars Rectangles
+        # Create Task Rectangles
         task_num = current_task.id
         length = 1 * self.scale_rect
         num_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
         color = self.dict_colors[current_task.color_num]
-        self.list_rect_progress_bar.append(Rectangle(self.rect_offset - (length-self.rect_dist),
+        self.list_rect_progress_bar.append(TaskRectangle(self.rect_offset - (length-self.rect_dist),
                                                      self.rect_line_y0 + self.rect_lines_dist*(task_num-1),
                                                      length-self.rect_dist,
                                                      self.rect_height,
@@ -216,5 +217,5 @@ class Window(Gtk.Window):
                                                      TaskRecord(current_task, current_task.state, current_task.progress )))
         self.rect_offset += (1 * self.scale_rect)
 
-        # Draw created rectangle
+        # Draw created Task Rectangle
         self.drawingarea_progress_bar.queue_draw()
