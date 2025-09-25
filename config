@@ -1,2 +1,2 @@
-ICON_FILE="imgs/icon.png";
-TASKS_FILE="data/tasks";
+ICON_PATH="imgs/icon.png";
+TASKS_PATH="data/tasks";

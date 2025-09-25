@@ -10,10 +10,10 @@ from task_record import TaskRecord
 
 
 class Window(Gtk.Window):
-    def __init__(self, 
-        icon_file: str = '',
-        app = None,
-        list_tasks = [],
+    def __init__(self,
+        app,
+        list_tasks,
+        icon_path = None,
     ):
         super().__init__()
 
@@ -31,11 +31,11 @@ class Window(Gtk.Window):
 
         # Icon
         try:
-            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_file, 64, 64, True)
+            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_path, 64, 64, True)
             self.set_icon(self.pixbuf)
         except:
             self.pixbuf = None
-            print(f'Failed to load icon from "{icon_file}"')
+            print(f'Failed to load icon from "{icon_path}"')
 
         # Window dimensions
         self.set_size_request(600, 300)

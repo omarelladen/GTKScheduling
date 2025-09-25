@@ -12,15 +12,15 @@ exec(open('config').read())
 class App():
     def __init__(self):
         # Scheduling parameters
-        self.alg_scheduling, self.quantum = self._setup_scheduling(TASKS_FILE)
-        self.list_tasks = self._setup_tasks(TASKS_FILE)
+        self.alg_scheduling, self.quantum = self._setup_scheduling(TASKS_PATH)
+        self.list_tasks = self._setup_tasks(TASKS_PATH)
         self.num_tasks = len(self.list_tasks)
         self.time = 0
         self.current_task = self.list_tasks[0]
         self.clk_duration = 300
        
         # Load GTK Window
-        self.win = Window(ICON_FILE, self, self.list_tasks)
+        self.win = Window(self, self.list_tasks, ICON_PATH)
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
         
