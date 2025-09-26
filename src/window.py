@@ -199,7 +199,7 @@ class Window(Gtk.Window):
         self.label_stats.set_markup(
             f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
             f"<big><b>Tasks:</b> {len(self.list_tasks)}</big>\n"
-            f"<big><b>CLK duration:</b> {self.app.clk_duration} ms</big>\n"
+            f"<big><b>CLK duration:</b> {self.app.timer.interval_ms} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.scheduler.quantum} CLKs</big>\n"
         )
      

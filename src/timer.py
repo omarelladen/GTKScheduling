@@ -8,7 +8,7 @@ class Timer:
         callback,
         *args, **kwargs,  # additional args for the callback
     ):
-        self.interval = interval_ms
+        self.interval_ms = interval_ms
         self.callback = callback
         self.args = args
         self.kwargs = kwargs
@@ -17,7 +17,7 @@ class Timer:
 
     def start(self):
         if not self.is_running:
-            self.timeout_id = GLib.timeout_add(self.interval, self._on_timeout)
+            self.timeout_id = GLib.timeout_add(self.interval_ms, self._on_timeout)
             self.is_running = True
 
     def stop(self):

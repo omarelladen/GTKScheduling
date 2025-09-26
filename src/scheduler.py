@@ -1,10 +1,13 @@
+import os
+
 from task import Task
 
 class Scheduler():
-    def __init__(self, tasks_path):
+    def __init__(self,
+        tasks_path
+    ):
         # Scheduling parameters
-        self.alg_scheduling, self.quantum = self._setup_scheduling(tasks_path)
-        self.list_tasks = self._setup_tasks(tasks_path)
+        self.alg_scheduling, self.quantum, self.list_tasks = self._setup_from_file(tasks_path)
         self.num_tasks = len(self.list_tasks)
         self.time = 0
         self.current_task = self.list_tasks[0]
@@ -31,21 +34,37 @@ class Scheduler():
 
         return old_task
 
-    def _setup_scheduling(self, file_path):
+    def _setup_from_file(self, file_path):
+        # Default parameters
+        default_alg_scheduling = 'FCFS'
+        default_quantum = 2
+        default_list_tasks = [Task(1,1,0,5,2),
+                              Task(2,2,0,4,3),
+                              Task(3,3,3,5,5),
+                              Task(4,4,5,6,9),
+                              Task(5,5,7,4,6)]
+                                       
+        if not os.path.isfile(file_path):
+            return default_alg_scheduling, \
+                   default_quantum, \
+                   default_list_tasks
+        
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
+        print(len(lines))
+
+        if len(lines) < 2:
+            return default_alg_scheduling, \
+                   default_quantum, \
+                   default_list_tasks
+                    
+            
         alg_scheduling = lines[0].split(";")[0]
         quantum = int(lines[0].split(";")[1])
-    
-        return alg_scheduling, quantum
-
-    def _setup_tasks(self, file_path):
-        with open(file_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
         
         list_tasks = []
         for line in lines[1:]:            
-            task_id         = int(line.split(";")[0].replace("t", ""))                
+            task_id         = int(line.split(";")[0])              
             task_color_num  = int(line.split(";")[1])                
             task_start_time = int(line.split(";")[2])                
             task_duration   = int(line.split(";")[3])                
@@ -59,4 +78,4 @@ class Scheduler():
 
             list_tasks.append(task)
 
-        return list_tasks
+        return alg_scheduling, quantum, list_tasks

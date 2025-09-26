@@ -12,19 +12,18 @@ exec(open('config').read())
 
 class App():
     def __init__(self):
-        self.clk_duration = 300
 
+        # Timer
+        self.timer = Timer(300, self.tick)
+        self.timer.start()
+        
         # Scheduler
         self.scheduler = Scheduler(TASKS_PATH)
         
-        # Load GTK Window
+        # Window
         self.win = Window(self, self.scheduler.list_tasks, ICON_PATH)
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
-        
-        # Timer
-        self.timer = Timer(self.clk_duration, self.tick)
-        self.timer.start()
         
     def _on_destroy(self, window):
         Gtk.main_quit()
@@ -35,4 +34,3 @@ class App():
     def tick(self):
         old_task = self.scheduler.tick()
         self.win.update_rect_time(old_task)
-
