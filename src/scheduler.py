@@ -10,29 +10,27 @@ class Scheduler():
         self.alg_scheduling, self.quantum, self.list_tasks = self._setup_from_file(tasks_path)
         self.num_tasks = len(self.list_tasks)
         self.time = 0
-        self.current_task = self.list_tasks[0]
-
-    def tick(self):
-        # Update time
-        self.time += 1;
-
-        # Update task info
-        self.current_task.progress += 1
-        for task in self.list_tasks:
-            if task != self.current_task:
-                task.state = 'ready'
-        self.current_task.state = 'running'
-
-        old_task = self.current_task
         
-        # Change or not the current task
-        if self.time % self.quantum == 0:
+        self.current_task = self.list_tasks[0]
+        self.current_task.state = 'running'
+        
+    def update_current_task(self):
+        self.time += 1
+        self.current_task.progress += 1
+
+    def fcfs(self):
+        if self.time % self.quantum == 0: 
+            # Change to next (circular)
+            self.current_task.state = 'ready'
             if self.current_task.id == self.num_tasks:
-                self.current_task = self.list_tasks[0]
+                self.current_task = self.list_tasks[0]  
             else:
                 self.current_task = self.list_tasks[self.current_task.id]
-
-        return old_task
+            self.current_task.state = 'running'
+                
+    def execute(self):
+        if self.alg_scheduling == 'FCFS':
+            self.fcfs()
 
     def _setup_from_file(self, file_path):
         # Default parameters

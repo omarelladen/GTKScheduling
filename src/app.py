@@ -32,5 +32,6 @@ class App():
         Gtk.main()
 
     def tick(self):
-        old_task = self.scheduler.tick()
-        self.win.update_rect_time(old_task)
+        self.scheduler.update_current_task()
+        self.win.update_rect_time(self.scheduler.current_task)
+        self.scheduler.execute()

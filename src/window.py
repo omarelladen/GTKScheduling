@@ -85,7 +85,6 @@ class Window(Gtk.Window):
 
         self.list_rect_progress_bar = []
 
-
         # Bars Tab
         self.drawingarea_progress_bar = Gtk.DrawingArea()
         self.drawingarea_progress_bar.connect("draw", self._on_draw_text)
@@ -134,7 +133,6 @@ class Window(Gtk.Window):
                     rect.y <= event.y <= rect.y + rect.height):
                     self._show_task_popover(rect, widget, event)
                     break
-
 
     def _on_click_about(self, widget):
         about = Gtk.AboutDialog(transient_for=self, modal=True)
