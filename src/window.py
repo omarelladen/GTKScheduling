@@ -90,7 +90,7 @@ class Window(Gtk.Window):
             step=1
         )
         slider.set_draw_value(False)  # Hide the numerical value display
-        slider.set_size_request(100, -1)  # Set width
+        slider.set_size_request(120, -1)  # Set width
         slider.set_value(self.app.timer.interval_ms)  # Set initial value to match the variable
         slider.connect("value-changed", self._on_slider_value_changed)
         headerbar.pack_start(slider)
@@ -243,7 +243,7 @@ class Window(Gtk.Window):
 
         texts = [
             f"Algorithm: {self.app.scheduler.alg_scheduling}",
-            f"CLK duration: {self.app.timer.interval_ms:.0f} ms",
+            f"CLK period: {self.app.timer.interval_ms:.0f} ms",
             f"Quantum: {self.app.scheduler.quantum}",
             f"Time: {self.app.scheduler.time}",
         ]
@@ -279,8 +279,8 @@ class Window(Gtk.Window):
         self.label_info.set_markup(
             f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
             f"<big><b>Tasks:</b> {len(self.list_tasks)}</big>\n"
-            f"<big><b>CLK duration:</b> {self.app.timer.interval_ms:.0f} ms</big>\n"
-            f"<big><b>Quantum:</b> {self.app.scheduler.quantum} CLKs</big>\n"
+            f"<big><b>CLK period:</b> {self.app.timer.interval_ms:.0f} ms</big>\n"
+            f"<big><b>Quantum:</b> {self.app.scheduler.quantum}</big>\n"
             f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
         )
      
