@@ -21,7 +21,7 @@ class Timer:
             self.is_running = True
 
     def stop(self):
-        if self.timeout_id is not None and self.is_running:
+        if self.timeout_id and self.is_running:
             GLib.Source.remove(self.timeout_id)
             self.timeout_id = None
             self.is_running = False

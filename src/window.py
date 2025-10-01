@@ -85,8 +85,8 @@ class Window(Gtk.Window):
         # Slider
         slider = Gtk.Scale.new_with_range(
             orientation=Gtk.Orientation.HORIZONTAL,
-            min=20,
-            max=400,
+            min=10,
+            max=300,
             step=1
         )
         slider.set_draw_value(False)  # Hide the numerical value display
