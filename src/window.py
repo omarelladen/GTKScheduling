@@ -82,6 +82,19 @@ class Window(Gtk.Window):
         bt_advance.connect("clicked", self._on_click_advance)
         headerbar.pack_start(bt_advance)
 
+        # Slider
+        slider = Gtk.Scale.new_with_range(
+            orientation=Gtk.Orientation.HORIZONTAL,
+            min=20,
+            max=400,
+            step=1
+        )
+        slider.set_draw_value(False)  # Hide the numerical value display
+        slider.set_size_request(100, -1)  # Set width
+        slider.set_value(self.app.timer.interval_ms)  # Set initial value to match the variable
+        slider.connect("value-changed", self._on_slider_value_changed)
+        headerbar.pack_start(slider)
+
         # Stack
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
@@ -102,14 +115,14 @@ class Window(Gtk.Window):
 
         self.list_rect_progress_bar = []
 
-        # Bars Tab
-        self.drawingarea_progress_bar = Gtk.DrawingArea()
-        self.drawingarea_progress_bar.connect("draw", self._on_draw_task_lines_text)
-        self.drawingarea_progress_bar.connect("draw", self._on_draw_progress_bar)
-        self.drawingarea_progress_bar.connect("draw", self._on_draw_info)
-        self.drawingarea_progress_bar.connect("button-press-event", self._on_click_task_rect)
-        self.drawingarea_progress_bar.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
-        stack.add_titled(self.drawingarea_progress_bar, "diagram", "Diagram")
+        # Diagram Tab
+        self.drawingarea_diagram = Gtk.DrawingArea()
+        self.drawingarea_diagram.connect("draw", self._on_draw_task_lines_text)
+        self.drawingarea_diagram.connect("draw", self._on_draw_progress_bar)
+        self.drawingarea_diagram.connect("draw", self._on_draw_info)
+        self.drawingarea_diagram.connect("button-press-event", self._on_click_task_rect)
+        self.drawingarea_diagram.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
+        stack.add_titled(self.drawingarea_diagram, "diagram", "Diagram")
 
         # Info Tab
         self.label_info = Gtk.Label()
@@ -136,6 +149,15 @@ class Window(Gtk.Window):
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
 
+    def _on_slider_value_changed(self, scale):
+        self.app.timer.interval_ms = scale.get_value()
+        self.refresh_info_label()
+        self.drawingarea_diagram.queue_draw()
+
+        if self.app.timer.is_running:
+            self.app.timer.stop()   # Stop the current timer
+            self.app.timer.start()  # Restart with new interval_ms
+        
     def _on_click_start_stop(self, button):
      
         bt_child = button.get_child()
@@ -221,7 +243,7 @@ class Window(Gtk.Window):
 
         texts = [
             f"Algorithm: {self.app.scheduler.alg_scheduling}",
-            f"CLK duration: {self.app.timer.interval_ms} ms",
+            f"CLK duration: {self.app.timer.interval_ms:.0f} ms",
             f"Quantum: {self.app.scheduler.quantum}",
             f"Time: {self.app.scheduler.time}",
         ]
@@ -257,7 +279,7 @@ class Window(Gtk.Window):
         self.label_info.set_markup(
             f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
             f"<big><b>Tasks:</b> {len(self.list_tasks)}</big>\n"
-            f"<big><b>CLK duration:</b> {self.app.timer.interval_ms} ms</big>\n"
+            f"<big><b>CLK duration:</b> {self.app.timer.interval_ms:.0f} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.scheduler.quantum} CLKs</big>\n"
             f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
         )
@@ -277,4 +299,4 @@ class Window(Gtk.Window):
         self.rect_offset += (1 * self.scale_rect)
 
         # Draw created Task Rectangle
-        self.drawingarea_progress_bar.queue_draw()
+        self.drawingarea_diagram.queue_draw()
