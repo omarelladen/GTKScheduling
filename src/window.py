@@ -135,11 +135,12 @@ class Window(Gtk.Window):
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
 
-    def   _on_click_start_stop(self, button):
+    def _on_click_start_stop(self, button):
      
         bt_child = button.get_child()
         if bt_child:
             button.remove(bt_child)
+            
         if self.app.timer.is_running:
             icon_name = "media-playback-start"
             self.app.timer.stop()
