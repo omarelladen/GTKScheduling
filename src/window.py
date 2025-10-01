@@ -238,7 +238,7 @@ class Window(Gtk.Window):
                                    f"<b>start time:</b> {rect.task_record.task.start_time}\n"
                                    f"<b>duration:</b> {rect.task_record.task.duration}\n"
                                    f"<b>priority:</b> {rect.task_record.task.priority}\n"
-                                   f"<b>progress:</b> {rect.task_record.progress}\n"
+                                   f"<b>progress:</b> {rect.task_record.progress}"
         )
         e_x = event.x
         e_y = event.y
