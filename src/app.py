@@ -32,5 +32,6 @@ class App():
 
     def tick(self):
         self.scheduler.update_current_task()
-        self.win.update_rect_time(self.scheduler.current_task)
+        self.win.draw_new_rect(self.scheduler.current_task)
+        self.win.refresh_info_label()
         self.scheduler.execute()

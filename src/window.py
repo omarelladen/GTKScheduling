@@ -38,11 +38,6 @@ class Window(Gtk.Window):
                 self.pixbuf = None
                 print(f'Failed to load icon from "{icon_path}"')
 
-        # Window dimensions
-        self.set_size_request(600, 300)
-        self.set_resizable(True)
-        self.set_border_width(6)
-
         # Vertical Box
         outerbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.add(outerbox)
@@ -95,25 +90,31 @@ class Window(Gtk.Window):
         self.scale_rect = 10
         self.rect_line_x0 = 20 + self.scale_rect  # initial x
         self.rect_line_y0 = 20  # initial y
-        self.rect_height = 10  # bar height
+        self.rect_height = 10  # task rect height
         self.rect_lines_dist = self.rect_height + 2  # distance between lines
         self.rect_dist = 0  #1  # distance between 2 bars
         self.rect_offset = self.rect_line_x0  # initial offset that will be incremented with time (+= 1*scale_rect)
+
+        # Window dimensions
+        self.set_size_request(600, self.rect_lines_dist*len(self.list_tasks) + 220)
+        self.set_resizable(True)
+        self.set_border_width(6)
 
         self.list_rect_progress_bar = []
 
         # Bars Tab
         self.drawingarea_progress_bar = Gtk.DrawingArea()
-        self.drawingarea_progress_bar.connect("draw", self._on_draw_text)
+        self.drawingarea_progress_bar.connect("draw", self._on_draw_task_lines_text)
         self.drawingarea_progress_bar.connect("draw", self._on_draw_progress_bar)
+        self.drawingarea_progress_bar.connect("draw", self._on_draw_info)
         self.drawingarea_progress_bar.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_progress_bar.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
         stack.add_titled(self.drawingarea_progress_bar, "diagram", "Diagram")
 
-        # Stats Tab
-        self.label_stats = Gtk.Label()
-        self._refresh_stats_label()
-        stack.add_titled(self.label_stats, "stats", "Statistics")
+        # Info Tab
+        self.label_info = Gtk.Label()
+        self.refresh_info_label()
+        stack.add_titled(self.label_info, "info", "Info")
 
         # Task Popover
         self.popover_task = Gtk.Popover()
@@ -177,7 +178,7 @@ class Window(Gtk.Window):
         about = Gtk.AboutDialog(transient_for=self, modal=True)
 
         about.set_program_name("GTKScheduling")
-        about.set_version("0.1.0")
+        about.set_version("0.2.0")
         about.set_comments("CPU scheduling simulator")
         about.set_website("https://github.com/omarelladen/GTKScheduling")
         about.set_website_label("Repository")
@@ -191,14 +192,13 @@ class Window(Gtk.Window):
         about.connect("response", lambda dialog, response: dialog.destroy())
         about.present()
 
-    def _on_draw_text(self, widget, cr: cairo.Context):
+    def _on_draw_task_lines_text(self, widget, cr: cairo.Context):
         cr.set_source_rgb(1, 1, 1)
         cr.set_font_size(10)
 
         for task_num, _ in enumerate(self.list_tasks, 1):
             # Calculate position - offset for single-digit task numbers
-            num_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
-            x_pos = num_pos
+            x_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
             y_pos = self.rect_line_y0 + self.rect_lines_dist * (task_num - 1) + self.rect_height - 2
 
             # Draw the task line label
@@ -209,15 +209,37 @@ class Window(Gtk.Window):
         for rect in self.list_rect_progress_bar:
             cr.set_source_rgb(*rect.color)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
-
             cr.fill()
 
+    def _on_draw_info(self, widget, cr: cairo.Context):
+        cr.set_source_rgb(1, 1, 1)
+        cr.set_font_size(10)
+
+        y = self.rect_line_y0 + self.rect_lines_dist * len(self.list_tasks) + 30
+        x_offset = self.rect_line_x0
+        spacing = 50
+
+        texts = [
+            f"Algorithm: {self.app.scheduler.alg_scheduling}",
+            f"CLK duration: {self.app.timer.interval_ms} ms",
+            f"Quantum: {self.app.scheduler.quantum}",
+            f"Time: {self.app.scheduler.time}",
+        ]
+
+        for text in texts:
+            cr.move_to(x_offset, y)
+            cr.show_text(text)
+            
+            extents = cr.text_extents(text)
+            x_offset += extents.width + spacing
+                                   
     def _show_task_popover(self, rect, widget, event):
         self.label_task.set_markup(f"<b>id:</b> {rect.task_record.task.id}\n"
                                    f"<b>start time:</b> {rect.task_record.task.start_time}\n"
                                    f"<b>duration:</b> {rect.task_record.task.duration}\n"
                                    f"<b>priority:</b> {rect.task_record.task.priority}\n"
-                                   f"<b>progress:</b> {rect.task_record.progress}")
+                                   f"<b>progress:</b> {rect.task_record.progress}\n"
+        )
         e_x = event.x
         e_y = event.y
 
@@ -231,15 +253,16 @@ class Window(Gtk.Window):
         self.cursor_y_at_popover = e_y
         self.is_popover_task_active = True
             
-    def _refresh_stats_label(self):
-        self.label_stats.set_markup(
+    def refresh_info_label(self):
+        self.label_info.set_markup(
             f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
             f"<big><b>Tasks:</b> {len(self.list_tasks)}</big>\n"
             f"<big><b>CLK duration:</b> {self.app.timer.interval_ms} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.scheduler.quantum} CLKs</big>\n"
+            f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
         )
      
-    def update_rect_time(self, current_task):
+    def draw_new_rect(self, current_task):
         # Create Task Rectangles
         task_num = current_task.id
         length = 1 * self.scale_rect
