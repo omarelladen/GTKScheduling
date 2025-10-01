@@ -49,7 +49,6 @@ class Scheduler():
         
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
-        print(len(lines))
 
         if len(lines) < 2:
             return default_alg_scheduling, \

@@ -70,6 +70,23 @@ class Window(Gtk.Window):
         bt_menu.add(img_icon)
         headerbar.pack_end(bt_menu)
 
+        # Start/Stop button
+        bt_start_stop = Gtk.Button()
+        icon_name = "media-playback-pause" if self.app.timer.is_running else "media-playback-start"  
+        icon = Gio.ThemedIcon(name=icon_name)
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt_start_stop.add(img_icon)
+        bt_start_stop.connect("clicked", self._on_click_start_stop)
+        headerbar.pack_start(bt_start_stop)
+
+        # Advance button
+        bt_advance = Gtk.Button()
+        icon = Gio.ThemedIcon(name='forward')
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt_advance.add(img_icon)
+        bt_advance.connect("clicked", self._on_click_advance)
+        headerbar.pack_start(bt_advance)
+
         # Stack
         stack = Gtk.Stack()
         stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
@@ -117,7 +134,27 @@ class Window(Gtk.Window):
 
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
+
+    def   _on_click_start_stop(self, button):
+     
+        bt_child = button.get_child()
+        if bt_child:
+            button.remove(bt_child)
+        if self.app.timer.is_running:
+            icon_name = "media-playback-start"
+            self.app.timer.stop()
+        else:
+            icon_name = "media-playback-pause"
+            self.app.timer.start()
             
+        icon = Gio.ThemedIcon(name=icon_name)
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        button.add(img_icon)
+        button.show_all()
+
+    def _on_click_advance(self, button):
+        self.app.tick()
+        
     def _on_click_outside_popover(self, widget, event):
         # Hide only when clicking in a point that is not the one that opened the popover
         if (self.is_popover_task_active == True and

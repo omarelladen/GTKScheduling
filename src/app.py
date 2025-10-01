@@ -15,7 +15,6 @@ class App():
 
         # Timer
         self.timer = Timer(300, self.tick)
-        self.timer.start()
         
         # Scheduler
         self.scheduler = Scheduler(TASKS_PATH)
