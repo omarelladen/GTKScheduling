@@ -113,12 +113,12 @@ class Window(Gtk.Window):
         self.set_resizable(True)
         self.set_border_width(6)
 
-        self.list_rect_progress_bar = []
+        self.list_task_rects = []
 
         # Diagram Tab
         self.drawingarea_diagram = Gtk.DrawingArea()
         self.drawingarea_diagram.connect("draw", self._on_draw_task_lines_text)
-        self.drawingarea_diagram.connect("draw", self._on_draw_progress_bar)
+        self.drawingarea_diagram.connect("draw", self._on_draw_task_rects)
         self.drawingarea_diagram.connect("draw", self._on_draw_info)
         self.drawingarea_diagram.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_diagram.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
@@ -190,7 +190,7 @@ class Window(Gtk.Window):
     def _on_click_task_rect(self, widget, event):
         if (event.type == Gdk.EventType.BUTTON_PRESS and
             event.button == Gdk.BUTTON_PRIMARY):
-            for rect in self.list_rect_progress_bar:
+            for rect in self.list_task_rects:
                 if (rect.x <= event.x <= rect.x + rect.width and
                     rect.y <= event.y <= rect.y + rect.height):
                     self._show_task_popover(rect, widget, event)
@@ -227,8 +227,8 @@ class Window(Gtk.Window):
             cr.move_to(x_pos, y_pos)
             cr.show_text(str(task_num))
             
-    def _on_draw_progress_bar(self, widget, cr: cairo.Context):
-        for rect in self.list_rect_progress_bar:
+    def _on_draw_task_rects(self, widget, cr: cairo.Context):
+        for rect in self.list_task_rects:
             cr.set_source_rgb(*rect.color)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
             cr.fill()
@@ -290,7 +290,7 @@ class Window(Gtk.Window):
         length = 1 * self.scale_rect
         num_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
         color = self.dict_colors[current_task.color_num]
-        self.list_rect_progress_bar.append(TaskRectangle(self.rect_offset - (length-self.rect_dist),
+        self.list_task_rects.append(TaskRectangle(self.rect_offset - (length-self.rect_dist),
                                                          self.rect_line_y0 + self.rect_lines_dist*(task_num-1),
                                                          length-self.rect_dist,
                                                          self.rect_height,
