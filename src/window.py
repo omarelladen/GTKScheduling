@@ -291,11 +291,11 @@ class Window(Gtk.Window):
         num_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
         color = self.dict_colors[current_task.color_num]
         self.list_task_rects.append(TaskRectangle(self.rect_offset - (length-self.rect_dist),
-                                                         self.rect_line_y0 + self.rect_lines_dist*(task_num-1),
-                                                         length-self.rect_dist,
-                                                         self.rect_height,
-                                                         color,
-                                                         TaskRecord(current_task, current_task.state, current_task.progress )))
+                                                  self.rect_line_y0 + self.rect_lines_dist*(task_num-1),
+                                                  length-self.rect_dist,
+                                                  self.rect_height,
+                                                  color,
+                                                  TaskRecord(current_task, current_task.state, current_task.progress )))
         self.rect_offset += (1 * self.scale_rect)
 
         # Draw created Task Rectangle

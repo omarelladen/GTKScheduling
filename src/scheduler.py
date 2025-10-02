@@ -19,7 +19,7 @@ class Scheduler():
         self.current_task.progress += 1
 
     def fcfs(self):
-        if self.time % self.quantum == 0: 
+        if self.time % self.quantum == 0:
             # Change to next (circular)
             self.current_task.state = 'ready'
             if self.current_task.id == self.num_tasks:
