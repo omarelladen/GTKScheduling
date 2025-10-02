@@ -1,2 +1,3 @@
 ICON_PATH="imgs/icon.png";
 TASKS_PATH="data/tasks";
+DIAGRAM_PATH="data/diagram";

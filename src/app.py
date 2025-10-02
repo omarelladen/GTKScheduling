@@ -20,7 +20,7 @@ class App():
         self.scheduler = Scheduler(TASKS_PATH)
         
         # Window
-        self.win = Window(self, self.scheduler.list_tasks, ICON_PATH)
+        self.win = Window(self, self.scheduler.list_tasks, DIAGRAM_PATH, ICON_PATH)
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
         

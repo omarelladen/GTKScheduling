@@ -13,6 +13,7 @@ class Window(Gtk.Window):
     def __init__(self,
         app,
         list_tasks,
+        diagram_path,
         icon_path = None,
     ):
         super().__init__()
@@ -21,13 +22,7 @@ class Window(Gtk.Window):
 
         self.list_tasks = list_tasks
 
-        self.dict_colors = {
-            1: (1.0, 0.0, 0.0),
-            2: (0.0, 0.0, 1.0),
-            3: (0.0, 1.0, 0.0),
-            4: (1.0, 1.0, 0.0),
-            5: (0.5, 0.0, 1.0),
-        }
+        self.diagram_path = diagram_path
 
         # Icon
         if icon_path:
@@ -37,6 +32,15 @@ class Window(Gtk.Window):
             except:
                 self.pixbuf = None
                 print(f'Failed to load icon from "{icon_path}"')
+
+        # Colors
+        self.dict_colors = {
+            1: (1.0, 0.0, 0.0),
+            2: (0.0, 0.0, 1.0),
+            3: (0.0, 1.0, 0.0),
+            4: (1.0, 1.0, 0.0),
+            5: (0.5, 0.0, 1.0),
+        }
 
         # Vertical Box
         outerbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -59,28 +63,36 @@ class Window(Gtk.Window):
         self.set_titlebar(headerbar)
 
         # Menu Button
-        bt_menu = Gtk.MenuButton(popover=popover_menu)
+        bt = Gtk.MenuButton(popover=popover_menu)
         icon = Gio.ThemedIcon(name="open-menu-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt_menu.add(img_icon)
-        headerbar.pack_end(bt_menu)
+        bt.add(img_icon)
+        headerbar.pack_end(bt)
+
+        # Save button
+        bt = Gtk.Button()
+        icon = Gio.ThemedIcon(name='org.remmina.Remmina-document-save-symbolic')
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.add(img_icon)
+        bt.connect("clicked", self._save_diagram_to_png)
+        headerbar.pack_end(bt)
 
         # Start/Stop button
-        bt_start_stop = Gtk.Button()
+        bt = Gtk.Button()
         icon_name = "media-playback-pause" if self.app.timer.is_running else "media-playback-start"  
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt_start_stop.add(img_icon)
-        bt_start_stop.connect("clicked", self._on_click_start_stop)
-        headerbar.pack_start(bt_start_stop)
+        bt.add(img_icon)
+        bt.connect("clicked", self._on_click_start_stop)
+        headerbar.pack_start(bt)
 
         # Advance button
-        bt_advance = Gtk.Button()
+        bt = Gtk.Button()
         icon = Gio.ThemedIcon(name='forward')
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt_advance.add(img_icon)
-        bt_advance.connect("clicked", self._on_click_advance)
-        headerbar.pack_start(bt_advance)
+        bt.add(img_icon)
+        bt.connect("clicked", self._on_click_advance)
+        headerbar.pack_start(bt)
 
         # Slider
         slider = Gtk.Scale.new_with_range(
@@ -159,7 +171,6 @@ class Window(Gtk.Window):
             self.app.timer.start()  # Restart with new interval_ms
         
     def _on_click_start_stop(self, button):
-     
         bt_child = button.get_child()
         if bt_child:
             button.remove(bt_child)
@@ -300,3 +311,28 @@ class Window(Gtk.Window):
 
         # Draw created Task Rectangle
         self.drawingarea_diagram.queue_draw()
+
+    def _save_diagram_to_png(self, button):
+        if self.list_task_rects:
+            max_x = max(rect.x + rect.width  for rect in self.list_task_rects)
+            max_y = max(rect.y + rect.height for rect in self.list_task_rects)
+            surface_width  = int(max_x + self.rect_line_x0)  # Add padding
+            surface_height = int(max_y + self.rect_line_y0)  # Add padding
+
+            # Create a Cairo surface
+            surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, surface_width, surface_height)
+            cr = cairo.Context(surface)
+
+            # Set background
+            cr.set_source_rgb(1, 1, 1)
+            cr.paint()
+
+            # Draw all rectangles
+            for rect in self.list_task_rects:
+                cr.set_source_rgb(*rect.color)
+                cr.rectangle(rect.x, rect.y, rect.width, rect.height)
+                cr.fill()
+
+            # Save to PNG
+            surface.write_to_png(self.diagram_path)
+            surface.finish()
