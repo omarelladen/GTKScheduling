@@ -29,9 +29,9 @@ class Window(Gtk.Window):
             try:
                 self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_path, 64, 64, True)
                 self.set_icon(self.pixbuf)
-            except:
+            except Exception as e:
                 self.pixbuf = None
-                print(f'Failed to load icon from "{icon_path}"')
+                print(f'Failed to load icon from "{icon_path}": {e}')
 
         # Colors
         self.dict_colors = {
@@ -95,12 +95,7 @@ class Window(Gtk.Window):
         headerbar.pack_start(bt)
 
         # Slider
-        slider = Gtk.Scale.new_with_range(
-            orientation=Gtk.Orientation.HORIZONTAL,
-            min=10,
-            max=300,
-            step=1
-        )
+        slider = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, min=10, max=300, step=1)
         slider.set_draw_value(False)  # Hide the numerical value display
         slider.set_size_request(120, -1)  # Set width
         slider.set_value(self.app.timer.interval_ms)  # Set initial value to match the variable
@@ -109,19 +104,19 @@ class Window(Gtk.Window):
 
         # Stack
         stack = Gtk.Stack()
-        stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
 
         # Task Rectangles position parameters
-        self.scale_rect = 10
-        self.rect_line_x0 = 20 + self.scale_rect  # initial x
-        self.rect_line_y0 = 20  # initial y
-        self.rect_height = 10  # task rect height
-        self.rect_lines_dist = self.rect_height + 2  # distance between lines
-        self.rect_dist = 0  #1  # distance between 2 bars
-        self.rect_offset = self.rect_line_x0  # initial offset that will be incremented with time (+= 1*scale_rect)
+        self.rect_length = 10
+        self.rect_x0 = 20 + self.rect_length
+        self.rect_y0 = 20
+        self.rect_height = 10
+        self.rect_lines_dist = self.rect_height  # distance between lines
+        self.rect_offset_x = self.rect_x0
 
         # Window dimensions
-        self.set_size_request(600, self.rect_lines_dist*len(self.list_tasks) + 220)
+        win_width = 620
+        win_height = self.rect_lines_dist*len(self.list_tasks) + 230
+        self.set_size_request(win_width, win_height)
         self.set_resizable(True)
         self.set_border_width(6)
 
@@ -134,7 +129,15 @@ class Window(Gtk.Window):
         self.drawingarea_diagram.connect("draw", self._on_draw_info)
         self.drawingarea_diagram.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_diagram.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
-        stack.add_titled(self.drawingarea_diagram, "diagram", "Diagram")
+
+        drawingarea_width = sum(task.duration for task in list_tasks) * self.rect_length
+        drawingarea_height = len(list_tasks) * self.rect_height
+        self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
+
+        # Scroll
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.add(self.drawingarea_diagram)
+        stack.add_titled(scrolled_window, "diagram", "Diagram")
 
         # Info Tab
         self.label_info = Gtk.Label()
@@ -167,8 +170,8 @@ class Window(Gtk.Window):
         self.drawingarea_diagram.queue_draw()
 
         if self.app.timer.is_running:
-            self.app.timer.stop()   # Stop the current timer
-            self.app.timer.start()  # Restart with new interval_ms
+            self.app.timer.stop()
+            self.app.timer.start()
         
     def _on_click_start_stop(self, button):
         bt_child = button.get_child()
@@ -211,7 +214,7 @@ class Window(Gtk.Window):
         about = Gtk.AboutDialog(transient_for=self, modal=True)
 
         about.set_program_name("GTKScheduling")
-        about.set_version("0.2.0")
+        about.set_version("0.3.0")
         about.set_comments("CPU scheduling simulator")
         about.set_website("https://github.com/omarelladen/GTKScheduling")
         about.set_website_label("Repository")
@@ -231,8 +234,8 @@ class Window(Gtk.Window):
 
         for task_num, _ in enumerate(self.list_tasks, 1):
             # Calculate position - offset for single-digit task numbers
-            x_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
-            y_pos = self.rect_line_y0 + self.rect_lines_dist * (task_num - 1) + self.rect_height - 2
+            x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
+            y_pos = self.rect_y0 + self.rect_lines_dist * (task_num - 1) + self.rect_height - 2
 
             # Draw the task line label
             cr.move_to(x_pos, y_pos)
@@ -248,8 +251,8 @@ class Window(Gtk.Window):
         cr.set_source_rgb(1, 1, 1)
         cr.set_font_size(10)
 
-        y = self.rect_line_y0 + self.rect_lines_dist * len(self.list_tasks) + 30
-        x_offset = self.rect_line_x0
+        y = self.rect_y0 + self.rect_lines_dist * len(self.list_tasks) + 30
+        x_offset = self.rect_x0
         spacing = 50
 
         texts = [
@@ -297,17 +300,13 @@ class Window(Gtk.Window):
      
     def draw_new_rect(self, current_task):
         # Create Task Rectangles
-        task_num = current_task.id
-        length = 1 * self.scale_rect
-        num_pos = 0 if task_num >= 10 else self.rect_line_x0 / 4
-        color = self.dict_colors[current_task.color_num]
-        self.list_task_rects.append(TaskRectangle(self.rect_offset - (length-self.rect_dist),
-                                                  self.rect_line_y0 + self.rect_lines_dist*(task_num-1),
-                                                  length-self.rect_dist,
-                                                  self.rect_height,
-                                                  color,
-                                                  TaskRecord(current_task, current_task.state, current_task.progress )))
-        self.rect_offset += (1 * self.scale_rect)
+        color = self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
+                                                          self.rect_y0 + self.rect_lines_dist*(current_task.id-1),
+                                                          self.rect_length,
+                                                          self.rect_height,
+                                                          self.dict_colors[current_task.color_num],
+                                                          TaskRecord(current_task, current_task.state, current_task.progress)))
+        self.rect_offset_x += self.rect_length
 
         # Draw created Task Rectangle
         self.drawingarea_diagram.queue_draw()
@@ -316,8 +315,8 @@ class Window(Gtk.Window):
         if self.list_task_rects:
             max_x = max(rect.x + rect.width  for rect in self.list_task_rects)
             max_y = max(rect.y + rect.height for rect in self.list_task_rects)
-            surface_width  = int(max_x + self.rect_line_x0)  # Add padding
-            surface_height = int(max_y + self.rect_line_y0)  # Add padding
+            surface_width  = int(max_x + self.rect_x0)  # Add padding
+            surface_height = int(max_y + self.rect_y0)  # Add padding
 
             # Create a Cairo surface
             surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, surface_width, surface_height)
@@ -334,5 +333,8 @@ class Window(Gtk.Window):
                 cr.fill()
 
             # Save to PNG
-            surface.write_to_png(self.diagram_path)
-            surface.finish()
+            try:
+                surface.write_to_png(self.diagram_path)
+                surface.finish()
+            except Exception as e:
+                print(f"Failed to save diagram image at {self.diagram_path}: {e}")
