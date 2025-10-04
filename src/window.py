@@ -18,18 +18,8 @@ class Window(Gtk.Window):
         super().__init__()
 
         self.app = app
-
         self.list_tasks = list_tasks
-        
-        self.accel_group = Gtk.AccelGroup()
-        self.add_accel_group(self.accel_group)
-
-        # Shortcuts
-        key, mod = Gtk.accelerator_parse("<Control>q")
-        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_q)
-
-        key, mod = Gtk.accelerator_parse("<Control>s")
-        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_s)
+        self.list_task_rects = []
 
         # Icon
         if icon_path:
@@ -48,6 +38,17 @@ class Window(Gtk.Window):
             4: (1.0, 1.0, 0.0),
             5: (0.5, 0.0, 1.0),
         }
+
+        # Shortcuts
+        self.accel_group = Gtk.AccelGroup()
+        self.add_accel_group(self.accel_group)
+
+        key, mod = Gtk.accelerator_parse("<Control>q")
+        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_q)
+        
+        key, mod = Gtk.accelerator_parse("<Control>s")
+        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_s)
+
 
         # Vertical Box
         outerbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -127,8 +128,6 @@ class Window(Gtk.Window):
         self.set_resizable(True)
         self.set_border_width(6)
 
-        self.list_task_rects = []
-
         # Diagram Tab
         self.drawingarea_diagram = Gtk.DrawingArea()
         self.drawingarea_diagram.connect("draw", self._on_draw_task_lines_text)
@@ -155,7 +154,7 @@ class Window(Gtk.Window):
         self.popover_task = Gtk.Popover()
         self.label_task = Gtk.Label()
         self.popover_task.add(self.label_task)
-
+        
         self.is_popover_task_active = False
         self.cursor_x_at_popover = None
         self.cursor_y_at_popover = None
@@ -201,15 +200,15 @@ class Window(Gtk.Window):
         dialog.destroy()
 
     def _add_file_filters(self, dialog):
-        filter_png = Gtk.FileFilter()
-        filter_png.set_name("PNG image")
-        filter_png.add_mime_type("image/png")
-        dialog.add_filter(filter_png)
+        file_filter = Gtk.FileFilter()
+        file_filter.set_name("PNG image")
+        file_filter.add_mime_type("image/png")
+        dialog.add_filter(file_filter)
 
-        filter_any = Gtk.FileFilter()
-        filter_any.set_name("Any files")
-        filter_any.add_pattern("*")
-        dialog.add_filter(filter_any)
+        file_filter = Gtk.FileFilter()
+        file_filter.set_name("Any files")
+        file_filter.add_pattern("*")
+        dialog.add_filter(file_filter)
 
     def _on_slider_value_changed(self, scale):
         self.app.timer.interval_ms = scale.get_value()
