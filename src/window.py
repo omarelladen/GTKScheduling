@@ -20,7 +20,16 @@ class Window(Gtk.Window):
         self.app = app
 
         self.list_tasks = list_tasks
+        
+        self.accel_group = Gtk.AccelGroup()
+        self.add_accel_group(self.accel_group)
 
+        # Shortcuts
+        key, mod = Gtk.accelerator_parse("<Control>q")
+        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_q)
+
+        key, mod = Gtk.accelerator_parse("<Control>s")
+        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_s)
 
         # Icon
         if icon_path:
@@ -72,7 +81,7 @@ class Window(Gtk.Window):
         icon = Gio.ThemedIcon(name='org.remmina.Remmina-document-save-symbolic')
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
-        bt.connect("clicked", self._on_file_clicked)
+        bt.connect("clicked", self._on_click_save)
         headerbar.pack_end(bt)
 
         # Start/Stop button
@@ -162,8 +171,16 @@ class Window(Gtk.Window):
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
 
+    def _on_ctrl_q(self, accel_group, window, key, modifier):
+        self.app.quit()
+        
+    def _on_ctrl_s(self, accel_group, window, key, modifier):
+        self._open_save_dialog()
 
-    def _on_file_clicked(self, widget):
+    def _on_click_save(self, widget):
+        self._open_save_dialog()
+        
+    def _open_save_dialog(self):
         dialog = Gtk.FileChooserDialog(title="Save", parent=self, action=Gtk.FileChooserAction.SAVE)
         dialog.set_do_overwrite_confirmation(True)
         dialog.set_current_folder(os.path.expanduser("~"))

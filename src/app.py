@@ -23,10 +23,13 @@ class App():
         self.win = Window(self, self.scheduler.list_tasks, ICON_PATH)
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
-        
-    def _on_destroy(self, window):
-        Gtk.main_quit()
 
+    def _on_destroy(self, window):
+        self.quit()
+        
+    def quit(self):
+        Gtk.main_quit()
+        
     def run(self):
         Gtk.main()
 
