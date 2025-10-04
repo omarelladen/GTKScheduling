@@ -28,9 +28,84 @@ class Scheduler():
                 self.current_task = self.list_tasks[self.current_task.id]
             self.current_task.state = 'running'
                 
+    #New algorithms
+    def rr(self):
+        if self.time % self.quantum == 0:
+            self.current_task.state = 'ready'
+            next_index = (self.current_task.id) % self.num_tasks
+            # Skip finished
+            for _ in range(self.num_tasks):
+                task = self.list_tasks[next_index]
+                if task.state != 'finished':
+                    self.current_task = task
+                    break
+                next_index = (next_index + 1) % self.num_tasks
+            self.current_task.state = 'running'
+
+    def sjf(self):
+        if self.current_task.state == 'finished' or self.time == 0:
+            #Choose the task with least duration
+            ready_tasks = [t for t in self.list_tasks if t.state != 'finished']
+            if ready_tasks:
+                self.current_task = min(ready_tasks, key=lambda t: t.duration)
+                self.current_task.state = 'running'
+
+    def srtf(self):
+        #Choose the task with least duration
+        ready_tasks = [t for t in self.list_tasks if t.state != 'finished' and t.start_time <= self.time]
+        if ready_tasks:
+            shortest = min(ready_tasks, key=lambda t: t.duration - t.progress)
+            if self.current_task != shortest:
+                self.current_task.state = 'ready'
+                self.current_task = shortest
+                self.current_task.state = 'running'
+
+    def prioc(self):
+        if self.current_task.state == 'finished' or self.time == 0:
+            ready_tasks = [t for t in self.list_tasks if t.state != 'finished']
+            if ready_tasks:
+                self.current_task = min(ready_tasks, key=lambda t: t.priority)
+                self.current_task.state = 'running'
+
+    def priop(self):
+        ready_tasks = [t for t in self.list_tasks if t.state != 'finished']
+        if ready_tasks:
+            highest = min(ready_tasks, key=lambda t: t.priority)
+            if self.current_task != highest:
+                self.current_task.state = 'ready'
+                self.current_task = highest
+                self.current_task.state = 'running'
+
+    def priod(self):
+        #Increment priority
+        for t in self.list_tasks:
+            if t.state == 'ready':
+                t.priority = max(1, t.priority - 1) #Considering 1 as the most important
+
+        ready_tasks = [t for t in self.list_tasks if t.state != 'finished']
+        if ready_tasks:
+            chosen = min(ready_tasks, key=lambda t: t.priority)
+            if self.current_task != chosen:
+                self.current_task.state = 'ready'
+                self.current_task = chosen
+                self.current_task.state = 'running'
+    
     def execute(self):
         if self.alg_scheduling == 'FCFS':
             self.fcfs()
+        #New if cases
+        elif self.alg_scheduling == 'RR':
+            self.rr()
+        elif self.alg_scheduling == 'SJF':
+            self.sjf()
+        elif self.alg_scheduling == 'SRTF':
+            self.srtf()
+        elif self.alg_scheduling == 'PRIOc':
+            self.prioc()
+        elif self.alg_scheduling == 'PRIOp':
+            self.priop()
+        elif self.alg_scheduling == 'PRIOd':
+            self.priod()
 
     def _setup_from_file(self, file_path):
         # Default parameters
