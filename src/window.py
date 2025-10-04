@@ -13,7 +13,6 @@ class Window(Gtk.Window):
     def __init__(self,
         app,
         list_tasks,
-        diagram_path,
         icon_path = None,
     ):
         super().__init__()
@@ -22,7 +21,6 @@ class Window(Gtk.Window):
 
         self.list_tasks = list_tasks
 
-        self.diagram_path = diagram_path
 
         # Icon
         if icon_path:
@@ -74,7 +72,7 @@ class Window(Gtk.Window):
         icon = Gio.ThemedIcon(name='org.remmina.Remmina-document-save-symbolic')
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
-        bt.connect("clicked", self._save_diagram_to_png)
+        bt.connect("clicked", self._on_file_clicked)
         headerbar.pack_end(bt)
 
         # Start/Stop button
@@ -164,6 +162,38 @@ class Window(Gtk.Window):
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
 
+
+    def _on_file_clicked(self, widget):
+        dialog = Gtk.FileChooserDialog(title="Save", parent=self, action=Gtk.FileChooserAction.SAVE)
+        dialog.set_do_overwrite_confirmation(True)
+        dialog.set_current_folder(os.path.expanduser("~"))
+        dialog.set_current_name("diagram.png")
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL,
+            Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_SAVE,
+            Gtk.ResponseType.OK,
+        )
+
+        self._add_file_filters(dialog)
+        
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            self._save_diagram_to_png(dialog.get_filename())
+
+        dialog.destroy()
+
+    def _add_file_filters(self, dialog):
+        filter_png = Gtk.FileFilter()
+        filter_png.set_name("PNG image")
+        filter_png.add_mime_type("image/png")
+        dialog.add_filter(filter_png)
+
+        filter_any = Gtk.FileFilter()
+        filter_any.set_name("Any files")
+        filter_any.add_pattern("*")
+        dialog.add_filter(filter_any)
+
     def _on_slider_value_changed(self, scale):
         self.app.timer.interval_ms = scale.get_value()
         self.refresh_info_label()
@@ -212,9 +242,8 @@ class Window(Gtk.Window):
 
     def _on_click_about(self, widget):
         about = Gtk.AboutDialog(transient_for=self, modal=True)
-
         about.set_program_name("GTKScheduling")
-        about.set_version("0.3.0")
+        about.set_version("0.4.0")
         about.set_comments("CPU scheduling simulator")
         about.set_website("https://github.com/omarelladen/GTKScheduling")
         about.set_website_label("Repository")
@@ -311,30 +340,29 @@ class Window(Gtk.Window):
         # Draw created Task Rectangle
         self.drawingarea_diagram.queue_draw()
 
-    def _save_diagram_to_png(self, button):
-        if self.list_task_rects:
-            max_x = max(rect.x + rect.width  for rect in self.list_task_rects)
-            max_y = max(rect.y + rect.height for rect in self.list_task_rects)
-            surface_width  = int(max_x + self.rect_x0)  # Add padding
-            surface_height = int(max_y + self.rect_y0)  # Add padding
+    def _save_diagram_to_png(self, filename):
+        max_x = max(rect.x + rect.width  for rect in self.list_task_rects) if self.list_task_rects else 100
+        max_y = max(rect.y + rect.height for rect in self.list_task_rects) if self.list_task_rects else 100
+        surface_width  = int(max_x + self.rect_x0)  # Add padding
+        surface_height = int(max_y + self.rect_y0)  # Add padding
 
-            # Create a Cairo surface
-            surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, surface_width, surface_height)
-            cr = cairo.Context(surface)
+        # Create a Cairo surface
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, surface_width, surface_height)
+        cr = cairo.Context(surface)
 
-            # Set background
-            cr.set_source_rgb(1, 1, 1)
-            cr.paint()
+        # Set background
+        cr.set_source_rgb(1, 1, 1)
+        cr.paint()
 
-            # Draw all rectangles
-            for rect in self.list_task_rects:
-                cr.set_source_rgb(*rect.color)
-                cr.rectangle(rect.x, rect.y, rect.width, rect.height)
-                cr.fill()
+        # Draw all rectangles
+        for rect in self.list_task_rects:
+            cr.set_source_rgb(*rect.color)
+            cr.rectangle(rect.x, rect.y, rect.width, rect.height)
+            cr.fill()
 
-            # Save to PNG
-            try:
-                surface.write_to_png(self.diagram_path)
-                surface.finish()
-            except Exception as e:
-                print(f"Failed to save diagram image at {self.diagram_path}: {e}")
+        # Save to PNG
+        try:
+            surface.write_to_png(filename)
+            surface.finish()
+        except Exception as e:
+            print(f"Failed to save diagram image at {filename}: {e}")
