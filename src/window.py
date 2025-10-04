@@ -79,7 +79,7 @@ class Window(Gtk.Window):
 
         # Save button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name='org.remmina.Remmina-document-save-symbolic')
+        icon = Gio.ThemedIcon(name='document-save-symbolic')
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_save)
@@ -180,7 +180,7 @@ class Window(Gtk.Window):
         self._open_save_dialog()
         
     def _open_save_dialog(self):
-        dialog = Gtk.FileChooserDialog(title="Save", parent=self, action=Gtk.FileChooserAction.SAVE)
+        dialog = Gtk.FileChooserDialog(title="Save diagram", parent=self, action=Gtk.FileChooserAction.SAVE)
         dialog.set_do_overwrite_confirmation(True)
         dialog.set_current_folder(os.path.expanduser("~"))
         dialog.set_current_name("diagram.png")
