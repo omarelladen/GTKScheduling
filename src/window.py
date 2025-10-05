@@ -57,9 +57,9 @@ class Window(Gtk.Window):
         # Menu Popover
         popover_menu = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        bt_about = Gtk.ModelButton(label="About GTKScheduling")
-        bt_about.connect("clicked", self._on_click_about)
-        vbox.pack_start(bt_about, False, True, 10)
+        bt = Gtk.ModelButton(label="About GTKScheduling")
+        bt.connect("clicked", self._on_click_about)
+        vbox.pack_start(bt, False, True, 10)
         vbox.show_all()
         popover_menu.add(vbox)
         popover_menu.set_position(Gtk.PositionType.BOTTOM)
@@ -359,8 +359,10 @@ class Window(Gtk.Window):
     def _save_diagram_to_png(self, filename):
         max_x = max(rect.x + rect.width  for rect in self.list_task_rects) if self.list_task_rects else 100
         max_y = max(rect.y + rect.height for rect in self.list_task_rects) if self.list_task_rects else 100
-        surface_width  = int(max_x + self.rect_x0)  # Add padding
-        surface_height = int(max_y + self.rect_y0)  # Add padding
+
+        # Add padding
+        surface_width  = int(max_x + self.rect_x0) 
+        surface_height = int(max_y + self.rect_y0)
 
         # Create a Cairo surface
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, surface_width, surface_height)
