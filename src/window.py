@@ -348,7 +348,9 @@ class Window(Gtk.Window):
         # Create Task Rectangles
 
         for task in self.list_tasks:
-            if task != current_task and task.start_time <= self.app.scheduler.time and not task.state == 'running':
+            if (task != current_task and
+                task.start_time < self.app.scheduler.time and
+                not task.state == 'running'):
                 self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
                                                           self.rect_y0 + self.lines_dist_y*(task.id-1),
                                                           self.rect_length,
