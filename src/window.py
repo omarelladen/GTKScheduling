@@ -353,7 +353,7 @@ class Window(Gtk.Window):
                                                           self.rect_y0 + self.lines_dist_y*(task.id-1),
                                                           self.rect_length,
                                                           self.rect_height,
-                                                          (1,1,1,0.1),
+                                                          (0.5, 0.5, 0.5, 0.5),
                                                           TaskRecord(task, task.state, task.progress)))
 
         self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
@@ -380,12 +380,12 @@ class Window(Gtk.Window):
         cr = cairo.Context(surface)
 
         # Set background
-        cr.set_source_rgb(1, 1, 1)
+        cr.set_source_rgb(1,1,1)
         cr.paint()
 
         # Draw all rectangles
         for rect in self.list_task_rects:
-            cr.set_source_rgb(*rect.color)
+            cr.set_source_rgba(*rect.color)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
             cr.fill()
 
