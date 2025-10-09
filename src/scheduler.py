@@ -91,25 +91,24 @@ class Scheduler():
                 self.current_task.state = 'running'
     
     def execute(self):
-        if self.alg_scheduling == 'FCFS':
+        if self.alg_scheduling == 'fcfs':
             self.fcfs()
-        #New if cases
-        elif self.alg_scheduling == 'RR':
+        elif self.alg_scheduling == 'rr':
             self.rr()
-        elif self.alg_scheduling == 'SJF':
+        elif self.alg_scheduling == 'sjf':
             self.sjf()
-        elif self.alg_scheduling == 'SRTF':
+        elif self.alg_scheduling == 'srtf':
             self.srtf()
-        elif self.alg_scheduling == 'PRIOc':
+        elif self.alg_scheduling == 'prioc':
             self.prioc()
-        elif self.alg_scheduling == 'PRIOp':
+        elif self.alg_scheduling == 'priop':
             self.priop()
-        elif self.alg_scheduling == 'PRIOd':
+        elif self.alg_scheduling == 'priod':
             self.priod()
 
     def _setup_from_file(self, file_path):
         # Default parameters
-        default_alg_scheduling = 'FCFS'
+        default_alg_scheduling = 'fcfs'
         default_quantum = 2
         default_list_tasks = [Task(1,1,0,5,2),
                               Task(2,2,0,4,3),
@@ -131,7 +130,7 @@ class Scheduler():
                    default_list_tasks
                     
             
-        alg_scheduling = lines[0].split(";")[0]
+        alg_scheduling = lines[0].split(";")[0].lower()
         quantum = int(lines[0].split(";")[1])
         
         list_tasks = []

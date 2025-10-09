@@ -32,11 +32,11 @@ class Window(Gtk.Window):
 
         # Colors
         self.dict_colors = {
-            1: (1.0, 0.0, 0.0),
-            2: (0.0, 0.0, 1.0),
-            3: (0.0, 1.0, 0.0),
-            4: (1.0, 1.0, 0.0),
-            5: (0.5, 0.0, 1.0),
+            1: (1.0, 0.0, 0.0, 1),
+            2: (0.0, 0.0, 1.0, 1),
+            3: (0.0, 1.0, 0.0, 1),
+            4: (1.0, 1.0, 0.0, 1),
+            5: (0.5, 0.0, 1.0, 1),
         }
 
         # Shortcuts
@@ -118,12 +118,12 @@ class Window(Gtk.Window):
         self.rect_x0 = 20 + self.rect_length
         self.rect_y0 = 20
         self.rect_height = 10
-        self.rect_lines_dist = self.rect_height  # distance between lines
+        self.lines_dist_y = self.rect_height + 2  # distance between lines
         self.rect_offset_x = self.rect_x0
 
         # Window dimensions
         win_width = 620
-        win_height = self.rect_lines_dist*len(self.list_tasks) + 230
+        win_height = self.lines_dist_y*len(self.list_tasks) + 230
         self.set_size_request(win_width, win_height)
         self.set_resizable(True)
         self.set_border_width(6)
@@ -280,7 +280,7 @@ class Window(Gtk.Window):
         for task_num, _ in enumerate(self.list_tasks, 1):
             # Calculate position - offset for single-digit task numbers
             x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
-            y_pos = self.rect_y0 + self.rect_lines_dist * (task_num - 1) + self.rect_height - 2
+            y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
 
             # Draw the task line label
             cr.move_to(x_pos, y_pos)
@@ -288,7 +288,7 @@ class Window(Gtk.Window):
             
     def _on_draw_task_rects(self, widget, cr: cairo.Context):
         for rect in self.list_task_rects:
-            cr.set_source_rgb(*rect.color)
+            cr.set_source_rgba(*rect.color)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
             cr.fill()
 
@@ -296,7 +296,7 @@ class Window(Gtk.Window):
         cr.set_source_rgb(1, 1, 1)
         cr.set_font_size(10)
 
-        y = self.rect_y0 + self.rect_lines_dist * len(self.list_tasks) + 30
+        y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 30
         x_offset = self.rect_x0
         spacing = 50
 
@@ -319,7 +319,8 @@ class Window(Gtk.Window):
                                    f"<b>start time:</b> {rect.task_record.task.start_time}\n"
                                    f"<b>duration:</b> {rect.task_record.task.duration}\n"
                                    f"<b>priority:</b> {rect.task_record.task.priority}\n"
-                                   f"<b>progress:</b> {rect.task_record.progress}"
+                                   f"<b>progress:</b> {rect.task_record.progress}\n"
+                                   f"<b>progress:</b> {rect.task_record.state}"
         )
         e_x = event.x
         e_y = event.y
@@ -345,12 +346,22 @@ class Window(Gtk.Window):
      
     def draw_new_rect(self, current_task):
         # Create Task Rectangles
-        color = self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
-                                                          self.rect_y0 + self.rect_lines_dist*(current_task.id-1),
+
+        for task in self.list_tasks:
+            if task != current_task and task.start_time <= self.app.scheduler.time and not task.state == 'running':
+                self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
+                                                          self.rect_y0 + self.lines_dist_y*(task.id-1),
                                                           self.rect_length,
                                                           self.rect_height,
-                                                          self.dict_colors[current_task.color_num],
-                                                          TaskRecord(current_task, current_task.state, current_task.progress)))
+                                                          (1,1,1,0.1),
+                                                          TaskRecord(task, task.state, task.progress)))
+
+        self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
+                                                  self.rect_y0 + self.lines_dist_y*(current_task.id-1),
+                                                  self.rect_length,
+                                                  self.rect_height,
+                                                  self.dict_colors[current_task.color_num],
+                                                  TaskRecord(current_task, current_task.state, current_task.progress)))
         self.rect_offset_x += self.rect_length
 
         # Draw created Task Rectangle
