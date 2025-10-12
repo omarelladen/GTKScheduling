@@ -19,7 +19,7 @@ The dependencies usually come pre-installed on popular Linux distributions with 
 - Mint 22: Cinnamon, Xfce, MATE
 - Fedora 42: GNOME, KDE
 
-However some they do not come with the package 'python3-gi-cairo' by default, such as:
+However some distros do not come with the package 'python3-gi-cairo' installed by default, such as:
 - Ubuntu 24.04: GNOME
 - Ubuntu 25.10: GNOME, KDE (lKubuntu)
 - Debian 13: KDE, MATE, LXQt
