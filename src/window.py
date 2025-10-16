@@ -263,7 +263,7 @@ class Window(Gtk.Window):
         about.set_comments("CPU scheduling simulator")
         about.set_website("https://github.com/omarelladen/GTKScheduling")
         about.set_website_label("Repository")
-        about.set_authors(["Omar El Laden"])
+        about.set_authors(["Omar El Laden", "Gabriel Martines"])
         about.set_license_type(Gtk.License.GPL_3_0)
         about.set_copyright("Copyright © 2025 Omar El Laden")
 
