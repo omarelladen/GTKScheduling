@@ -8,7 +8,7 @@ from task import Task
 from scheduler import Scheduler
 
 # Include config variables
-exec(open('config').read())
+exec(open("config").read())
 
 class App():
     def __init__(self):

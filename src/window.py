@@ -79,7 +79,7 @@ class Window(Gtk.Window):
 
         # Save button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name='document-save-symbolic')
+        icon = Gio.ThemedIcon(name="document-save-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_save)
@@ -96,7 +96,7 @@ class Window(Gtk.Window):
 
         # Advance button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name='go-next')
+        icon = Gio.ThemedIcon(name="go-next")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_advance)
@@ -350,7 +350,7 @@ class Window(Gtk.Window):
         for task in self.list_tasks:
             if (task != current_task and
                 task.start_time < self.app.scheduler.time and
-                not task.state == 'running'):
+                not task.state == "running"):
                 self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
                                                           self.rect_y0 + self.lines_dist_y*(task.id-1),
                                                           self.rect_length,
