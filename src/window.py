@@ -45,7 +45,7 @@ class Window(Gtk.Window):
 
         key, mod = Gtk.accelerator_parse("<Control>q")
         self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_q)
-        
+
         key, mod = Gtk.accelerator_parse("<Control>s")
         self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_s)
 
@@ -96,7 +96,7 @@ class Window(Gtk.Window):
 
         # Advance button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name='forward')
+        icon = Gio.ThemedIcon(name='go-next')
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_advance)
@@ -154,7 +154,7 @@ class Window(Gtk.Window):
         self.popover_task = Gtk.Popover()
         self.label_task = Gtk.Label()
         self.popover_task.add(self.label_task)
-        
+
         self.is_popover_task_active = False
         self.cursor_x_at_popover = None
         self.cursor_y_at_popover = None
@@ -172,13 +172,13 @@ class Window(Gtk.Window):
 
     def _on_ctrl_q(self, accel_group, window, key, modifier):
         self.app.quit()
-        
+
     def _on_ctrl_s(self, accel_group, window, key, modifier):
         self._open_save_dialog()
 
     def _on_click_save(self, widget):
         self._open_save_dialog()
-        
+
     def _open_save_dialog(self):
         dialog = Gtk.FileChooserDialog(title="Save diagram", parent=self, action=Gtk.FileChooserAction.SAVE)
         dialog.set_do_overwrite_confirmation(True)
@@ -192,7 +192,7 @@ class Window(Gtk.Window):
         )
 
         self._add_file_filters(dialog)
-        
+
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self._save_diagram_to_png(dialog.get_filename())
@@ -218,19 +218,19 @@ class Window(Gtk.Window):
         if self.app.timer.is_running:
             self.app.timer.stop()
             self.app.timer.start()
-        
+
     def _on_click_start_stop(self, button):
         bt_child = button.get_child()
         if bt_child:
             button.remove(bt_child)
-            
+
         if self.app.timer.is_running:
             icon_name = "media-playback-start"
             self.app.timer.stop()
         else:
             icon_name = "media-playback-pause"
             self.app.timer.start()
-            
+
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         button.add(img_icon)
@@ -238,7 +238,7 @@ class Window(Gtk.Window):
 
     def _on_click_advance(self, button):
         self.app.tick()
-        
+
     def _on_click_outside_popover(self, widget, event):
         # Hide only when clicking in a point that is not the one that opened the popover
         if (self.is_popover_task_active == True and
@@ -274,7 +274,7 @@ class Window(Gtk.Window):
         about.present()
 
     def _on_draw_task_lines_text(self, widget, cr: cairo.Context):
-        cr.set_source_rgb(1, 1, 1)
+        cr.set_source_rgb(0.7,0.7,0.7)
         cr.set_font_size(10)
 
         for task_num, _ in enumerate(self.list_tasks, 1):
@@ -285,7 +285,7 @@ class Window(Gtk.Window):
             # Draw the task line label
             cr.move_to(x_pos, y_pos)
             cr.show_text(str(task_num))
-            
+
     def _on_draw_task_rects(self, widget, cr: cairo.Context):
         for rect in self.list_task_rects:
             cr.set_source_rgba(*rect.color)
@@ -293,7 +293,7 @@ class Window(Gtk.Window):
             cr.fill()
 
     def _on_draw_info(self, widget, cr: cairo.Context):
-        cr.set_source_rgb(1, 1, 1)
+        cr.set_source_rgb(0.7,0.7,0.7)
         cr.set_font_size(10)
 
         y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 30
@@ -310,10 +310,10 @@ class Window(Gtk.Window):
         for text in texts:
             cr.move_to(x_offset, y)
             cr.show_text(text)
-            
+
             extents = cr.text_extents(text)
             x_offset += extents.width + spacing
-                                   
+
     def _show_task_popover(self, rect, widget, event):
         self.label_task.set_markup(f"<b>id:</b> {rect.task_record.task.id}\n"
                                    f"<b>start time:</b> {rect.task_record.task.start_time}\n"
@@ -334,7 +334,7 @@ class Window(Gtk.Window):
         self.cursor_x_at_popover = e_x
         self.cursor_y_at_popover = e_y
         self.is_popover_task_active = True
-            
+
     def refresh_info_label(self):
         self.label_info.set_markup(
             f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
@@ -343,7 +343,7 @@ class Window(Gtk.Window):
             f"<big><b>Quantum:</b> {self.app.scheduler.quantum}</big>\n"
             f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
         )
-     
+
     def draw_new_rect(self, current_task):
         # Create Task Rectangles
 
