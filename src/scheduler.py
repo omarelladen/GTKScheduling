@@ -1,4 +1,5 @@
 import os
+import queue
 
 from task import Task
 
@@ -10,25 +11,49 @@ class Scheduler():
         self.alg_scheduling, self.quantum, self.list_tasks = self._setup_from_file(tasks_path)
         self.num_tasks = len(self.list_tasks)
         self.time = 0
-        
-        self.current_task = self.list_tasks[0]
-        self.current_task.state = 'running'
+
+        self.queue_tasks = queue.Queue()
+
+        if self.alg_scheduling == 'fcfs':
+            self.init_fcfs()
+        elif self.alg_scheduling == 'rr':
+            self.init_rr()
+        elif self.alg_scheduling == 'sjf':
+            self.init_sjf()
+        elif self.alg_scheduling == 'srtf':
+            self.init_srtf()
+        elif self.alg_scheduling == 'prioc':
+            self.init_prioc()
+        elif self.alg_scheduling == 'priop':
+            self.init_priop()
+        elif self.alg_scheduling == 'priod':
+            self.init_priod()
         
     def update_current_task(self):
         self.time += 1
         self.current_task.progress += 1
 
+    def init_fcfs(self):
+        # Sort tasks by start time
+        list_tasks_sorted = sorted(self.list_tasks, key=lambda t: t.start_time)
+        for task in list_tasks_sorted:
+             self.queue_tasks.put(task)
+
+        # Get first task
+        self.current_task = self.queue_tasks.get()
+        self.current_task.state = 'running'
+
     def fcfs(self):
-        if self.time % self.quantum == 0:
-            # Change to next (circular)
-            self.current_task.state = 'ready'
-            if self.current_task.id == self.num_tasks:
-                self.current_task = self.list_tasks[0]  
+        if self.current_task.progress == self.current_task.duration:  # current task finished
+            self.current_task.state = 'finished'
+
+            # Get next task
+            if not self.queue_tasks.empty():
+                self.current_task = self.queue_tasks.get()
+                self.current_task.state = 'running'
             else:
-                self.current_task = self.list_tasks[self.current_task.id]
-            self.current_task.state = 'running'
+                self.current_task = None
                 
-    #New algorithms
     def rr(self):
         if self.time % self.quantum == 0:
             self.current_task.state = 'ready'
@@ -44,14 +69,14 @@ class Scheduler():
 
     def sjf(self):
         if self.current_task.state == 'finished' or self.time == 0:
-            #Choose the task with least duration
+            # Choose the task with least duration
             ready_tasks = [t for t in self.list_tasks if t.state != 'finished']
             if ready_tasks:
                 self.current_task = min(ready_tasks, key=lambda t: t.duration)
                 self.current_task.state = 'running'
 
     def srtf(self):
-        #Choose the task with least duration
+        # Choose the task with least duration
         ready_tasks = [t for t in self.list_tasks if t.state != 'finished' and t.start_time <= self.time]
         if ready_tasks:
             shortest = min(ready_tasks, key=lambda t: t.duration - t.progress)
@@ -77,10 +102,10 @@ class Scheduler():
                 self.current_task.state = 'running'
 
     def priod(self):
-        #Increment priority
+        # Increment priority
         for t in self.list_tasks:
             if t.state == 'ready':
-                t.priority = max(1, t.priority - 1) #Considering 1 as the most important
+                t.priority = max(1, t.priority - 1)  # Considering 1 as the most important
 
         ready_tasks = [t for t in self.list_tasks if t.state != 'finished']
         if ready_tasks:

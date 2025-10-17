@@ -34,7 +34,8 @@ class App():
         Gtk.main()
 
     def tick(self):
-        self.scheduler.update_current_task()
-        self.win.draw_new_rect(self.scheduler.current_task)
-        self.win.refresh_info_label()
-        self.scheduler.execute()
+        if self.scheduler.current_task:
+            self.scheduler.update_current_task()
+            self.win.draw_new_rect(self.scheduler.current_task)
+            self.win.refresh_info_label()
+            self.scheduler.execute()
