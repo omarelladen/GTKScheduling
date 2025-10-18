@@ -104,9 +104,9 @@ class Window(Gtk.Window):
 
         # Slider
         slider = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, min=10, max=300, step=1)
-        slider.set_draw_value(False)  # Hide the numerical value display
-        slider.set_size_request(120, -1)  # Set width
-        slider.set_value(self.app.timer.interval_ms)  # Set initial value to match the variable
+        slider.set_draw_value(False)
+        slider.set_size_request(120, -1)
+        slider.set_value(self.app.timer.interval_ms)
         slider.connect("value-changed", self._on_slider_value_changed)
         headerbar.pack_start(slider)
 
@@ -263,9 +263,10 @@ class Window(Gtk.Window):
         about.set_comments("CPU scheduling simulator")
         about.set_website("https://github.com/omarelladen/GTKScheduling")
         about.set_website_label("Repository")
-        about.set_authors(["Omar El Laden", "Gabriel Martines"])
+        authors = ["Omar El Laden", "Gabriel Martines"]
+        about.set_authors(authors)
         about.set_license_type(Gtk.License.GPL_3_0)
-        about.set_copyright("Copyright © 2025 Omar El Laden")
+        about.set_copyright(f"Copyright © 2025 {', '.join(authors)}")
 
         if self.pixbuf:
             about.set_logo(self.pixbuf)
