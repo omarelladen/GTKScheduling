@@ -44,8 +44,8 @@ class Scheduler():
         self.current_task.state = "running"
 
     def fcfs(self):
-        if self.current_task.progress == self.current_task.duration:  # current task finished
-            self.current_task.state = "finished"
+        if self.current_task.progress == self.current_task.duration:  # current task terminated
+            self.current_task.state = "terminated"
 
             # Get next task
             if not self.queue_tasks.empty():
@@ -58,26 +58,26 @@ class Scheduler():
         if self.time % self.quantum == 0:
             self.current_task.state = "ready"
             next_index = (self.current_task.id) % self.num_tasks
-            # Skip finished
+            # Skip terminated
             for _ in range(self.num_tasks):
                 task = self.list_tasks[next_index]
-                if task.state != "finished":
+                if task.state != "terminated":
                     self.current_task = task
                     break
                 next_index = (next_index + 1) % self.num_tasks
             self.current_task.state = "running"
 
     def sjf(self):
-        if self.current_task.state == "finished" or self.time == 0:
+        if self.current_task.state == "terminated" or self.time == 0:
             # Choose the task with least duration
-            ready_tasks = [t for t in self.list_tasks if t.state != "finished"]
+            ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
             if ready_tasks:
                 self.current_task = min(ready_tasks, key=lambda t: t.duration)
                 self.current_task.state = "running"
 
     def srtf(self):
         # Choose the task with least duration
-        ready_tasks = [t for t in self.list_tasks if t.state != "finished" and t.start_time <= self.time]
+        ready_tasks = [t for t in self.list_tasks if t.state != "terminated" and t.start_time <= self.time]
         if ready_tasks:
             shortest = min(ready_tasks, key=lambda t: t.duration - t.progress)
             if self.current_task != shortest:
@@ -86,14 +86,14 @@ class Scheduler():
                 self.current_task.state = "running"
 
     def prioc(self):
-        if self.current_task.state == "finished" or self.time == 0:
-            ready_tasks = [t for t in self.list_tasks if t.state != "finished"]
+        if self.current_task.state == "terminated" or self.time == 0:
+            ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
             if ready_tasks:
                 self.current_task = min(ready_tasks, key=lambda t: t.priority)
                 self.current_task.state = "running"
 
     def priop(self):
-        ready_tasks = [t for t in self.list_tasks if t.state != "finished"]
+        ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
         if ready_tasks:
             highest = min(ready_tasks, key=lambda t: t.priority)
             if self.current_task != highest:
@@ -107,7 +107,7 @@ class Scheduler():
             if t.state == "ready":
                 t.priority = max(1, t.priority - 1)  # Considering 1 as the most important
 
-        ready_tasks = [t for t in self.list_tasks if t.state != "finished"]
+        ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
         if ready_tasks:
             chosen = min(ready_tasks, key=lambda t: t.priority)
             if self.current_task != chosen:
