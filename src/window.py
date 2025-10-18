@@ -77,7 +77,7 @@ class Window(Gtk.Window):
         bt.add(img_icon)
         headerbar.pack_end(bt)
 
-        # Save button
+        # Save Button
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name="document-save-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
@@ -85,7 +85,7 @@ class Window(Gtk.Window):
         bt.connect("clicked", self._on_click_save)
         headerbar.pack_end(bt)
 
-        # Start/Stop button
+        # Start/Stop Button
         bt = Gtk.Button()
         icon_name = "media-playback-pause" if self.app.timer.is_running else "media-playback-start"  
         icon = Gio.ThemedIcon(name=icon_name)
@@ -94,7 +94,7 @@ class Window(Gtk.Window):
         bt.connect("clicked", self._on_click_start_stop)
         headerbar.pack_start(bt)
 
-        # Advance button
+        # Advance Button
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name="go-next")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
@@ -160,6 +160,7 @@ class Window(Gtk.Window):
         self.cursor_y_at_popover = None
 
         # All clicks will be checked to be able to hide the task popovers
+        # only when clicking in a point outside the one that opened it
         self.connect("button-press-event", self._on_click_outside_popover)
 
         # Stack Switcher
@@ -240,7 +241,6 @@ class Window(Gtk.Window):
         self.app.tick()
 
     def _on_click_outside_popover(self, widget, event):
-        # Hide only when clicking in a point that is not the one that opened the popover
         if (self.is_popover_task_active == True and
             event.x != self.cursor_x_at_popover and
             event.y != self.cursor_y_at_popover):
@@ -275,11 +275,11 @@ class Window(Gtk.Window):
         about.present()
 
     def _on_draw_task_lines_text(self, widget, cr: cairo.Context):
-        cr.set_source_rgb(0.7,0.7,0.7)
+        cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
 
         for task_num, _ in enumerate(self.list_tasks, 1):
-            # Calculate position - offset for single-digit task numbers
+            # Calculate position with offset for single-digit task numbers
             x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
             y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
 
@@ -294,7 +294,7 @@ class Window(Gtk.Window):
             cr.fill()
 
     def _on_draw_info(self, widget, cr: cairo.Context):
-        cr.set_source_rgb(0.7,0.7,0.7)
+        cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
 
         y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 30
@@ -346,8 +346,7 @@ class Window(Gtk.Window):
         )
 
     def draw_new_rect(self, current_task):
-        # Create Task Rectangles
-
+        # Create tranparent task rectangles
         for task in self.list_tasks:
             if (task != current_task and
                 task.start_time < self.app.scheduler.time and
@@ -359,6 +358,7 @@ class Window(Gtk.Window):
                                                           (0.5, 0.5, 0.5, 0.5),
                                                           TaskRecord(task, task.state, task.progress)))
 
+        # Create current task rectangle
         self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
                                                   self.rect_y0 + self.lines_dist_y*(current_task.id-1),
                                                   self.rect_length,
@@ -367,7 +367,7 @@ class Window(Gtk.Window):
                                                   TaskRecord(current_task, current_task.state, current_task.progress)))
         self.rect_offset_x += self.rect_length
 
-        # Draw created Task Rectangle
+        # Draw
         self.drawingarea_diagram.queue_draw()
 
     def _save_diagram_to_png(self, filename):
@@ -383,7 +383,7 @@ class Window(Gtk.Window):
         cr = cairo.Context(surface)
 
         # Set background
-        cr.set_source_rgb(1,1,1)
+        cr.set_source_rgb(1, 1, 1)
         cr.paint()
 
         # Draw all rectangles
