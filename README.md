@@ -31,7 +31,7 @@ sudo apt install python3-gi-cairo
 
 If you wish to configure on other operating systems, including Windows, follow the instructions on the [PyGObject website](https://pygobject.gnome.org/getting_started.html), making sure to replace 'GTK4' with 'GTK3' when instaling packages.
 
-## Setup:
+## Setup
 To launch the app directly from the desktop environment, there is a Shell script which after executed will add a desktop entry to ~/.local/share/applications/gtk-scheduling.desktop and also setup the scripts/launcher.sh that will be called to start the app.
 
 To add the entry:
@@ -48,5 +48,5 @@ or:
 python3 src/main.py
 ```
 
-## Configure scheduling parameters:
+## Configure scheduling parameters
 The scheduling parameters can be changed by editing the data/tasks file.
