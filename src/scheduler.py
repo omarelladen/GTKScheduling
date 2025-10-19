@@ -14,6 +14,10 @@ class Scheduler():
 
         self.queue_tasks = queue.Queue()
 
+        self.current_task = None
+
+        self.used_quantum = 0
+
         if self.alg_scheduling == "fcfs":
             self.init_fcfs()
         elif self.alg_scheduling == "rr":
@@ -32,16 +36,29 @@ class Scheduler():
     def update_current_task(self):
         self.time += 1
         self.current_task.progress += 1
+        self.used_quantum += 1
 
     def init_fcfs(self):
         # Sort tasks by start time
         list_tasks_sorted = sorted(self.list_tasks, key=lambda t: t.start_time)
+
+        # Enqueue tasks in advance
         for task in list_tasks_sorted:
              self.queue_tasks.put(task)
 
         # Get first task
         self.current_task = self.queue_tasks.get()
         self.current_task.state = "running"
+
+    def init_rr(self):
+        for task in self.list_tasks:
+            if task.start_time == 0:
+                task.state = "ready"
+                self.queue_tasks.put(task)
+
+        if not self.queue_tasks.empty():
+            self.current_task = self.queue_tasks.get()
+            self.current_task.state = "running"
 
     def fcfs(self):
         if self.current_task.progress == self.current_task.duration:  # current task terminated
@@ -53,19 +70,29 @@ class Scheduler():
                 self.current_task.state = "running"
             else:
                 self.current_task = None
-                
+     
     def rr(self):
-        if self.time % self.quantum == 0:
-            self.current_task.state = "ready"
-            next_index = (self.current_task.id) % self.num_tasks
-            # Skip terminated
-            for _ in range(self.num_tasks):
-                task = self.list_tasks[next_index]
-                if task.state != "terminated":
-                    self.current_task = task
-                    break
-                next_index = (next_index + 1) % self.num_tasks
-            self.current_task.state = "running"
+        # Enqueue new tasks
+        for task in self.list_tasks:
+            if task.state == None and task.start_time <= self.time:  #  or time +- 1
+                task.state = "ready"
+                self.queue_tasks.put(task)
+                
+        if self.used_quantum == self.quantum or self.current_task.progress == self.current_task.duration:
+            if self.current_task.progress == self.current_task.duration:
+                self.current_task.state = "terminated"
+                self.used_quantum = 0
+            else:  # requeue
+                self.current_task.state = "ready"
+                self.queue_tasks.put(self.current_task)
+                self.used_quantum = 0
+
+            # Get next task
+            if not self.queue_tasks.empty():
+                self.current_task = self.queue_tasks.get()
+                self.current_task.state = "running"
+            else:
+                self.current_task = None
 
     def sjf(self):
         if self.current_task.state == "terminated" or self.time == 0:
