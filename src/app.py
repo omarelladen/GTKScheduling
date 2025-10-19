@@ -22,6 +22,13 @@ class App():
         # Window
         self.win = Window(self,
                           self.scheduler.list_tasks,
+                          APP_NAME,
+                          APP_DESCRIPTION,
+                          APP_VERSION,
+                          WEBSITE_URL,
+                          WEBSITE_LABEL,
+                          AUTHORS,
+                          COPYRIGHT,
                           APP_ICON_PATH,
                           PLAY_ICON,
                           PAUSE_ICON,
