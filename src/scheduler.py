@@ -11,12 +11,9 @@ class Scheduler():
         self.alg_scheduling, self.quantum, self.list_tasks = self._setup_from_file(tasks_path)
         self.num_tasks = len(self.list_tasks)
         self.time = 0
-
-        self.queue_tasks = queue.Queue()
-
-        self.current_task = None
-
         self.used_quantum = 0
+        self.current_task = None
+        self.queue_tasks = queue.Queue()
 
         if self.alg_scheduling == "fcfs":
             self.init_fcfs()
@@ -173,6 +170,7 @@ class Scheduler():
                               Task(4,4,5,6,9),
                               Task(5,5,7,4,6)]
 
+
         if not os.path.isfile(file_path):
             return default_alg_scheduling, \
                    default_quantum, \
@@ -187,6 +185,7 @@ class Scheduler():
                    default_list_tasks
 
 
+        # Extract parameters from file
         alg_scheduling = lines[0].split(";")[0].lower()
         quantum = int(lines[0].split(";")[1])
 
