@@ -1,2 +1,8 @@
-ICON_PATH="imgs/icon.png";
+APP_ICON_PATH="imgs/icon.png";
 TASKS_PATH="data/tasks";
+PLAY_ICON="media-playback-start";
+PAUSE_ICON="media-playback-pause";
+NEXT_ICON="go-next";
+SKIP_ICON="stock_media-next";
+MENU_ICON="open-menu-symbolic";
+SAVE_ICON="document-save-symbolic";

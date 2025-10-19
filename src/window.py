@@ -13,22 +13,36 @@ class Window(Gtk.Window):
     def __init__(self,
         app,
         list_tasks,
-        icon_path = None,
+        app_icon_path = None,
+        play_icon = None,
+        pause_icon = None,
+        next_icon = None,
+        skip_icon = None,
+        menu_icon = None,
+        save_icon = None,
     ):
         super().__init__()
 
         self.app = app
         self.list_tasks = list_tasks
         self.list_task_rects = []
-
+        
+        self.app_icon_path = app_icon_path
+        self.play_icon = play_icon
+        self.pause_icon = pause_icon
+        self.next_icon = next_icon
+        self.skip_icon = skip_icon
+        self.menu_icon = menu_icon
+        self.save_icon = save_icon
+        
         # Icon
-        if icon_path:
+        if self.app_icon_path:
             try:
-                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_path, 64, 64, True)
+                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.app_icon_path, 64, 64, True)
                 self.set_icon(self.pixbuf)
             except Exception as e:
                 self.pixbuf = None
-                print(f'Failed to load icon from "{icon_path}": {e}')
+                print(f'Failed to load icon from "{self.app_icon_path}": {e}')
 
         # Colors
         self.dict_colors = {
@@ -72,14 +86,14 @@ class Window(Gtk.Window):
 
         # Menu Button
         bt = Gtk.MenuButton(popover=popover_menu)
-        icon = Gio.ThemedIcon(name="open-menu-symbolic")
+        icon = Gio.ThemedIcon(name=self.menu_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         headerbar.pack_end(bt)
 
         # Save Button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name="document-save-symbolic")
+        icon = Gio.ThemedIcon(name=self.save_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_save)
@@ -87,16 +101,18 @@ class Window(Gtk.Window):
 
         # Start/Stop Button
         bt = Gtk.Button()
-        icon_name = "media-playback-pause" if self.app.timer.is_running else "media-playback-start"  
+        icon_name = self.pause_icon if self.app.timer.is_running else self.play_icon
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_start_stop)
         headerbar.pack_start(bt)
 
-        # Advance Button
+        self.bt_start_stop = bt
+
+        # Next Button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name="go-next")
+        icon = Gio.ThemedIcon(name=self.next_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_advance)
@@ -104,7 +120,7 @@ class Window(Gtk.Window):
 
         # Skip button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name="stock_media-next")
+        icon = Gio.ThemedIcon(name=self.skip_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_skip)
@@ -234,11 +250,25 @@ class Window(Gtk.Window):
             button.remove(bt_child)
 
         if self.app.timer.is_running:
-            icon_name = "media-playback-start"
+            icon_name = self.play_icon
             self.app.timer.stop()
         else:
-            icon_name = "media-playback-pause"
+            icon_name = self.pause_icon
             self.app.timer.start()
+
+        icon = Gio.ThemedIcon(name=icon_name)
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        button.add(img_icon)
+        button.show_all() 
+
+    def set_stop_icon(self):
+        button = self.bt_start_stop
+        
+        bt_child = button.get_child()
+        if bt_child:
+            button.remove(bt_child)
+
+        icon_name = self.play_icon
 
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)

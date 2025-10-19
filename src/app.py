@@ -20,7 +20,16 @@ class App():
         self.scheduler = Scheduler(TASKS_PATH)
 
         # Window
-        self.win = Window(self, self.scheduler.list_tasks, ICON_PATH)
+        self.win = Window(self,
+                          self.scheduler.list_tasks,
+                          APP_ICON_PATH,
+                          PLAY_ICON,
+                          PAUSE_ICON,
+                          NEXT_ICON,
+                          SKIP_ICON,
+                          MENU_ICON,
+                          SAVE_ICON
+        )
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
 
@@ -39,3 +48,5 @@ class App():
             self.win.draw_new_rect(self.scheduler.current_task)
             self.win.refresh_info_label()
             self.scheduler.execute()
+        else:
+            self.win.set_stop_icon()
