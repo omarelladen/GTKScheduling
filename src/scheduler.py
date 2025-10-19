@@ -32,23 +32,22 @@ class Scheduler():
             self.init_priop()
         elif self.alg_scheduling == "priod":
             self.init_priod()
-        
+
     def update_current_task(self):
         self.time += 1
         self.current_task.progress += 1
         self.used_quantum += 1
 
     def init_fcfs(self):
-        # Sort tasks by start time
-        list_tasks_sorted = sorted(self.list_tasks, key=lambda t: t.start_time)
-
-        # Enqueue tasks in advance
-        for task in list_tasks_sorted:
-             self.queue_tasks.put(task)
+        for task in self.list_tasks:
+            if task.start_time == 0:
+                task.state = "ready"
+                self.queue_tasks.put(task)
 
         # Get first task
-        self.current_task = self.queue_tasks.get()
-        self.current_task.state = "running"
+        if not self.queue_tasks.empty():
+            self.current_task = self.queue_tasks.get()
+            self.current_task.state = "running"
 
     def init_rr(self):
         for task in self.list_tasks:
@@ -61,6 +60,12 @@ class Scheduler():
             self.current_task.state = "running"
 
     def fcfs(self):
+        # Enqueue new tasks
+        for task in self.list_tasks:
+            if task.state == None and task.start_time <= self.time:  #  or time +- 1
+                task.state = "ready"
+                self.queue_tasks.put(task)
+
         if self.current_task.progress == self.current_task.duration:  # current task terminated
             self.current_task.state = "terminated"
 
@@ -70,14 +75,14 @@ class Scheduler():
                 self.current_task.state = "running"
             else:
                 self.current_task = None
-     
+
     def rr(self):
         # Enqueue new tasks
         for task in self.list_tasks:
             if task.state == None and task.start_time <= self.time:  #  or time +- 1
                 task.state = "ready"
                 self.queue_tasks.put(task)
-                
+
         if self.used_quantum == self.quantum or self.current_task.progress == self.current_task.duration:
             if self.current_task.progress == self.current_task.duration:
                 self.current_task.state = "terminated"
@@ -167,12 +172,12 @@ class Scheduler():
                               Task(3,3,3,5,5),
                               Task(4,4,5,6,9),
                               Task(5,5,7,4,6)]
-                                       
+
         if not os.path.isfile(file_path):
             return default_alg_scheduling, \
                    default_quantum, \
                    default_list_tasks
-        
+
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
@@ -180,17 +185,17 @@ class Scheduler():
             return default_alg_scheduling, \
                    default_quantum, \
                    default_list_tasks
-                    
-            
+
+
         alg_scheduling = lines[0].split(";")[0].lower()
         quantum = int(lines[0].split(";")[1])
-        
+
         list_tasks = []
-        for line in lines[1:]:            
-            task_id         = int(line.split(";")[0])              
-            task_color_num  = int(line.split(";")[1])                
-            task_start_time = int(line.split(";")[2])                
-            task_duration   = int(line.split(";")[3])                
+        for line in lines[1:]:
+            task_id         = int(line.split(";")[0])
+            task_color_num  = int(line.split(";")[1])
+            task_start_time = int(line.split(";")[2])
+            task_duration   = int(line.split(";")[3])
             task_priority   = int(line.split(";")[4])
 
             task = Task(task_id,

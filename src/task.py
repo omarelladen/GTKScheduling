@@ -3,7 +3,7 @@ class Task():
     def __init__(self,
         id,
         color_num,
-        start_time, 
+        start_time,
         duration,
         priority,
         state = None,

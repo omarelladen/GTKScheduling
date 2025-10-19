@@ -102,6 +102,14 @@ class Window(Gtk.Window):
         bt.connect("clicked", self._on_click_advance)
         headerbar.pack_start(bt)
 
+        # Skip button
+        bt = Gtk.Button()
+        icon = Gio.ThemedIcon(name="stock_media-next")
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.add(img_icon)
+        bt.connect("clicked", self._on_click_skip)
+        headerbar.pack_start(bt)
+
         # Slider
         slider = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, min=10, max=300, step=1)
         slider.set_draw_value(False)
@@ -240,6 +248,16 @@ class Window(Gtk.Window):
     def _on_click_advance(self, button):
         self.app.tick()
 
+    def _on_click_skip(self, button):
+        old_interval_ms = self.app.timer.interval_ms
+
+        # Run very fast
+        self.app.timer.interval_ms = 1
+        self.app.timer.start()
+
+        # Go back to previous interval_ms for consistency
+        self.app.timer.interval_ms = old_interval_ms
+
     def _on_click_outside_popover(self, widget, event):
         if (self.is_popover_task_active == True and
             event.x != self.cursor_x_at_popover and
@@ -375,7 +393,7 @@ class Window(Gtk.Window):
         max_y = max(rect.y + rect.height for rect in self.list_task_rects) if self.list_task_rects else 100
 
         # Add padding
-        surface_width  = int(max_x + self.rect_x0) 
+        surface_width  = int(max_x + self.rect_x0)
         surface_height = int(max_y + self.rect_y0)
 
         # Create a Cairo surface

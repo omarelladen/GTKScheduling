@@ -15,10 +15,10 @@ class App():
 
         # Timer
         self.timer = Timer(300, self.tick)
-        
+
         # Scheduler
         self.scheduler = Scheduler(TASKS_PATH)
-        
+
         # Window
         self.win = Window(self, self.scheduler.list_tasks, ICON_PATH)
         self.win.connect("destroy", self._on_destroy)
@@ -26,10 +26,10 @@ class App():
 
     def _on_destroy(self, window):
         self.quit()
-        
+
     def quit(self):
         Gtk.main_quit()
-        
+
     def run(self):
         Gtk.main()
 
