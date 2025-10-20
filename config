@@ -7,8 +7,8 @@ WEBSITE_LABEL="Repository";
 AUTHORS="Omar El Laden https://github.com/omarelladen,Gabriel Martines https://github.com/Gaoss97";
 COPYRIGHT="Copyright © 2025 Omar El Laden, Gabriel Martines";
 
-APP_ICON_FILE=f"/usr/local/share/{APP_NAME_LOWER}/icons/icon.png";
-TASKS_FILE=f"/usr/local/share/{APP_NAME_LOWER}/tasks";
+APP_ICON_FILE="/usr/local/share/gtkscheduling/icons/icon.png";
+TASKS_FILE="/usr/local/share/gtkscheduling/tasks";
 
 PLAY_ICON="media-playback-start-symbolic";
 PAUSE_ICON="media-playback-pause-symbolic";
@@ -22,8 +22,8 @@ ORIG_ICONS_DIR="data/icons"
 ORIG_TASKS_FILE="data/tasks"
 
 BIN_DIR="/usr/local/bin"
-BIN_FILE="/usr/local/bin/$APP_NAME_LOWER"
+BIN_FILE="/usr/local/bin/gtkscheduling"
 DESKTOP_DIR="/usr/local/share/applications"
-DESKTOP_FILE="$DESKTOP_DIR/$APP_NAME_LOWER.desktop"
-DATA_DIR="/usr/local/share/$APP_NAME_LOWER"
-ICONS_DIR="/usr/local/share/$APP_NAME_LOWER/icons"
+DESKTOP_FILE="/usr/local/share/applications/gtkscheduling.desktop"
+DATA_DIR="/usr/local/share/gtkscheduling"
+ICONS_DIR="/usr/local/share/gtkscheduling/icons"
