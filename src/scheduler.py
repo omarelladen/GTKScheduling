@@ -7,14 +7,22 @@ class Scheduler():
     def __init__(self,
         tasks_path
     ):
+        self.tasks_path = tasks_path
+        self.reset()
+
+    def reset(self):
         # Scheduling parameters
-        self.alg_scheduling, self.quantum, self.list_tasks = self._setup_from_file(tasks_path)
+        self.alg_scheduling, self.quantum, self.list_tasks = self._setup_from_file(self.tasks_path)
         self.num_tasks = len(self.list_tasks)
+
         self.time = 0
         self.used_quantum = 0
         self.current_task = None
         self.queue_tasks = queue.Queue()
 
+        self.init_alg()
+
+    def init_alg(self):
         if self.alg_scheduling == "fcfs":
             self.init_fcfs()
         elif self.alg_scheduling == "rr":

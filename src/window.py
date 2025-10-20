@@ -140,6 +140,14 @@ class Window(Gtk.Window):
         bt.connect("clicked", self._on_click_skip)
         headerbar.pack_start(bt)
 
+        # Restart button
+        bt = Gtk.Button()
+        icon = Gio.ThemedIcon(name="reload")
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.add(img_icon)
+        bt.connect("clicked", self._on_click_restart)
+        headerbar.pack_start(bt)
+
         # Slider
         slider = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, min=10, max=300, step=1)
         slider.set_draw_value(False)
@@ -249,6 +257,22 @@ class Window(Gtk.Window):
         file_filter.add_pattern("*")
         dialog.add_filter(file_filter)
 
+    def set_play_icon_on_finish(self):
+        self.app.timer.stop()
+        
+        button = self.bt_start_stop
+        
+        bt_child = button.get_child()
+        if bt_child:
+            button.remove(bt_child)
+
+        icon_name = self.play_icon
+
+        icon = Gio.ThemedIcon(name=icon_name)
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        button.add(img_icon)
+        button.show_all()
+
     def _on_slider_value_changed(self, scale):
         self.app.timer.interval_ms = scale.get_value()
         self.refresh_info_label()
@@ -275,20 +299,6 @@ class Window(Gtk.Window):
         button.add(img_icon)
         button.show_all() 
 
-    def set_play_icon_on_finish(self):
-        button = self.bt_start_stop
-        
-        bt_child = button.get_child()
-        if bt_child:
-            button.remove(bt_child)
-
-        icon_name = self.play_icon
-
-        icon = Gio.ThemedIcon(name=icon_name)
-        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        button.add(img_icon)
-        button.show_all()
-
     def _on_click_advance(self, button):
         self.app.tick()
 
@@ -302,6 +312,14 @@ class Window(Gtk.Window):
 
         # Go back to previous interval_ms for consistency
         self.app.timer.interval_ms = old_interval_ms
+
+    def _on_click_restart(self, widget):
+        self.list_task_rects = []
+        self.rect_offset_x = self.rect_x0
+        self.drawingarea_diagram.queue_draw()
+    
+        self.app.scheduler.reset()
+        self.list_tasks = self.app.scheduler.list_tasks
 
     def _on_click_outside_popover(self, widget, event):
         if (self.is_popover_task_active == True and
