@@ -1,8 +1,6 @@
 import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
-from app import App
+from .app import App
 
 def main():
     try:

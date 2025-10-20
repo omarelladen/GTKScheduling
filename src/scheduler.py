@@ -1,7 +1,7 @@
 import os
 import queue
 
-from task import Task
+from .task import Task
 
 class Scheduler():
     def __init__(self,

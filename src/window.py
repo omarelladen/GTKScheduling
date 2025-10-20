@@ -5,9 +5,8 @@ import cairo
 import gi
 from gi.repository import Gtk, Gio, Gdk, GdkPixbuf
 
-from task_rectangle import TaskRectangle
-from task_record import TaskRecord
-
+from .task_rectangle import TaskRectangle
+from .task_record import TaskRecord
 
 class Window(Gtk.Window):
     def __init__(self,

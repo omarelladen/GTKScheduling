@@ -1,12 +1,12 @@
-<img height="64" src="imgs/icon.png" align="left"/>
+<img height="64" src="data/icons/icon.png" align="left"/>
 
 # GTKScheduling (in development)
 
 GTKScheduling is GTK 3 based app to simulate CPU scheduling.
 
 <p align="center" width="100%">
-<img src="imgs/diagram.png">
-<img src="imgs/info.png">
+<img src="data/imgs/diagram.png">
+<img src="data/imgs/info.png">
 </p>
 
 ## Requirements
@@ -31,22 +31,19 @@ sudo apt install python3-gi-cairo
 
 If you wish to configure on other operating systems, including Windows, follow the instructions on the [PyGObject website](https://pygobject.gnome.org/getting_started.html), making sure to replace 'GTK4' with 'GTK3' when instaling packages.
 
-## Setup
-To launch the app directly from the desktop environment, there is a Shell script which after executed will add a desktop entry to ~/.local/share/applications/gtk-scheduling.desktop and also setup the scripts/launcher.sh that will be called to start the app.
-
-To add the entry:
-```sh
-sh scripts/setup_desktop_entry.sh
-```
-
-You can also directly run the app with:
-```sh
-sh scripts/launcher.sh
-```
-or:
-```sh
-python3 src/main.py
-```
-
 ## Configure scheduling parameters
-The scheduling parameters can be changed by editing the data/tasks file.
+The scheduling parameters can be changed by editing the data/tasks/tasks file.
+
+## Install app
+```sh
+sudo scripts/install.sh
+```
+After the installation you can open the app with the apps menu of your desktop environment or run:
+```sh
+gtkscheduling
+```
+
+## Uninstall app
+```sh
+sudo scripts/uninstall.sh
+```

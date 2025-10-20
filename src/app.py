@@ -2,13 +2,12 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-from timer import Timer
-from window import Window
-from task import Task
-from scheduler import Scheduler
+from .timer import Timer
+from .window import Window
+from .scheduler import Scheduler
 
 # Include config variables
-exec(open("config").read())
+exec(open("/usr/local/share/gtkscheduling/config").read())
 
 class App():
     def __init__(self):
