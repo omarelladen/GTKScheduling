@@ -16,7 +16,7 @@ class App():
         self.timer = Timer(300, self.tick)
 
         # Scheduler
-        self.scheduler = Scheduler(TASKS_PATH)
+        self.scheduler = Scheduler(TASKS_FILE)
 
         # Window
         self.win = Window(self,
@@ -28,7 +28,7 @@ class App():
                           WEBSITE_LABEL,
                           AUTHORS,
                           COPYRIGHT,
-                          APP_ICON_PATH,
+                          APP_ICON_FILE,
                           PLAY_ICON,
                           PAUSE_ICON,
                           NEXT_ICON,
@@ -55,4 +55,4 @@ class App():
             self.win.refresh_info_label()
             self.scheduler.execute()
         else:
-            self.win.set_stop_icon()
+            self.win.set_play_icon_on_finish()

@@ -1,37 +1,36 @@
 #!/bin/sh
 
+# Include config variables
+. "$PWD"/config
+
+
 ./scripts/uninstall.sh
 
-
-APP_NAME="gtkscheduling"
-PREFIX=/usr/local
-BIN_DIR=$PREFIX/bin
-BIN_FILE=$BIN_DIR/$APP_NAME
-DATA_DIR=$PREFIX/share/$APP_NAME
-ICONS_DIR=$DATA_DIR/icons
-TASKS_DIR=$DATA_DIR/tasks
-DESKTOP_DIR=/usr/local/share/applications
 PYTHON_SITE=$(python3 -c "import site; print(site.getsitepackages()[0])")
-PYTHON_PKG_DIR=$PYTHON_SITE/$APP_NAME
+PYTHON_PKG_DIR="$PYTHON_SITE/$APP_NAME_LOWER"
 
 
-mkdir -pv "$BIN_DIR" "$ICONS_DIR" "$TASKS_DIR" "$DESKTOP_DIR" "$PYTHON_PKG_DIR"
+mkdir -pv "$BIN_DIR" "$DATA_DIR" "$ICONS_DIR" "$DESKTOP_DIR" "$PYTHON_PKG_DIR"
 
-cp -v src/*.py "$PYTHON_PKG_DIR"
-cp -v data/icons/* "$ICONS_DIR/"
-cp -v data/tasks/* "$TASKS_DIR"
-cp -v data/$APP_NAME.desktop "$DESKTOP_DIR/"
-cp -v config "$DATA_DIR/"
+cp -v "$ORIG_SRC_DIR"/* "$PYTHON_PKG_DIR"
+cp -v "$ORIG_ICONS_DIR"/* "$ICONS_DIR"
+cp -v "$ORIG_TASKS_FILE" "$DATA_DIR"
+cp -v config "$DATA_DIR"
 
 
-touch $BIN_FILE
+echo "[Desktop Entry]
+Name=$APP_NAME
+Comment=$APP_DESCRIPTION
+Exec=$BIN_FILE
+Type=Application
+Icon=$APP_ICON_FILE" > "$DESKTOP_FILE"
 
-cat << 'EOF' > "$BIN_FILE"
-#!/usr/bin/env python3
-from gtkscheduling.main import main
 
-if __name__ == "__main__":
+echo "#!/usr/bin/python3
+from $APP_NAME_LOWER.main import main
+
+if __name__ == '__main__':
     main()
-EOF
+" > "$BIN_FILE"
 
 chmod -v +x "$BIN_FILE"

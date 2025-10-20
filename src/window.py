@@ -275,7 +275,7 @@ class Window(Gtk.Window):
         button.add(img_icon)
         button.show_all() 
 
-    def set_stop_icon(self):
+    def set_play_icon_on_finish(self):
         button = self.bt_start_stop
         
         bt_child = button.get_child()

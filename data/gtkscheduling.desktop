@@ -1,6 +1,0 @@
-[Desktop Entry]
-Name=GTKScheduling
-Comment=CPU scheduling simulator
-Exec=/usr/local/bin/gtkscheduling
-Type=Application
-Icon=/usr/local/share/gtkscheduling/icons/icon.png
