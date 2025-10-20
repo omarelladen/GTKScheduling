@@ -7,8 +7,8 @@ WEBSITE_LABEL="Repository";
 AUTHORS="Omar El Laden https://github.com/omarelladen,Gabriel Martines https://github.com/Gaoss97";
 COPYRIGHT="Copyright © 2025 Omar El Laden, Gabriel Martines";
 
-APP_ICON_FILE="/usr/local/share/gtkscheduling/icons/icon.png";
-TASKS_FILE="/usr/local/share/gtkscheduling/tasks";
+APP_ICON_FILE=f"/usr/local/share/{APP_NAME_LOWER}/icons/icon.png";
+TASKS_FILE=f"/usr/local/share/{APP_NAME_LOWER}/tasks";
 
 PLAY_ICON="media-playback-start-symbolic";
 PAUSE_ICON="media-playback-pause-symbolic";
