@@ -12,18 +12,12 @@ class Window(Gtk.Window):
     def __init__(self,
         app,
         list_tasks,
-        app_name = None,
-        app_description = None,
-        app_version = None,
-        website_url = None,
-        website_label = None,
-        authors = None,
-        copyright = None,
         app_icon_path = None,
         play_icon = None,
         pause_icon = None,
         next_icon = None,
         skip_icon = None,
+        restart_icon = None,
         menu_icon = None,
         save_icon = None,
     ):
@@ -33,22 +27,15 @@ class Window(Gtk.Window):
         self.list_tasks = list_tasks
         self.list_task_rects = []
 
-        self.app_name = app_name
-        self.app_description = app_description
-        self.app_version = app_version
-        self.website_url = website_url
-        self.website_label = website_label
-        self.authors = authors.split(",")
-        self.copyright = copyright
-
         self.app_icon_path = app_icon_path
         self.play_icon = play_icon
         self.pause_icon = pause_icon
         self.next_icon = next_icon
         self.skip_icon = skip_icon
+        self.restart_icon = restart_icon
         self.menu_icon = menu_icon
         self.save_icon = save_icon
-        
+
         # Icon
         if self.app_icon_path:
             try:
@@ -85,7 +72,7 @@ class Window(Gtk.Window):
         # Menu Popover
         popover_menu = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        bt = Gtk.ModelButton(label=f"About {self.app_name}")
+        bt = Gtk.ModelButton(label=f"About {self.app.name}")
         bt.connect("clicked", self._on_click_about)
         vbox.pack_start(bt, False, True, 10)
         vbox.show_all()
@@ -95,7 +82,7 @@ class Window(Gtk.Window):
         # Header Bar
         headerbar = Gtk.HeaderBar()
         headerbar.set_show_close_button(True)
-        headerbar.props.title = self.app_name
+        headerbar.props.title = self.app.name
         self.set_titlebar(headerbar)
 
         # Menu Button
@@ -142,7 +129,7 @@ class Window(Gtk.Window):
 
         # Restart button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name="reload")
+        icon = Gio.ThemedIcon(name=self.restart_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_restart)
@@ -259,9 +246,9 @@ class Window(Gtk.Window):
 
     def set_play_icon_on_finish(self):
         self.app.timer.stop()
-        
+
         button = self.bt_start_stop
-        
+
         bt_child = button.get_child()
         if bt_child:
             button.remove(bt_child)
@@ -297,7 +284,7 @@ class Window(Gtk.Window):
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         button.add(img_icon)
-        button.show_all() 
+        button.show_all()
 
     def _on_click_advance(self, button):
         self.app.tick()
@@ -317,7 +304,7 @@ class Window(Gtk.Window):
         self.list_task_rects = []
         self.rect_offset_x = self.rect_x0
         self.drawingarea_diagram.queue_draw()
-    
+
         self.app.scheduler.reset()
         self.list_tasks = self.app.scheduler.list_tasks
 
@@ -339,14 +326,14 @@ class Window(Gtk.Window):
 
     def _on_click_about(self, widget):
         about = Gtk.AboutDialog(transient_for=self, modal=True)
-        about.set_program_name(self.app_name)
-        about.set_version(self.app_version)
-        about.set_comments(self.app_description)
-        about.set_website(self.website_url)
-        about.set_website_label(self.website_label)
-        about.set_authors(self.authors)
+        about.set_program_name(self.app.name)
+        about.set_version(self.app.version)
+        about.set_comments(self.app.description)
+        about.set_website(self.app.website_url)
+        about.set_website_label(self.app.website_label)
+        about.set_authors(self.app.authors)
         about.set_license_type(Gtk.License.GPL_3_0)
-        about.set_copyright(self.copyright)
+        about.set_copyright(self.app.copyright)
 
         if self.pixbuf:
             about.set_logo(self.pixbuf)

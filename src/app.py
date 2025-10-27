@@ -1,3 +1,5 @@
+import os
+
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -11,28 +13,30 @@ exec(open("/usr/local/share/gtkscheduling/config").read())
 
 class App():
     def __init__(self):
+        self.name = APP_NAME
+        self.name_lower = APP_NAME_LOWER
+        self.description = APP_DESCRIPTION
+        self.version = APP_VERSION
+        self.website_url = WEBSITE_URL
+        self.website_label = WEBSITE_LABEL
+        self.authors = AUTHORS.split(",")
+        self.copyright = COPYRIGHT
 
         # Timer
         self.timer = Timer(300, self.tick)
 
         # Scheduler
-        self.scheduler = Scheduler(TASKS_FILE)
+        self.scheduler = Scheduler(os.path.expanduser(TASKS_FILE))
 
         # Window
         self.win = Window(self,
                           self.scheduler.list_tasks,
-                          APP_NAME,
-                          APP_DESCRIPTION,
-                          APP_VERSION,
-                          WEBSITE_URL,
-                          WEBSITE_LABEL,
-                          AUTHORS,
-                          COPYRIGHT,
                           APP_ICON_FILE,
                           PLAY_ICON,
                           PAUSE_ICON,
                           NEXT_ICON,
                           SKIP_ICON,
+                          RESTART_ICON,
                           MENU_ICON,
                           SAVE_ICON
         )

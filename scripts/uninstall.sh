@@ -3,8 +3,20 @@
 # Include config variables
 . "$PWD"/config
 
-PYTHON_SITE=$(python3 -c "import site; print(site.getsitepackages()[0])")
-PYTHON_PKG_DIR="$PYTHON_SITE/$APP_NAME_LOWER"
+
+expand_home()
+{
+	_PATH="$1"
+
+	case "$_PATH" in
+		"~"|"~"/*)
+			_PATH="/home/${SUDO_USER:-$USER}${_PATH#\~}" ;;
+	esac
+
+	echo "$_PATH"
+}
+
+TASKS_DIR=$(expand_home "$TASKS_FILE")
 
 
-rm -rfv "$DATA_DIR" "$DESKTOP_FILE" "$PYTHON_PKG_DIR" "$BIN_FILE"
+rm -rfv "$BIN_FILE" "$PYTHON_PKG_DIR" "ICONS_DIR" "$DATA_DIR" "$DESKTOP_FILE" "$TASKS_DIR"

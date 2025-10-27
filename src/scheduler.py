@@ -180,6 +180,7 @@ class Scheduler():
 
 
         if not os.path.isfile(file_path):
+            print(f'Could not find file "{file_path}". Using default scheduling parameters')
             return default_alg_scheduling, \
                    default_quantum, \
                    default_list_tasks
@@ -188,6 +189,7 @@ class Scheduler():
             lines = f.readlines()
 
         if len(lines) < 2:
+            print(f'Not enough lines in file "{file_path}". Using default scheduling parameters')
             return default_alg_scheduling, \
                    default_quantum, \
                    default_list_tasks
