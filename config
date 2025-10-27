@@ -15,7 +15,7 @@ PLAY_ICON="media-playback-start-symbolic";
 PAUSE_ICON="media-playback-pause-symbolic";
 NEXT_ICON="go-next-symbolic";
 SKIP_ICON="media-skip-forward-symbolic";
-RESTART_ICON="reload";
+RESTART_ICON="view-refresh-symbolic";
 MENU_ICON="open-menu-symbolic";
 SAVE_ICON="document-save-symbolic";
 
