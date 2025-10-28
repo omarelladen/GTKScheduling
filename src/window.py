@@ -280,13 +280,9 @@ class Window(Gtk.Window):
         button.show_all()
 
     def _on_slider_value_changed(self, scale):
-        self.app.timer.interval_ms = scale.get_value()
+        self.app.timer.change_interval_ms(scale.get_value())
         self.refresh_info_label()
         self.drawingarea_diagram.queue_draw()
-
-        if self.app.timer.is_running:
-            self.app.timer.stop()
-            self.app.timer.start()
 
     def _on_click_play_pause(self, button):
         bt_child = button.get_child()
@@ -309,15 +305,7 @@ class Window(Gtk.Window):
         self.app.tick()
 
     def _on_click_skip(self, button):
-        old_interval_ms = self.app.timer.interval_ms
-
-        # Run very fast
-        self.app.timer.interval_ms = 1
-        self.app.timer.stop()
-        self.app.timer.start()
-
-        # Go back to previous interval_ms for consistency
-        self.app.timer.interval_ms = old_interval_ms
+        self.app.skip()
 
     def _on_click_restart(self, widget):
         self._restart_rects()
@@ -332,7 +320,6 @@ class Window(Gtk.Window):
 
     def _on_click_edit(self, widget):
         self.app.scheduler.edit_file()
-
 
     def _on_click_outside_popover(self, widget, event):
         if (self.is_popover_task_active == True and

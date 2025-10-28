@@ -61,3 +61,7 @@ class App():
             self.scheduler.execute()
         else:
             self.win.set_play_icon_on_finish()
+
+    def skip(self):
+        while self.scheduler.has_tasks():
+            self.tick()
