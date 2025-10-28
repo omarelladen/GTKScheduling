@@ -92,7 +92,7 @@ class Window(Gtk.Window):
         bt = Gtk.MenuButton(popover=popover_menu)
         icon = Gio.ThemedIcon(name=self.menu_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Main Menu")
+        bt.set_tooltip_text("Main menu")
         bt.add(img_icon)
         headerbar.pack_end(bt)
 

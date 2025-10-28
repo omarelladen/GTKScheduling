@@ -6,12 +6,9 @@ class Timer:
     def __init__(self,
         interval_ms,
         callback,
-        *args, **kwargs,  # additional args for the callback
     ):
         self.interval_ms = interval_ms
         self.callback = callback
-        self.args = args
-        self.kwargs = kwargs
         self.timeout_id = None
         self.is_running = False
 
@@ -36,6 +33,5 @@ class Timer:
         self.start()
 
     def _on_timeout(self):
-        """Internal callback that is called by the GLib every interval"""
-        self.callback(*self.args, **self.kwargs)
-        return True  # returns True to keep the timeout active
+        self.callback()
+        return True  # to keep the timeout active

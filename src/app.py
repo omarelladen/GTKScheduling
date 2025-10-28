@@ -23,7 +23,7 @@ class App():
         self.copyright = COPYRIGHT
 
         # Timer
-        self.timer = Timer(300, self.tick)
+        self.timer = Timer(interval_ms=300, callback=self.tick)
 
         # Scheduler
         self.scheduler = Scheduler(os.path.expanduser(TASKS_FILE))
