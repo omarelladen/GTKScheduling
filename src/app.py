@@ -38,7 +38,8 @@ class App():
                           SKIP_ICON,
                           RESTART_ICON,
                           MENU_ICON,
-                          SAVE_ICON
+                          SAVE_ICON,
+                          EDIT_ICON
         )
         self.win.connect("destroy", self._on_destroy)
         self.win.show_all()
@@ -53,7 +54,7 @@ class App():
         Gtk.main()
 
     def tick(self):
-        if self.scheduler.current_task:
+        if self.scheduler.has_tasks():
             self.scheduler.update_current_task()
             self.win.draw_new_rect(self.scheduler.current_task)
             self.win.refresh_info_label()

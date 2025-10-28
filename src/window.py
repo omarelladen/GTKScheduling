@@ -1,5 +1,6 @@
 import os
 import csv
+import subprocess
 
 import cairo
 import gi
@@ -20,6 +21,7 @@ class Window(Gtk.Window):
         restart_icon = None,
         menu_icon = None,
         save_icon = None,
+        edit_icon = None,
     ):
         super().__init__()
 
@@ -35,6 +37,7 @@ class Window(Gtk.Window):
         self.restart_icon = restart_icon
         self.menu_icon = menu_icon
         self.save_icon = save_icon
+        self.edit_icon = edit_icon
 
         # Icon
         if self.app_icon_path:
@@ -98,6 +101,14 @@ class Window(Gtk.Window):
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_save)
+        headerbar.pack_end(bt)
+
+        # Edit button
+        bt = Gtk.Button()
+        icon = Gio.ThemedIcon(name=self.edit_icon)
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.add(img_icon)
+        bt.connect("clicked", self._on_click_edit)
         headerbar.pack_end(bt)
 
         # Start/Stop Button
@@ -301,12 +312,19 @@ class Window(Gtk.Window):
         self.app.timer.interval_ms = old_interval_ms
 
     def _on_click_restart(self, widget):
+        self._restart_rects()
+
+    def _restart_rects(self):
         self.list_task_rects = []
         self.rect_offset_x = self.rect_x0
         self.drawingarea_diagram.queue_draw()
 
         self.app.scheduler.reset()
         self.list_tasks = self.app.scheduler.list_tasks
+
+    def _on_click_edit(self, widget):
+        self.app.scheduler.edit_file()
+
 
     def _on_click_outside_popover(self, widget, event):
         if (self.is_popover_task_active == True and

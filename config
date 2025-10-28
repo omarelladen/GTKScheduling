@@ -18,6 +18,7 @@ SKIP_ICON="media-skip-forward-symbolic";
 RESTART_ICON="view-refresh-symbolic";
 MENU_ICON="open-menu-symbolic";
 SAVE_ICON="document-save-symbolic";
+EDIT_ICON="document-edit-symbolic";
 
 ORIG_SRC_DIR="src";
 ORIG_ICONS_DIR="data/icons";

@@ -1,5 +1,6 @@
 import os
 import queue
+import subprocess
 
 from .task import Task
 
@@ -33,6 +34,13 @@ class Scheduler():
 
     def has_tasks(self):
         return True if self.current_task else False
+
+    def edit_file(self):
+        cmd = ["xdg-open", self.tasks_path]
+        result = subprocess.run(cmd)
+
+        if result.returncode != 0:
+            print(f'Error executing "{cmd}"')
 
     def _init_alg(self):
         if self.alg_scheduling == "fcfs":
