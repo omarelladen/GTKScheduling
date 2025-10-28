@@ -218,7 +218,7 @@ class Scheduler():
         # Extract parameters from file
         alg_scheduling = lines[0].split(";")[0].lower()
         if alg_scheduling not in ["fcfs", "rr", "sjf", "srtf", "prioc", "priop", "priod"]:
-            print(f'Invalid algorithm in file "{file_path}". Using default scheduling parameters')
+            print(f'Invalid algorithm "{alg_scheduling}" in file "{file_path}". Using default scheduling parameters')
             return default_alg_scheduling, \
                    default_quantum, \
                    default_list_tasks
