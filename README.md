@@ -39,8 +39,3 @@ gtkscheduling
 cd GTKScheduling
 sudo scripts/uninstall.sh
 ```
-
-## Uninstall app
-```sh
-sudo scripts/uninstall.sh
-```
