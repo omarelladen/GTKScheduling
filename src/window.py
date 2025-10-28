@@ -92,6 +92,7 @@ class Window(Gtk.Window):
         bt = Gtk.MenuButton(popover=popover_menu)
         icon = Gio.ThemedIcon(name=self.menu_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.set_tooltip_text("Main Menu")
         bt.add(img_icon)
         headerbar.pack_end(bt)
 
@@ -99,6 +100,7 @@ class Window(Gtk.Window):
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name=self.save_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.set_tooltip_text("Save diagram")
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_save)
         headerbar.pack_end(bt)
@@ -107,25 +109,28 @@ class Window(Gtk.Window):
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name=self.edit_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.set_tooltip_text("Edit parameters")
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_edit)
         headerbar.pack_end(bt)
 
-        # Start/Stop Button
+        # Play/Pause Button
         bt = Gtk.Button()
         icon_name = self.pause_icon if self.app.timer.is_running else self.play_icon
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.set_tooltip_text("Play/Pause")
         bt.add(img_icon)
-        bt.connect("clicked", self._on_click_start_stop)
+        bt.connect("clicked", self._on_click_play_pause)
         headerbar.pack_start(bt)
 
-        self.bt_start_stop = bt
+        self.bt_play_pause = bt
 
         # Next Button
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name=self.next_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.set_tooltip_text("Next")
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_advance)
         headerbar.pack_start(bt)
@@ -134,6 +139,7 @@ class Window(Gtk.Window):
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name=self.skip_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.set_tooltip_text("Skip")
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_skip)
         headerbar.pack_start(bt)
@@ -142,6 +148,7 @@ class Window(Gtk.Window):
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name=self.restart_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.set_tooltip_text("Restart")
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_restart)
         headerbar.pack_start(bt)
@@ -152,6 +159,7 @@ class Window(Gtk.Window):
         slider.set_size_request(120, -1)
         slider.set_value(self.app.timer.interval_ms)
         slider.connect("value-changed", self._on_slider_value_changed)
+        slider.set_tooltip_text("Change speed")
         headerbar.pack_start(slider)
 
         # Stack
@@ -258,7 +266,7 @@ class Window(Gtk.Window):
     def set_play_icon_on_finish(self):
         self.app.timer.stop()
 
-        button = self.bt_start_stop
+        button = self.bt_play_pause
 
         bt_child = button.get_child()
         if bt_child:
@@ -280,7 +288,7 @@ class Window(Gtk.Window):
             self.app.timer.stop()
             self.app.timer.start()
 
-    def _on_click_start_stop(self, button):
+    def _on_click_play_pause(self, button):
         bt_child = button.get_child()
         if bt_child:
             button.remove(bt_child)
