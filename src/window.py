@@ -313,6 +313,7 @@ class Window(Gtk.Window):
     def _on_click_restart(self, widget):
         self._restart_rects()
         self.update_diagram_size()
+        self.refresh_info_label()
 
     def _restart_rects(self):
         self.list_task_rects = []
