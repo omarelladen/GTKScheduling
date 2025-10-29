@@ -187,9 +187,7 @@ class Window(Gtk.Window):
         self.drawingarea_diagram.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_diagram.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
-        drawingarea_width = sum(task.duration for task in list_tasks) * self.rect_length * 1.05
-        drawingarea_height = len(list_tasks) * self.lines_dist_y * 1.1
-        self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
+        self.update_diagram_size()
 
         # Scroll
         scrolled_window = Gtk.ScrolledWindow()
@@ -262,6 +260,12 @@ class Window(Gtk.Window):
         file_filter.add_pattern("*")
         dialog.add_filter(file_filter)
 
+    def update_diagram_size(self):
+        drawingarea_width = sum(task.duration for task in self.list_tasks) * self.rect_length * 1.05
+        drawingarea_height = len(self.list_tasks) * self.lines_dist_y * 1.1
+
+        self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
+
     def set_play_icon_on_finish(self):
         self.app.timer.stop()
 
@@ -308,6 +312,7 @@ class Window(Gtk.Window):
 
     def _on_click_restart(self, widget):
         self._restart_rects()
+        self.update_diagram_size()
 
     def _restart_rects(self):
         self.list_task_rects = []
