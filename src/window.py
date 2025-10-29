@@ -1,6 +1,5 @@
 import os
 import csv
-import subprocess
 
 import cairo
 import gi
@@ -175,7 +174,7 @@ class Window(Gtk.Window):
 
         # Window dimensions
         win_width = 620
-        win_height = self.lines_dist_y*len(self.list_tasks) + 230
+        win_height = 300
         self.set_size_request(win_width, win_height)
         self.set_resizable(True)
         self.set_border_width(6)
@@ -188,8 +187,8 @@ class Window(Gtk.Window):
         self.drawingarea_diagram.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_diagram.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
-        drawingarea_width = sum(task.duration for task in list_tasks) * self.rect_length
-        drawingarea_height = len(list_tasks) * self.rect_height
+        drawingarea_width = sum(task.duration for task in list_tasks) * self.rect_length * 1.05
+        drawingarea_height = len(list_tasks) * self.lines_dist_y * 1.1
         self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
 
         # Scroll
