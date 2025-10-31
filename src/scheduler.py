@@ -45,18 +45,12 @@ class Scheduler():
     def _init_alg(self):
         if self.alg_scheduling == "fcfs":
             self._init_fcfs()
-        elif self.alg_scheduling == "rr":
-            self._init_rr()
-        elif self.alg_scheduling == "sjf":
-            self._init_sjf()
+        elif self.alg_scheduling == "fifo":
+            self._init_fifo()
         elif self.alg_scheduling == "srtf":
             self._init_srtf()
-        elif self.alg_scheduling == "prioc":
-            self._init_prioc()
         elif self.alg_scheduling == "priop":
             self._init_priop()
-        elif self.alg_scheduling == "priod":
-            self._init_priod()
 
     def update_current_task(self):
         self.time += 1
@@ -74,7 +68,7 @@ class Scheduler():
             self.current_task = self.queue_tasks.get()
             self.current_task.state = "running"
 
-    def _init_rr(self):
+    def _init_fifo(self):
         for task in self.list_tasks:
             if task.start_time == 0:
                 task.state = "ready"
@@ -84,6 +78,17 @@ class Scheduler():
             self.current_task = self.queue_tasks.get()
             self.current_task.state = "running"
 
+    def _init_srtf(self):
+        list_ready = []
+        for task in self.list_tasks:
+            if task.start_time == 0:
+                task.state = "ready"
+                list_ready.append(task)
+        shortest_task = min(list_ready, key=lambda t: t.duration)
+        self.current_task = shortest_task
+        self.current_task.state = "running"
+        
+        
     def _fcfs(self):
         # Enqueue new tasks
         for task in self.list_tasks:
@@ -101,7 +106,7 @@ class Scheduler():
             else:
                 self.current_task = None
 
-    def _rr(self):
+    def _fifo(self):
         # Enqueue new tasks
         for task in self.list_tasks:
             if task.state == None and task.start_time <= self.time:  #  or time +- 1
@@ -124,31 +129,33 @@ class Scheduler():
             else:
                 self.current_task = None
 
-    def _sjf(self):
-        if self.current_task.state == "terminated" or self.time == 0:
-            # Choose the task with least duration
-            ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
-            if ready_tasks:
-                self.current_task = min(ready_tasks, key=lambda t: t.duration)
-                self.current_task.state = "running"
-
     def _srtf(self):
+        if self.current_task.progress == self.current_task.duration:
+            self.current_task.state = "terminated"
+            self.current_task = None
+        list_ready = [t for t in self.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
+        shortest_task = min(list_ready, key=lambda t: t.duration - t.progress, default=None)
+
+        list_tasks_new = []
         # Choose the task with least duration
-        ready_tasks = [t for t in self.list_tasks if t.state != "terminated" and t.start_time <= self.time]
-        if ready_tasks:
-            shortest = min(ready_tasks, key=lambda t: t.duration - t.progress)
-            if self.current_task != shortest:
+        for task in self.list_tasks:
+            if task.state == None and task.start_time <= self.time:
+                task.state = "ready"
+                list_tasks_new.append(task)
+        shortest_task_new = min(list_tasks_new, key=lambda t: t.duration, default=None)
+        if ((shortest_task_new and shortest_task and shortest_task_new.duration < shortest_task.duration - shortest_task.progress) or 
+            (shortest_task_new and shortest_task == None)):
+            if self.current_task:
                 self.current_task.state = "ready"
-                self.current_task = shortest
-                self.current_task.state = "running"
-
-    def _prioc(self):
-        if self.current_task.state == "terminated" or self.time == 0:
-            ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
-            if ready_tasks:
-                self.current_task = min(ready_tasks, key=lambda t: t.priority)
-                self.current_task.state = "running"
-
+            self.current_task = shortest_task_new
+            self.current_task.state = "running"
+        elif shortest_task and self.current_task == None:
+            self.current_task = shortest_task
+            self.current_task.state = "running"                   
+       
+                
+        
+        
     def _priop(self):
         ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
         if ready_tasks:
@@ -158,39 +165,19 @@ class Scheduler():
                 self.current_task = highest
                 self.current_task.state = "running"
 
-    def _priod(self):
-        # Increment priority
-        for t in self.list_tasks:
-            if t.state == "ready":
-                t.priority = max(1, t.priority - 1)  # Considering 1 as the most important
-
-        ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
-        if ready_tasks:
-            chosen = min(ready_tasks, key=lambda t: t.priority)
-            if self.current_task != chosen:
-                self.current_task.state = "ready"
-                self.current_task = chosen
-                self.current_task.state = "running"
-
     def execute(self):
         if self.alg_scheduling == "fcfs":
             self._fcfs()
-        elif self.alg_scheduling == "rr":
-            self._rr()
-        elif self.alg_scheduling == "sjf":
-            self._sjf()
+        elif self.alg_scheduling == "fifo":
+            self._fifo()
         elif self.alg_scheduling == "srtf":
             self._srtf()
-        elif self.alg_scheduling == "prioc":
-            self._prioc()
         elif self.alg_scheduling == "priop":
             self._priop()
-        elif self.alg_scheduling == "priod":
-            self._priod()
 
     def _setup_from_file(self, file_path):
         # Default parameters
-        default_alg_scheduling = "fcfs"
+        default_alg_scheduling = "fifo"
         default_quantum = 2
         default_list_tasks = [Task(1,1,0,5,2),
                               Task(2,2,0,4,3),
@@ -217,7 +204,7 @@ class Scheduler():
 
         # Extract parameters from file
         alg_scheduling = lines[0].split(";")[0].lower()
-        if alg_scheduling not in ["fcfs", "rr", "sjf", "srtf", "prioc", "priop", "priod"]:
+        if alg_scheduling not in ["fcfs", "fifo", "srtf", "priop"]:
             print(f'Invalid algorithm "{alg_scheduling}" in file "{file_path}". Using default scheduling parameters')
             return default_alg_scheduling, \
                    default_quantum, \
