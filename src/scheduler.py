@@ -9,15 +9,6 @@ class Scheduler():
         tasks_path
     ):
         self.tasks_path = tasks_path
-        self.alg_scheduling = None
-        self.quantum = None
-        self.list_tasks = None
-        self.num_tasks = None
-        self.time = None
-        self.used_quantum = None
-        self.current_task = None
-        self.queue_tasks = None
-        self.num_term_tasks = None
 
         self.reset()
 
@@ -121,13 +112,30 @@ class Scheduler():
             self.current_task.state = "running"
 
     def _exe_priop(self):
-        ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
-        if ready_tasks:
-            highest = min(ready_tasks, key=lambda t: t.priority)
-            if self.current_task != highest:
+        if self.current_task:
+            if self.current_task.progress == self.current_task.duration:
+                self.current_task.state = "terminated"
+                self.num_term_tasks += 1
+                self.current_task = None
+        list_ready = [t for t in self.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
+        shortest_task = max(list_ready, key=lambda t: t.priority, default=None)
+
+        list_tasks_new = []
+        # Choose the task with highest priority (biggest priority number)
+        for task in self.list_tasks:
+            if task.state == None and task.start_time <= self.time:
+                task.state = "ready"
+                list_tasks_new.append(task)
+        shortest_task_new = max(list_tasks_new, key=lambda t: t.priority, default=None)
+        if ((shortest_task_new and shortest_task and shortest_task_new.priority > shortest_task.priority) or 
+            (shortest_task_new and shortest_task == None)):
+            if self.current_task:
                 self.current_task.state = "ready"
-                self.current_task = highest
-                self.current_task.state = "running"
+            self.current_task = shortest_task_new
+            self.current_task.state = "running"
+        elif shortest_task and self.current_task == None:
+            self.current_task = shortest_task
+            self.current_task.state = "running"
 
     def execute(self):
         if self.alg_scheduling == "fcfs":
