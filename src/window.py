@@ -131,7 +131,7 @@ class Window(Gtk.Window):
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.set_tooltip_text("Next")
         bt.add(img_icon)
-        bt.connect("clicked", self._on_click_advance)
+        bt.connect("clicked", self._on_click_next)
         headerbar.pack_start(bt)
 
         # Skip button
@@ -307,7 +307,7 @@ class Window(Gtk.Window):
         button.add(img_icon)
         button.show_all()
 
-    def _on_click_advance(self, button):
+    def _on_click_next(self, button):
         self.app.tick()
 
     def _on_click_skip(self, button):
