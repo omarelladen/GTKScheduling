@@ -91,7 +91,7 @@ class Window(Gtk.Window):
         bt = Gtk.MenuButton(popover=popover_menu)
         icon = Gio.ThemedIcon(name=self.menu_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Main menu")
+        bt.set_tooltip_text("Main Menu")
         bt.add(img_icon)
         headerbar.pack_end(bt)
 
@@ -99,7 +99,7 @@ class Window(Gtk.Window):
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name=self.save_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Save diagram")
+        bt.set_tooltip_text("Save Diagram")
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_save)
         headerbar.pack_end(bt)
@@ -108,7 +108,7 @@ class Window(Gtk.Window):
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name=self.edit_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Edit parameters")
+        bt.set_tooltip_text("Edit Parameters")
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_edit)
         headerbar.pack_end(bt)
@@ -158,7 +158,7 @@ class Window(Gtk.Window):
         slider.set_size_request(120, -1)
         slider.set_value(self.app.timer.interval_ms)
         slider.connect("value-changed", self._on_slider_value_changed)
-        slider.set_tooltip_text("Change speed")
+        slider.set_tooltip_text("Change Speed")
         headerbar.pack_start(slider)
 
         # Stack
@@ -230,7 +230,7 @@ class Window(Gtk.Window):
         self._open_save_dialog()
 
     def _open_save_dialog(self):
-        dialog = Gtk.FileChooserDialog(title="Save diagram", parent=self, action=Gtk.FileChooserAction.SAVE)
+        dialog = Gtk.FileChooserDialog(title="Save Diagram", parent=self, action=Gtk.FileChooserAction.SAVE)
         dialog.set_do_overwrite_confirmation(True)
         dialog.set_current_folder(os.path.expanduser("~"))
         dialog.set_current_name("diagram.png")
@@ -251,12 +251,12 @@ class Window(Gtk.Window):
 
     def _add_file_filters(self, dialog):
         file_filter = Gtk.FileFilter()
-        file_filter.set_name("PNG image")
+        file_filter.set_name("PNG Images")
         file_filter.add_mime_type("image/png")
         dialog.add_filter(file_filter)
 
         file_filter = Gtk.FileFilter()
-        file_filter.set_name("Any files")
+        file_filter.set_name("All Files")
         file_filter.add_pattern("*")
         dialog.add_filter(file_filter)
 
