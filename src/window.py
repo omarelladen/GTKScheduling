@@ -295,9 +295,12 @@ class Window(Gtk.Window):
         if self.app.timer.is_running:
             icon_name = self.play_icon
             self.app.timer.stop()
-        else:
+        elif self.app.scheduler.has_tasks():
             icon_name = self.pause_icon
             self.app.timer.start()
+        else:
+            icon_name = self.play_icon
+            self.app.timer.stop()
 
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
