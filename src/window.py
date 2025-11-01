@@ -406,7 +406,8 @@ class Window(Gtk.Window):
                                    f"<b>duration:</b> {rect.task_record.task.duration}\n"
                                    f"<b>priority:</b> {rect.task_record.task.priority}\n"
                                    f"<b>progress:</b> {rect.task_record.progress}\n"
-                                   f"<b>state:</b> {rect.task_record.state}"
+                                   f"<b>state:</b> {rect.task_record.state}\n"
+                                   f"<b>time:</b> {rect.task_record.time}"
         )
         e_x = event.x
         e_y = event.y
@@ -424,7 +425,8 @@ class Window(Gtk.Window):
     def refresh_info_label(self):
         self.label_info.set_markup(
             f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
-            f"<big><b>Tasks:</b> {len(self.list_tasks)}</big>\n"
+            f"<big><b>Total tasks:</b> {len(self.list_tasks)}</big>\n"
+            f"<big><b>Terminated tasks:</b> {self.app.scheduler.num_term_tasks}</big>\n"
             f"<big><b>CLK period:</b> {self.app.timer.interval_ms:.0f} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.scheduler.quantum}</big>\n"
             f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
@@ -435,21 +437,23 @@ class Window(Gtk.Window):
         for task in self.list_tasks:
             if (task != current_task and
                 task.start_time < self.app.scheduler.time and
-                not task.state == "running"):
+                task.state == "ready"):
                 self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
                                                           self.rect_y0 + self.lines_dist_y*(task.id-1),
                                                           self.rect_length,
                                                           self.rect_height,
                                                           (0.5, 0.5, 0.5, 0.5),
-                                                          TaskRecord(task, task.state, task.progress)))
+                                                          TaskRecord(task, task.state, task.progress, self.app.scheduler.time)))
 
         # Create current task rectangle
-        self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
-                                                  self.rect_y0 + self.lines_dist_y*(current_task.id-1),
-                                                  self.rect_length,
-                                                  self.rect_height,
-                                                  self.dict_colors[current_task.color_num],
-                                                  TaskRecord(current_task, current_task.state, current_task.progress)))
+        if current_task:
+            self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
+                                                      self.rect_y0 + self.lines_dist_y*(current_task.id-1),
+                                                      self.rect_length,
+                                                      self.rect_height,
+                                                      self.dict_colors[current_task.color_num],
+                                                      TaskRecord(current_task, current_task.state, current_task.progress, self.app.scheduler.time)))
+
         self.rect_offset_x += self.rect_length
 
         # Draw

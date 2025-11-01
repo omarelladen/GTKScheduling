@@ -17,6 +17,7 @@ class Scheduler():
         self.used_quantum = None
         self.current_task = None
         self.queue_tasks = None
+        self.num_term_tasks = None
 
         self.reset()
 
@@ -27,13 +28,14 @@ class Scheduler():
 
         self.time = 0
         self.used_quantum = 0
+        self.num_term_tasks = 0
         self.current_task = None
         self.queue_tasks = queue.Queue()
 
-        self._init_alg()
+        self.execute()
 
     def has_tasks(self):
-        return True if self.current_task else False
+        return True if self.num_term_tasks < len(self.list_tasks) else False
 
     def edit_file(self):
         cmd = ["xdg-open", self.tasks_path]
@@ -42,62 +44,23 @@ class Scheduler():
         if result.returncode != 0:
             print(f'Error executing "{cmd}"')
 
-    def _init_alg(self):
-        if self.alg_scheduling == "fcfs":
-            self._init_fcfs()
-        elif self.alg_scheduling == "fifo":
-            self._init_fifo()
-        elif self.alg_scheduling == "srtf":
-            self._init_srtf()
-        elif self.alg_scheduling == "priop":
-            self._init_priop()
-
     def update_current_task(self):
         self.time += 1
-        self.current_task.progress += 1
-        self.used_quantum += 1
-
-    def _init_fcfs(self):
-        for task in self.list_tasks:
-            if task.start_time == 0:
-                task.state = "ready"
-                self.queue_tasks.put(task)
-
-        # Get first task
-        if not self.queue_tasks.empty():
-            self.current_task = self.queue_tasks.get()
-            self.current_task.state = "running"
-
-    def _init_fifo(self):
-        for task in self.list_tasks:
-            if task.start_time == 0:
-                task.state = "ready"
-                self.queue_tasks.put(task)
-
-        if not self.queue_tasks.empty():
-            self.current_task = self.queue_tasks.get()
-            self.current_task.state = "running"
-
-    def _init_srtf(self):
-        list_ready = []
-        for task in self.list_tasks:
-            if task.start_time == 0:
-                task.state = "ready"
-                list_ready.append(task)
-        shortest_task = min(list_ready, key=lambda t: t.duration)
-        self.current_task = shortest_task
-        self.current_task.state = "running"
+        if self.current_task:
+            self.current_task.progress += 1
+            self.used_quantum += 1
         
-        
-    def _fcfs(self):
+    def _exe_fcfs(self):
         # Enqueue new tasks
         for task in self.list_tasks:
-            if task.state == None and task.start_time <= self.time:  #  or time +- 1
+            if task.state == None and task.start_time <= self.time:
                 task.state = "ready"
                 self.queue_tasks.put(task)
 
-        if self.current_task.progress == self.current_task.duration:  # current task terminated
-            self.current_task.state = "terminated"
+        if not self.current_task or (self.current_task and self.current_task.progress == self.current_task.duration):  # current task terminated
+            if self.current_task:
+                self.current_task.state = "terminated"
+                self.num_term_tasks += 1
 
             # Get next task
             if not self.queue_tasks.empty():
@@ -106,33 +69,37 @@ class Scheduler():
             else:
                 self.current_task = None
 
-    def _fifo(self):
+    def _exe_fifo(self):
         # Enqueue new tasks
         for task in self.list_tasks:
-            if task.state == None and task.start_time <= self.time:  #  or time +- 1
+            if task.state == None and task.start_time <= self.time:
                 task.state = "ready"
                 self.queue_tasks.put(task)
 
-        if self.used_quantum == self.quantum or self.current_task.progress == self.current_task.duration:
+        if self.used_quantum % self.quantum == 0 or (self.current_task and self.current_task.progress == self.current_task.duration):
+            if self.current_task:
+                if self.current_task.progress == self.current_task.duration:
+                    self.current_task.state = "terminated"
+                    self.num_term_tasks += 1
+                    self.used_quantum = 0
+                else:  # requeue
+                    self.current_task.state = "ready"
+                    self.queue_tasks.put(self.current_task)
+                    self.used_quantum = 0
+
+            # Get next task
+            if not self.queue_tasks.empty():
+                self.current_task = self.queue_tasks.get()
+                self.current_task.state = "running"
+            else:
+                self.current_task = None
+
+    def _exe_srtf(self):
+        if self.current_task:
             if self.current_task.progress == self.current_task.duration:
                 self.current_task.state = "terminated"
-                self.used_quantum = 0
-            else:  # requeue
-                self.current_task.state = "ready"
-                self.queue_tasks.put(self.current_task)
-                self.used_quantum = 0
-
-            # Get next task
-            if not self.queue_tasks.empty():
-                self.current_task = self.queue_tasks.get()
-                self.current_task.state = "running"
-            else:
+                self.num_term_tasks += 1
                 self.current_task = None
-
-    def _srtf(self):
-        if self.current_task.progress == self.current_task.duration:
-            self.current_task.state = "terminated"
-            self.current_task = None
         list_ready = [t for t in self.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
         shortest_task = min(list_ready, key=lambda t: t.duration - t.progress, default=None)
 
@@ -151,12 +118,9 @@ class Scheduler():
             self.current_task.state = "running"
         elif shortest_task and self.current_task == None:
             self.current_task = shortest_task
-            self.current_task.state = "running"                   
-       
-                
-        
-        
-    def _priop(self):
+            self.current_task.state = "running"
+
+    def _exe_priop(self):
         ready_tasks = [t for t in self.list_tasks if t.state != "terminated"]
         if ready_tasks:
             highest = min(ready_tasks, key=lambda t: t.priority)
@@ -167,13 +131,13 @@ class Scheduler():
 
     def execute(self):
         if self.alg_scheduling == "fcfs":
-            self._fcfs()
+            self._exe_fcfs()
         elif self.alg_scheduling == "fifo":
-            self._fifo()
+            self._exe_fifo()
         elif self.alg_scheduling == "srtf":
-            self._srtf()
+            self._exe_srtf()
         elif self.alg_scheduling == "priop":
-            self._priop()
+            self._exe_priop()
 
     def _setup_from_file(self, file_path):
         # Default parameters
@@ -184,7 +148,6 @@ class Scheduler():
                               Task(3,3,3,5,5),
                               Task(4,4,5,6,9),
                               Task(5,5,7,4,6)]
-
 
         if not os.path.isfile(file_path):
             print(f'Could not find file "{file_path}". Using default scheduling parameters')
@@ -206,9 +169,7 @@ class Scheduler():
         alg_scheduling = lines[0].split(";")[0].lower()
         if alg_scheduling not in ["fcfs", "fifo", "srtf", "priop"]:
             print(f'Invalid algorithm "{alg_scheduling}" in file "{file_path}". Using default scheduling parameters')
-            return default_alg_scheduling, \
-                   default_quantum, \
-                   default_list_tasks
+            alg_scheduling = default_alg_scheduling
 
         quantum = int(lines[0].split(";")[1])
 

@@ -57,8 +57,8 @@ class App():
         if self.scheduler.has_tasks():
             self.scheduler.update_current_task()
             self.win.draw_new_rect(self.scheduler.current_task)
-            self.win.refresh_info_label()
             self.scheduler.execute()
+            self.win.refresh_info_label()
         else:
             self.win.set_play_icon_on_finish()
 

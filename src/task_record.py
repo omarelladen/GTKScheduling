@@ -4,7 +4,9 @@ class TaskRecord():
         task,
         state,
         progress,
+        time
     ):
         self.task = task
         self.state = state
         self.progress = progress
+        self.time = time
