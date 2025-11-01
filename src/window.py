@@ -387,10 +387,12 @@ class Window(Gtk.Window):
 
         y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 30
         x_offset = self.rect_x0
-        spacing = 50
+        spacing = 30
 
         texts = [
             f"Algorithm: {self.app.scheduler.alg_scheduling}",
+            f"Total tasks: {len(self.list_tasks)}",
+            f"Terminated tasks: {self.app.scheduler.num_term_tasks}",
             f"CLK period: {self.app.timer.interval_ms:.0f} ms",
             f"Quantum: {self.app.scheduler.quantum}",
             f"Time: {self.app.scheduler.time}",
