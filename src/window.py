@@ -1,13 +1,11 @@
 import os
 import csv
-import cairo  # Import the Cairo library for 2D graphics
-import gi     # Import Gtk bindings
+import cairo  
+import gi    
 
-# Require specific Gtk version
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gio, Gdk, GdkPixbuf  # Import Gtk components
+from gi.repository import Gtk, Gio, Gdk, GdkPixbuf
 
-# Import local modules for task data structures
 from .task_rectangle import TaskRectangle
 from .task_record import TaskRecord
 
