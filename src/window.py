@@ -56,7 +56,8 @@ class Window(Gtk.Window):
 
         # --- Task Colors ---
         # Use a custom dictionary that loops colors if the task ID is too high
-        self.dict_colors = CircularColorDict ({
+        self.dict_colors = {
+            0:  (0.0, 0.8, 0.8, 1),     # turquoise
             1:  (1.0, 0.0, 0.0, 1),     # red
             2:  (0.0, 0.0, 1.0, 1),     # blue
             3:  (0.0, 1.0, 0.0, 1),     # green
@@ -76,8 +77,7 @@ class Window(Gtk.Window):
             17: (0.6, 0.0, 0.6, 1),     # purple
             18: (0.0, 0.4, 0.8, 1),     # medium blue
             19: (0.8, 0.4, 0.6, 1),     # pastel pink
-            20: (0.0, 0.8, 0.8, 1),     # turquoise
-        })
+        }
 
         # --- Keyboard Shortcuts (Accelerators) ---
         self.accel_group = Gtk.AccelGroup()
@@ -553,7 +553,7 @@ class Window(Gtk.Window):
                 self.rect_y0 + self.lines_dist_y*(current_task.id-1), # y
                 self.rect_length,                           # width
                 self.rect_height,                           # height
-                self.dict_colors[current_task.color_num],   # color
+                self.dict_colors[(current_task.color_num % 20)],   # color
                 TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.scheduler.time) # data
             ))
 
@@ -596,17 +596,3 @@ class Window(Gtk.Window):
             surface.finish()
         except Exception as e:
             print(f"Failed to save diagram image at {filename}: {e}")
-
-class CircularColorDict(dict):
-    # A custom dictionary that wraps around.
-    # If a key (e.g., task ID 21) is requested but the dictionary
-    # only has 20 colors, it uses the modulo operator to
-    # wrap around and return a color (e.g., color 1).
-    def __getitem__(self, key):
-        if not self:
-            raise KeyError("Color dictionary is empty.")
-        keys = sorted(self.keys())
-        n = len(keys)
-        # (key - 1) % n maps key 1 -> index 0, key 2 -> index 1, etc.
-        circular_key = keys[(key - 1) % n]
-        return super().__getitem__(circular_key)
