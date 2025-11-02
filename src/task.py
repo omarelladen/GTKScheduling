@@ -8,6 +8,8 @@ class Task():
         priority,
         state = None,
         progress = 0,
+        turnaround_time = 0,
+        waiting_time = 0
     ):
         self.id = id
         self.color_num = color_num
@@ -16,3 +18,5 @@ class Task():
         self.priority = priority
         self.state = state
         self.progress = progress
+        self.turnaround_time = turnaround_time
+        self.waiting_time = waiting_time

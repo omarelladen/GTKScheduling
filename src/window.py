@@ -387,7 +387,7 @@ class Window(Gtk.Window):
 
         y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 30
         x_offset = self.rect_x0
-        spacing = 30
+        spacing = 20
 
         texts = [
             f"Algorithm: {self.app.scheduler.alg_scheduling}",
@@ -395,6 +395,8 @@ class Window(Gtk.Window):
             f"Terminated tasks: {self.app.scheduler.num_term_tasks}",
             f"CLK period: {self.app.timer.interval_ms:.0f} ms",
             f"Quantum: {self.app.scheduler.quantum}",
+            f"Turnaround time: {sum(t.turnaround_time for t in self.list_tasks) / len(self.list_tasks)}",
+            f"Average waiting time: {sum(t.waiting_time for t in self.list_tasks) / len(self.list_tasks)}",
             f"Time: {self.app.scheduler.time}",
         ]
 
@@ -403,7 +405,7 @@ class Window(Gtk.Window):
             cr.show_text(text)
 
             extents = cr.text_extents(text)
-            x_offset += extents.width + spacing
+            x_offset += (extents.width + spacing)
 
     def _show_task_popover(self, rect, widget, event):
         self.label_task.set_markup(f"<b>id:</b> {rect.task_record.task.id}\n"
@@ -412,6 +414,8 @@ class Window(Gtk.Window):
                                    f"<b>priority:</b> {rect.task_record.task.priority}\n"
                                    f"<b>progress:</b> {rect.task_record.progress}\n"
                                    f"<b>state:</b> {rect.task_record.state}\n"
+                                   f"<b>turnaround time:</b> {rect.task_record.turnaround_time}\n"
+                                   f"<b>waiting time:</b> {rect.task_record.waiting_time}\n"
                                    f"<b>time:</b> {rect.task_record.time}"
         )
         e_x = event.x
@@ -434,6 +438,8 @@ class Window(Gtk.Window):
             f"<big><b>Terminated tasks:</b> {self.app.scheduler.num_term_tasks}</big>\n"
             f"<big><b>CLK period:</b> {self.app.timer.interval_ms:.0f} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.scheduler.quantum}</big>\n"
+            f"<big><b>Turnaround time:</b> {sum(t.turnaround_time for t in self.list_tasks) / len(self.list_tasks)}</big>\n"
+            f"<big><b>Average waiting time:</b> {sum(t.waiting_time for t in self.list_tasks) / len(self.list_tasks)}</big>\n"
             f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
         )
 
@@ -448,7 +454,7 @@ class Window(Gtk.Window):
                                                           self.rect_length,
                                                           self.rect_height,
                                                           (0.5, 0.5, 0.5, 0.5),
-                                                          TaskRecord(task, task.state, task.progress, self.app.scheduler.time)))
+                                                          TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.scheduler.time)))
 
         # Create current task rectangle
         if current_task:
@@ -457,7 +463,7 @@ class Window(Gtk.Window):
                                                       self.rect_length,
                                                       self.rect_height,
                                                       self.dict_colors[current_task.color_num],
-                                                      TaskRecord(current_task, current_task.state, current_task.progress, self.app.scheduler.time)))
+                                                      TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.scheduler.time)))
 
         self.rect_offset_x += self.rect_length
 

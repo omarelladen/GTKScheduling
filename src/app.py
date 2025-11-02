@@ -56,6 +56,7 @@ class App():
     def tick(self):
         if self.scheduler.has_tasks():
             self.scheduler.update_current_task()
+            self.scheduler.update_ready_tasks()
             self.win.draw_new_rect(self.scheduler.current_task)
             self.scheduler.execute()
             self.win.refresh_info_label()

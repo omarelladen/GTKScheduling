@@ -39,8 +39,15 @@ class Scheduler():
         self.time += 1
         if self.current_task:
             self.current_task.progress += 1
+            self.current_task.turnaround_time += 1
             self.used_quantum += 1
-        
+
+    def update_ready_tasks(self):
+        list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
+        for task in list_tasks_ready:
+            task.waiting_time += 1
+            task.turnaround_time += 1
+
     def _exe_fcfs(self):
         # Enqueue new tasks
         for task in self.list_tasks:
@@ -91,8 +98,8 @@ class Scheduler():
                 self.current_task.state = "terminated"
                 self.num_term_tasks += 1
                 self.current_task = None
-        list_ready = [t for t in self.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
-        shortest_task = min(list_ready, key=lambda t: t.duration - t.progress, default=None)
+        list_tasks_ready = [t for t in self.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
+        shortest_task = min(list_tasks_ready, key=lambda t: t.duration - t.progress, default=None)
 
         list_tasks_new = []
         # Choose the task with least duration
@@ -117,8 +124,8 @@ class Scheduler():
                 self.current_task.state = "terminated"
                 self.num_term_tasks += 1
                 self.current_task = None
-        list_ready = [t for t in self.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
-        shortest_task = max(list_ready, key=lambda t: t.priority, default=None)
+        list_tasks_ready = [t for t in self.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
+        shortest_task = max(list_tasks_ready, key=lambda t: t.priority, default=None)
 
         list_tasks_new = []
         # Choose the task with highest priority (biggest priority number)
@@ -174,12 +181,16 @@ class Scheduler():
 
 
         # Extract parameters from file
+        
         alg_scheduling = lines[0].split(";")[0].lower()
         if alg_scheduling not in ["fcfs", "fifo", "srtf", "priop"]:
-            print(f'Invalid algorithm "{alg_scheduling}" in file "{file_path}". Using default scheduling parameters')
+            print(f'Invalid algorithm "{alg_scheduling}" in file "{file_path}". Using default {default_alg_scheduling}')
             alg_scheduling = default_alg_scheduling
 
         quantum = int(lines[0].split(";")[1])
+        if quantum <= 0:
+            print(f'Invalid quantum "{quantum}" in file "{file_path}". Using default {default_quantum}')
+            quantum = default_quantum
 
         list_tasks = []
         for line in lines[1:]:
