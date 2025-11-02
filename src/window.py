@@ -465,7 +465,7 @@ class Window(Gtk.Window):
                                                       self.dict_colors[current_task.color_num],
                                                       TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.scheduler.time)))
 
-        self.rect_offset_x += self.rect_length
+        self.rect_offset_x += (self.rect_length + 1)
 
         # Draw
         self.drawingarea_diagram.queue_draw()
