@@ -1,10 +1,13 @@
 import os
 import csv
+import cairo  # Import the Cairo library for 2D graphics
+import gi     # Import Gtk bindings
 
-import cairo
-import gi
-from gi.repository import Gtk, Gio, Gdk, GdkPixbuf
+# Require specific Gtk version
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk, Gio, Gdk, GdkPixbuf  # Import Gtk components
 
+# Import local modules for task data structures
 from .task_rectangle import TaskRectangle
 from .task_record import TaskRecord
 
@@ -24,10 +27,13 @@ class Window(Gtk.Window):
     ):
         super().__init__()
 
+        # Store references to the main application and task list
         self.app = app
         self.list_tasks = list_tasks
+        # This list will store all rectangle objects for drawing
         self.list_task_rects = []
 
+        # Store icon names passed from the application
         self.app_icon_path = app_icon_path
         self.play_icon = play_icon
         self.pause_icon = pause_icon
@@ -38,55 +44,58 @@ class Window(Gtk.Window):
         self.save_icon = save_icon
         self.edit_icon = edit_icon
 
-        # Icon
+        # --- Set Window Icon ---
         if self.app_icon_path:
             try:
+                # Load the icon file and set it as the window icon
                 self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.app_icon_path, 64, 64, True)
                 self.set_icon(self.pixbuf)
             except Exception as e:
                 self.pixbuf = None
                 print(f'Failed to load icon from "{self.app_icon_path}": {e}')
 
-        # Colors
+        # --- Task Colors ---
+        # Use a custom dictionary that loops colors if the task ID is too high
         self.dict_colors = CircularColorDict ({
-            1:  (1.0, 0.0, 0.0, 1),     # vermelho
-            2:  (0.0, 0.0, 1.0, 1),     # azul
-            3:  (0.0, 1.0, 0.0, 1),     # verde
-            4:  (1.0, 1.0, 0.0, 1),     # amarelo
-            5:  (0.5, 0.0, 1.0, 1),     # roxo
-            6:  (1.0, 0.5, 0.0, 1),     # laranja
-            7:  (0.0, 1.0, 1.0, 1),     # ciano
+            1:  (1.0, 0.0, 0.0, 1),     # red
+            2:  (0.0, 0.0, 1.0, 1),     # blue
+            3:  (0.0, 1.0, 0.0, 1),     # green
+            4:  (1.0, 1.0, 0.0, 1),     # yellow
+            5:  (0.5, 0.0, 1.0, 1),     # purple
+            6:  (1.0, 0.5, 0.0, 1),     # orange
+            7:  (0.0, 1.0, 1.0, 1),     # cyan
             8:  (1.0, 0.0, 1.0, 1),     # magenta
-            9:  (0.6, 0.3, 0.0, 1),     # marrom
-            10: (0.0, 0.5, 0.5, 1),     # verde petróleo
-            11: (0.3, 0.3, 0.3, 1),     # cinza escuro
-            12: (0.7, 0.7, 0.7, 1),     # cinza claro
-            13: (0.8, 0.2, 0.4, 1),     # rosa escuro
-            14: (0.2, 0.8, 0.2, 1),     # verde claro
-            15: (0.2, 0.2, 0.8, 1),     # azul escuro
-            16: (0.9, 0.6, 0.2, 1),     # dourado
-            17: (0.6, 0.0, 0.6, 1),     # púrpura
-            18: (0.0, 0.4, 0.8, 1),     # azul médio
-            19: (0.8, 0.4, 0.6, 1),     # rosa pastel
-            20: (0.0, 0.8, 0.8, 1),     # turquesa
+            9:  (0.6, 0.3, 0.0, 1),     # brown
+            10: (0.0, 0.5, 0.5, 1),     # teal
+            11: (0.3, 0.3, 0.3, 1),     # dark grey
+            12: (0.7, 0.7, 0.7, 1),     # light grey
+            13: (0.8, 0.2, 0.4, 1),     # dark pink
+            14: (0.2, 0.8, 0.2, 1),     # light green
+            15: (0.2, 0.2, 0.8, 1),     # dark blue
+            16: (0.9, 0.6, 0.2, 1),     # gold
+            17: (0.6, 0.0, 0.6, 1),     # purple
+            18: (0.0, 0.4, 0.8, 1),     # medium blue
+            19: (0.8, 0.4, 0.6, 1),     # pastel pink
+            20: (0.0, 0.8, 0.8, 1),     # turquoise
         })
 
-        # Shortcuts
+        # --- Keyboard Shortcuts (Accelerators) ---
         self.accel_group = Gtk.AccelGroup()
         self.add_accel_group(self.accel_group)
 
+        # Ctrl+Q to quit
         key, mod = Gtk.accelerator_parse("<Control>q")
         self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_q)
 
+        # Ctrl+S to save
         key, mod = Gtk.accelerator_parse("<Control>s")
         self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_s)
 
-
-        # Vertical Box
+        # --- Main Layout Box ---
         outerbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.add(outerbox)
 
-        # Menu Popover
+        # --- Popover Menu (for "About" button) ---
         popover_menu = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         bt = Gtk.ModelButton(label=f"About {self.app.name}")
@@ -96,13 +105,15 @@ class Window(Gtk.Window):
         popover_menu.add(vbox)
         popover_menu.set_position(Gtk.PositionType.BOTTOM)
 
-        # Header Bar
+        # --- Header Bar (Title Bar) ---
         headerbar = Gtk.HeaderBar()
         headerbar.set_show_close_button(True)
         headerbar.props.title = self.app.name
         self.set_titlebar(headerbar)
 
-        # Menu Button
+        # --- Header Bar Buttons ---
+
+        # Menu Button (links to popover_menu)
         bt = Gtk.MenuButton(popover=popover_menu)
         icon = Gio.ThemedIcon(name=self.menu_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
@@ -130,6 +141,7 @@ class Window(Gtk.Window):
 
         # Play/Pause Button
         bt = Gtk.Button()
+        # Set initial icon based on timer state
         icon_name = self.pause_icon if self.app.timer.is_running else self.play_icon
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
@@ -137,10 +149,9 @@ class Window(Gtk.Window):
         bt.add(img_icon)
         bt.connect("clicked", self._on_click_play_pause)
         headerbar.pack_start(bt)
+        self.bt_play_pause = bt  # Save a reference to toggle its icon
 
-        self.bt_play_pause = bt
-
-        # Next Button
+        # Next Button (Manual Tick)
         bt = Gtk.Button()
         icon = Gio.ThemedIcon(name=self.next_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
@@ -167,7 +178,7 @@ class Window(Gtk.Window):
         bt.connect("clicked", self._on_click_restart)
         headerbar.pack_start(bt)
 
-        # Slider
+        # Speed Slider
         slider = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, min=10, max=300, step=1)
         slider.set_draw_value(False)
         slider.set_size_request(120, -1)
@@ -176,78 +187,92 @@ class Window(Gtk.Window):
         slider.set_tooltip_text("Change Speed")
         headerbar.pack_start(slider)
 
-        # Stack
+        # --- Main Content Area (Stack) ---
+        # A Gtk.Stack holds multiple "pages" (widgets) and shows one at a time.
         stack = Gtk.Stack()
 
-        # Task Rectangles position parameters
-        self.rect_length = 10
-        self.rect_x0 = 20 + self.rect_length
-        self.rect_y0 = 20
-        self.rect_height = 10
-        self.lines_dist_y = self.rect_height + 2  # distance between lines
-        self.rect_offset_x = self.rect_x0
+        # --- Diagram Drawing Parameters ---
+        self.rect_length = 10      # Width of one time unit (tick)
+        self.rect_x0 = 20 + self.rect_length # Initial X offset for drawing
+        self.rect_y0 = 20          # Initial Y offset
+        self.rect_height = 10      # Height of a task rectangle
+        self.lines_dist_y = self.rect_height + 2  # Vertical distance between task lines
+        self.rect_offset_x = self.rect_x0         # Current X position for drawing (advances with time)
 
-        # Window dimensions
+        # --- Window Size ---
         win_width = 620
         win_height = 300
         self.set_size_request(win_width, win_height)
         self.set_resizable(True)
         self.set_border_width(6)
 
-        # Diagram Tab
+        # --- Stack Page 1: Diagram Tab ---
         self.drawingarea_diagram = Gtk.DrawingArea()
-        self.drawingarea_diagram.connect("draw", self._on_draw_task_lines_text)
-        self.drawingarea_diagram.connect("draw", self._on_draw_task_rects)
-        self.drawingarea_diagram.connect("draw", self._on_draw_info)
+        # Connect "draw" signals. Multiple functions can draw on the same canvas.
+        self.drawingarea_diagram.connect("draw", self._on_draw_task_lines_text) # Draws "1, 2, 3..."
+        self.drawingarea_diagram.connect("draw", self._on_draw_task_rects)      # Draws the Gantt chart rects
+        self.drawingarea_diagram.connect("draw", self._on_draw_info)            # Draws text info below chart
+        # Connect click event for showing popovers
         self.drawingarea_diagram.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_diagram.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
-        self.update_diagram_size()
+        self.update_diagram_size() # Set initial size of the drawing area
 
-        # Scroll
+        # Add a ScrolledWindow to allow scrolling the diagram
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.add(self.drawingarea_diagram)
         stack.add_titled(scrolled_window, "diagram", "Diagram")
 
-        # Info Tab
+        # --- Stack Page 2: Info Tab ---
         self.label_info = Gtk.Label()
-        self.refresh_info_label()
+        self.refresh_info_label() # Populate the label with initial data
         stack.add_titled(self.label_info, "info", "Info")
 
-        # Task Popover
+        # --- Task Popover ---
+        # This popover appears when a user clicks a task rectangle
         self.popover_task = Gtk.Popover()
         self.label_task = Gtk.Label()
         self.popover_task.add(self.label_task)
 
+        # State for managing popover clicks
         self.is_popover_task_active = False
         self.cursor_x_at_popover = None
         self.cursor_y_at_popover = None
 
-        # All clicks will be checked to be able to hide the task popovers
-        # only when clicking in a point outside the one that opened it
+        # Connect a click event to the *whole window* to detect clicks *outside* the popover
         self.connect("button-press-event", self._on_click_outside_popover)
 
-        # Stack Switcher
+        # --- Stack Switcher (Tabs) ---
+        # This creates the "Diagram" and "Info" buttons to switch the stack
         stackswitcher = Gtk.StackSwitcher()
         stackswitcher.set_stack(stack)
-        stackswitcher.set_halign(Gtk.Align.CENTER)  # horizontal
+        stackswitcher.set_halign(Gtk.Align.CENTER)  # Center the buttons
 
+        # Add the stack switcher and the stack itself to the main window box
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
 
+    # --- Shortcut Handlers ---
+
     def _on_ctrl_q(self, accel_group, window, key, modifier):
+        # Called on Ctrl+Q press.
         self.app.quit()
 
     def _on_ctrl_s(self, accel_group, window, key, modifier):
+        # Called on Ctrl+S press.
         self._open_save_dialog()
 
+    # --- Save Diagram Logic ---
+
     def _on_click_save(self, widget):
+        # Called when the Save button is clicked.
         self._open_save_dialog()
 
     def _open_save_dialog(self):
+        # Creates and runs a Gtk.FileChooserDialog to get a save filename.
         dialog = Gtk.FileChooserDialog(title="Save Diagram", parent=self, action=Gtk.FileChooserAction.SAVE)
         dialog.set_do_overwrite_confirmation(True)
-        dialog.set_current_folder(os.path.expanduser("~"))
+        dialog.set_current_folder(os.path.expanduser("~")) # Start in user's home dir
         dialog.set_current_name("diagram.png")
         dialog.add_buttons(
             Gtk.STOCK_CANCEL,
@@ -256,7 +281,7 @@ class Window(Gtk.Window):
             Gtk.ResponseType.OK,
         )
 
-        self._add_file_filters(dialog)
+        self._add_file_filters(dialog) # Add file type filters (e.g., "PNG")
 
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
@@ -265,6 +290,7 @@ class Window(Gtk.Window):
         dialog.destroy()
 
     def _add_file_filters(self, dialog):
+        # Adds file filters to the save dialog.
         file_filter = Gtk.FileFilter()
         file_filter.set_name("PNG Images")
         file_filter.add_mime_type("image/png")
@@ -275,38 +301,47 @@ class Window(Gtk.Window):
         file_filter.add_pattern("*")
         dialog.add_filter(file_filter)
 
+    # --- UI Update Callbacks ---
+
     def update_diagram_size(self):
+        # Recalculates and sets the size of the drawing area based on task data.
         drawingarea_width = sum(task.duration for task in self.list_tasks) * self.rect_length * 1.05
         drawingarea_height = len(self.list_tasks) * self.lines_dist_y * 1.1
 
         self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
 
     def set_play_icon_on_finish(self):
+        # Called when the simulation ends to force the Play/Pause button
+        # to show the "Play" icon.
         self.app.timer.stop()
-
         button = self.bt_play_pause
 
+        # Remove the current icon
         bt_child = button.get_child()
         if bt_child:
             button.remove(bt_child)
 
+        # Add the "Play" icon
         icon_name = self.play_icon
-
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         button.add(img_icon)
         button.show_all()
 
     def _on_slider_value_changed(self, scale):
+        # Called when the speed slider is moved.
         self.app.timer.change_interval_ms(scale.get_value())
         self.refresh_info_label()
-        self.drawingarea_diagram.queue_draw()
+        self.drawingarea_diagram.queue_draw() # Redraw to update info text
 
     def _on_click_play_pause(self, button):
+        # Called when the Play/Pause button is clicked.
+        # Remove the current icon
         bt_child = button.get_child()
         if bt_child:
             button.remove(bt_child)
 
+        # Toggle the timer and determine the new icon
         if self.app.timer.is_running:
             icon_name = self.play_icon
             self.app.timer.stop()
@@ -314,37 +349,47 @@ class Window(Gtk.Window):
             icon_name = self.pause_icon
             self.app.timer.start()
         else:
+            # No tasks left, stay on "Play"
             icon_name = self.play_icon
             self.app.timer.stop()
 
+        # Add the new icon
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         button.add(img_icon)
         button.show_all()
 
     def _on_click_next(self, button):
+        # Called when the "Next" button is clicked. Triggers one simulation tick.
         self.app.tick()
 
     def _on_click_skip(self, button):
+        # Called when the "Skip" button is clicked.
         self.app.skip()
 
     def _on_click_restart(self, widget):
+        # Called when the "Restart" button is clicked.
         self._restart_rects()
         self.update_diagram_size()
         self.refresh_info_label()
 
     def _restart_rects(self):
-        self.list_task_rects = []
-        self.rect_offset_x = self.rect_x0
-        self.drawingarea_diagram.queue_draw()
+        # Resets the diagram and simulation state.
+        self.list_task_rects = [] # Clear all drawn rectangles
+        self.rect_offset_x = self.rect_x0 # Reset drawing position
+        self.drawingarea_diagram.queue_draw() # Redraw the empty canvas
 
-        self.app.scheduler.reset()
+        self.app.scheduler.reset() # Tell the scheduler to reset
         self.list_tasks = self.app.scheduler.list_tasks
 
     def _on_click_edit(self, widget):
+        # Called when the "Edit" button is clicked.
         self.app.scheduler.edit_file()
 
+    # --- Popover Event Handlers ---
+
     def _on_click_outside_popover(self, widget, event):
+        # Hides the task popover if a click occurs anywhere else on the window.
         if (self.is_popover_task_active == True and
             event.x != self.cursor_x_at_popover and
             event.y != self.cursor_y_at_popover):
@@ -352,15 +397,22 @@ class Window(Gtk.Window):
             self.popover_task.hide()
 
     def _on_click_task_rect(self, widget, event):
+        # Called on any click in the drawing area.
+        # Checks if the click was on a task rectangle.
         if (event.type == Gdk.EventType.BUTTON_PRESS and
             event.button == Gdk.BUTTON_PRIMARY):
-            for rect in self.list_task_rects:
+            # Iterate backwards so clicks on top (later) rects are prioritized
+            for rect in reversed(self.list_task_rects):
+                # Simple bounding box collision check
                 if (rect.x <= event.x <= rect.x + rect.width and
                     rect.y <= event.y <= rect.y + rect.height):
                     self._show_task_popover(rect, widget, event)
-                    break
+                    break # Stop after finding the first match
+
+    # --- "About" Dialog ---
 
     def _on_click_about(self, widget):
+        # Displays the Gtk.AboutDialog.
         about = Gtk.AboutDialog(transient_for=self, modal=True)
         about.set_program_name(self.app.name)
         about.set_version(self.app.version)
@@ -377,33 +429,42 @@ class Window(Gtk.Window):
         about.connect("response", lambda dialog, response: dialog.destroy())
         about.present()
 
+    # --- Cairo Drawing Handlers ---
+    # These are called by Gtk when the drawingarea needs to be repainted.
+
     def _on_draw_task_lines_text(self, widget, cr: cairo.Context):
+        # Draws the task ID numbers (1, 2, 3...) on the left side.
         cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
         
         for task_num, _ in enumerate(self.list_tasks, 1):
-            # Calculate position with offset for single-digit task numbers
-            x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
+            # Calculate Y position
             y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
+            # Adjust X position slightly for single-digit numbers to align
+            x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
 
-            # Draw the task line label
+            # Draw the text
             cr.move_to(x_pos, y_pos)
             cr.show_text(str(task_num))
 
     def _on_draw_task_rects(self, widget, cr: cairo.Context):
+        # Draws all the task rectangles stored in self.list_task_rects.
         for rect in self.list_task_rects:
             cr.set_source_rgba(*rect.color)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
             cr.fill()
 
     def _on_draw_info(self, widget, cr: cairo.Context):
+        # Draws the summary text statistics below the Gantt chart.
         cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
 
+        # Calculate starting position
         y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 30
         x_offset = self.rect_x0
         spacing = 20
 
+        # Statistics to display
         texts = [
             f"Algorithm: {self.app.scheduler.alg_scheduling}",
             f"Total tasks: {len(self.list_tasks)}",
@@ -415,14 +476,20 @@ class Window(Gtk.Window):
             f"Time: {self.app.scheduler.time}",
         ]
 
+        # Draw each piece of text, advancing x_offset horizontally
         for text in texts:
             cr.move_to(x_offset, y)
             cr.show_text(text)
 
+            # Measure text to calculate position for the next item
             extents = cr.text_extents(text)
             x_offset += (extents.width + spacing)
 
+    # --- Popover and Info Tab Updates ---
+
     def _show_task_popover(self, rect, widget, event):
+        # Configures and displays the task popover with rectangle data.
+        # Set the popover's text using Pango markup for formatting
         self.label_task.set_markup(f"<b>task id:</b> {rect.task_record.task.id}\n"
                                    f"<b>start time:</b> {rect.task_record.task.start_time}\n"
                                    f"<b>duration:</b> {rect.task_record.task.duration}\n"
@@ -433,20 +500,20 @@ class Window(Gtk.Window):
                                    f"<b>waiting time:</b> {rect.task_record.waiting_time}\n"
                                    f"<b>time:</b> {rect.task_record.time}"
         )
-        e_x = event.x
-        e_y = event.y
-
-        # Set popover position
+        
+        # Store click coordinates to help with hiding the popover
+        self.cursor_x_at_popover = event.x
+        self.cursor_y_at_popover = event.y
+        self.is_popover_task_active = True
+        
+        # Set popover position relative to the clicked rectangle
         self.popover_task.set_relative_to(widget)
-        self.popover_task.set_pointing_to(rect)
+        self.popover_task.set_pointing_to(Gdk.Rectangle(rect.x, rect.y, rect.width, rect.height))
         self.popover_task.set_position(Gtk.PositionType.TOP)
         self.popover_task.show_all()
 
-        self.cursor_x_at_popover = e_x
-        self.cursor_y_at_popover = e_y
-        self.is_popover_task_active = True
-
     def refresh_info_label(self):
+        # Updates the text on the "Info" tab.
         self.label_info.set_markup(
             f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
             f"<big><b>Total tasks:</b> {len(self.list_tasks)}</big>\n"
@@ -458,56 +525,72 @@ class Window(Gtk.Window):
             f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
         )
 
+    # --- Main Simulation Drawing Method ---
+
     def draw_new_rect(self, current_task):
-        # Create tranparent task rectangles
+        # This is the main drawing function called by the application timer
+        # at each "tick". It adds new rectangles for the current time step.
+        # 1. Create transparent "waiting" rectangles for ready tasks
         for task in self.list_tasks:
             if (task != current_task and
                 task.start_time < self.app.scheduler.time and
                 task.state == "ready"):
-                self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
-                                                          self.rect_y0 + self.lines_dist_y*(task.id-1),
-                                                          self.rect_length,
-                                                          self.rect_height,
-                                                          (0.5, 0.5, 0.5, 0.5),
-                                                          TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.scheduler.time)))
+                
+                # Create a semi-transparent grey rectangle
+                self.list_task_rects.append(TaskRectangle(
+                    self.rect_offset_x - self.rect_length,       # x
+                    self.rect_y0 + self.lines_dist_y*(task.id-1), # y
+                    self.rect_length,                           # width
+                    self.rect_height,                           # height
+                    (0.5, 0.5, 0.5, 0.5),                       # color
+                    TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.scheduler.time) # data
+                ))
 
-        # Create current task rectangle
+        # 2. Create the solid rectangle for the currently executing task
         if current_task:
-            self.list_task_rects.append(TaskRectangle(self.rect_offset_x - self.rect_length,
-                                                      self.rect_y0 + self.lines_dist_y*(current_task.id-1),
-                                                      self.rect_length,
-                                                      self.rect_height,
-                                                      self.dict_colors[current_task.color_num],
-                                                      TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.scheduler.time)))
+            self.list_task_rects.append(TaskRectangle(
+                self.rect_offset_x - self.rect_length,       # x
+                self.rect_y0 + self.lines_dist_y*(current_task.id-1), # y
+                self.rect_length,                           # width
+                self.rect_height,                           # height
+                self.dict_colors[current_task.color_num],   # color
+                TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.scheduler.time) # data
+            ))
 
+        # 3. Advance the horizontal drawing position for the next tick
         self.rect_offset_x += (self.rect_length + 1)
 
-        # Draw
+        # 4. Invalidate the drawing area to force a repaint
         self.drawingarea_diagram.queue_draw()
 
+    # --- Save-to-File Method ---
+
     def _save_diagram_to_png(self, filename):
+        # Renders the diagram to a PNG file.
+        # Calculate the bounds of the diagram
         max_x = max(rect.x + rect.width  for rect in self.list_task_rects) if self.list_task_rects else 100
         max_y = max(rect.y + rect.height for rect in self.list_task_rects) if self.list_task_rects else 100
 
-        # Add padding
+        # Add some padding
         surface_width  = int(max_x + self.rect_x0)
         surface_height = int(max_y + self.rect_y0)
 
-        # Create a Cairo surface
+        # Create an off-screen Cairo surface (an image in memory)
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, surface_width, surface_height)
         cr = cairo.Context(surface)
 
-        # Set background
+        # Set a white background
         cr.set_source_rgb(1, 1, 1)
         cr.paint()
 
-        # Draw all rectangles
+        # Re-draw all the rectangles onto this surface
+        # (Note: This does not draw the text labels or info)
         for rect in self.list_task_rects:
             cr.set_source_rgba(*rect.color)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
             cr.fill()
 
-        # Save to PNG
+        # Write the in-memory surface to a PNG file
         try:
             surface.write_to_png(filename)
             surface.finish()
@@ -515,10 +598,15 @@ class Window(Gtk.Window):
             print(f"Failed to save diagram image at {filename}: {e}")
 
 class CircularColorDict(dict):
-            def __getitem__(self, key):
-                if not self:
-                    raise KeyError("Dicionário de cores está vazio.")
-                keys = sorted(self.keys())
-                n = len(keys)
-                circular_key = keys[(key - 1) % n]
-                return super().__getitem__(circular_key)
+    # A custom dictionary that wraps around.
+    # If a key (e.g., task ID 21) is requested but the dictionary
+    # only has 20 colors, it uses the modulo operator to
+    # wrap around and return a color (e.g., color 1).
+    def __getitem__(self, key):
+        if not self:
+            raise KeyError("Color dictionary is empty.")
+        keys = sorted(self.keys())
+        n = len(keys)
+        # (key - 1) % n maps key 1 -> index 0, key 2 -> index 1, etc.
+        circular_key = keys[(key - 1) % n]
+        return super().__getitem__(circular_key)
