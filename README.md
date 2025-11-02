@@ -22,7 +22,7 @@ sudo apt install python3-gi-cairo
 If you wish to configure on other operating systems, including Windows, follow the instructions on the [PyGObject website](https://pygobject.gnome.org/getting_started.html), making sure to replace 'GTK4' with 'GTK3' when instaling packages.
 
 ## Configure scheduling parameters
-The scheduling parameters can be changed by editing the data/tasks/tasks file.
+The scheduling parameters can be changed by editing the data/tasks.
 
 ## Install app
 ```sh
