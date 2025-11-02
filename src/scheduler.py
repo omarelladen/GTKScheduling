@@ -1,6 +1,6 @@
 import os
-import queue  # Import the queue module for task queuing
-import subprocess  # Import subprocess to run external commands (like opening an editor)
+import queue
+import subprocess
 
 from .task import Task  # Import the Task data structure
 
@@ -56,16 +56,12 @@ class Scheduler():
             task.turnaround_time += 1   # Increment their total time in system
 
     def _exe_fifo(self):
-        # --- Round Robin (RR) Logic ---
-        # Note: The name 'fifo' is misleading here; the logic implements Round Robin
-        # using a quantum and re-queuing.
-
         # 1. Enqueue new tasks
         for task in self.list_tasks:
             if task.state == None and task.start_time <= self.time:
                 task.state = "ready"
                 self.queue_tasks.put(task)
-
+                
         # 2. Check for preemption or task completion
         # This happens if the quantum is used up OR the current task finished
         if self.used_quantum % self.quantum == 0 or (self.current_task and self.current_task.progress == self.current_task.duration):
@@ -90,9 +86,6 @@ class Scheduler():
                 self.used_quantum = 0 # Reset quantum if idle
 
     def _exe_srtf(self):
-        # --- Shortest Remaining Time First (SRTF) Logic ---
-        # Preemptive.
-
         # 1. Check if the current task finished
         if self.current_task:
             if self.current_task.progress == self.current_task.duration:
@@ -129,8 +122,6 @@ class Scheduler():
             self.current_task.state = "running"
 
     def _exe_priop(self):
-        # --- Preemptive Priority Logic ---
-        
         # 1. Check if the current task finished
         if self.current_task:
             if self.current_task.progress == self.current_task.duration:
