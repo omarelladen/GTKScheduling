@@ -48,13 +48,28 @@ class Window(Gtk.Window):
                 print(f'Failed to load icon from "{self.app_icon_path}": {e}')
 
         # Colors
-        self.dict_colors = {
-            1: (1.0, 0.0, 0.0, 1),
-            2: (0.0, 0.0, 1.0, 1),
-            3: (0.0, 1.0, 0.0, 1),
-            4: (1.0, 1.0, 0.0, 1),
-            5: (0.5, 0.0, 1.0, 1),
-        }
+        self.dict_colors = CircularColorDict ({
+            1:  (1.0, 0.0, 0.0, 1),     # vermelho
+            2:  (0.0, 0.0, 1.0, 1),     # azul
+            3:  (0.0, 1.0, 0.0, 1),     # verde
+            4:  (1.0, 1.0, 0.0, 1),     # amarelo
+            5:  (0.5, 0.0, 1.0, 1),     # roxo
+            6:  (1.0, 0.5, 0.0, 1),     # laranja
+            7:  (0.0, 1.0, 1.0, 1),     # ciano
+            8:  (1.0, 0.0, 1.0, 1),     # magenta
+            9:  (0.6, 0.3, 0.0, 1),     # marrom
+            10: (0.0, 0.5, 0.5, 1),     # verde petróleo
+            11: (0.3, 0.3, 0.3, 1),     # cinza escuro
+            12: (0.7, 0.7, 0.7, 1),     # cinza claro
+            13: (0.8, 0.2, 0.4, 1),     # rosa escuro
+            14: (0.2, 0.8, 0.2, 1),     # verde claro
+            15: (0.2, 0.2, 0.8, 1),     # azul escuro
+            16: (0.9, 0.6, 0.2, 1),     # dourado
+            17: (0.6, 0.0, 0.6, 1),     # púrpura
+            18: (0.0, 0.4, 0.8, 1),     # azul médio
+            19: (0.8, 0.4, 0.6, 1),     # rosa pastel
+            20: (0.0, 0.8, 0.8, 1),     # turquesa
+        })
 
         # Shortcuts
         self.accel_group = Gtk.AccelGroup()
@@ -498,3 +513,12 @@ class Window(Gtk.Window):
             surface.finish()
         except Exception as e:
             print(f"Failed to save diagram image at {filename}: {e}")
+
+class CircularColorDict(dict):
+            def __getitem__(self, key):
+                if not self:
+                    raise KeyError("Dicionário de cores está vazio.")
+                keys = sorted(self.keys())
+                n = len(keys)
+                circular_key = keys[(key - 1) % n]
+                return super().__getitem__(circular_key)
