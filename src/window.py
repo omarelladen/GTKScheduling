@@ -365,7 +365,7 @@ class Window(Gtk.Window):
     def _on_draw_task_lines_text(self, widget, cr: cairo.Context):
         cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
-
+        
         for task_num, _ in enumerate(self.list_tasks, 1):
             # Calculate position with offset for single-digit task numbers
             x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
@@ -408,7 +408,7 @@ class Window(Gtk.Window):
             x_offset += (extents.width + spacing)
 
     def _show_task_popover(self, rect, widget, event):
-        self.label_task.set_markup(f"<b>id:</b> {rect.task_record.task.id}\n"
+        self.label_task.set_markup(f"<b>task id:</b> {rect.task_record.task.id}\n"
                                    f"<b>start time:</b> {rect.task_record.task.start_time}\n"
                                    f"<b>duration:</b> {rect.task_record.task.duration}\n"
                                    f"<b>priority:</b> {rect.task_record.task.priority}\n"
