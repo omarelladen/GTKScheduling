@@ -2,7 +2,7 @@ import os
 import queue
 import subprocess
 
-from .task import Task  # Import the Task data structure
+from .task import Task
 
 class Scheduler():
     def __init__(self,
