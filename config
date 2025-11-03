@@ -1,7 +1,7 @@
 APP_NAME="GTKScheduling";
 APP_NAME_LOWER="gtkscheduling";
 APP_DESCRIPTION="CPU scheduling simulator";
-APP_VERSION="0.7.0";
+APP_VERSION="0.8.0";
 WEBSITE_URL="https://github.com/omarelladen/GTKScheduling";
 WEBSITE_LABEL="Repository";
 AUTHORS="Omar El Laden,Gabriel Martines";

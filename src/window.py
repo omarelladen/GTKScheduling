@@ -194,7 +194,7 @@ class Window(Gtk.Window):
         self.rect_offset_x = self.rect_x0         # current x position for drawing (advances with time)
 
         # Window initial size
-        win_width = 620
+        win_width = 900
         win_height = 300
         self.set_size_request(win_width, win_height)
         self.set_resizable(True)
