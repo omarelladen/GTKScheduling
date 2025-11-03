@@ -186,12 +186,17 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
 
         # Diagram Drawing Parameters
-        self.rect_width = 25                      # width of a rectangle
-        self.rect_x0 = 20 + self.rect_width       # initial x
-        self.rect_y0 = 20                         # initial y
-        self.rect_height = 10                     # height of a task rectangle
-        self.lines_dist_y = self.rect_height + 2  # vertical distance between task lines
-        self.rect_offset_x = self.rect_x0         # current x position for drawing (advances with time)
+        self.rect_width = 25                 # width of a rectangle
+        self.rect_x0 = 20 + self.rect_width  # initial x
+        self.rect_y0 = 20                    # initial y
+        self.rect_height = 10                # height of a task rectangle
+        self.rect_gap_x = 1  # x distance between rectangles
+        self.rect_gap_y = 2  # y distance between rectangles
+        self.lines_dist_x = self.rect_width  + self.rect_gap_x  # horizontal distance between task lines
+        self.lines_dist_y = self.rect_height + self.rect_gap_y  # vertical distance between task lines
+        self.rect_offset_x = self.rect_x0  # current x position for drawing (advances with time)
+
+        self.info_x_offset = None  # max x position of diagram infos for drawing on image
 
         # Window initial size
         win_width = 900
@@ -202,9 +207,9 @@ class Window(Gtk.Window):
 
         # Diagram Tab (Stack Page 1)
         self.drawingarea_diagram = Gtk.DrawingArea()
-        self.drawingarea_diagram.connect("draw", self._on_draw_axes)
-        self.drawingarea_diagram.connect("draw", self._on_draw_task_rects)
-        self.drawingarea_diagram.connect("draw", self._on_draw_info)
+        self.drawingarea_diagram.connect("draw", self._draw_axes)
+        self.drawingarea_diagram.connect("draw", self._draw_task_rects)
+        self.drawingarea_diagram.connect("draw", self._draw_info)
         self.drawingarea_diagram.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_diagram.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
@@ -284,7 +289,7 @@ class Window(Gtk.Window):
 
     def update_diagram_size(self):
         # Recalculates and sets the size of the drawing area based on task data
-        drawingarea_width = sum(task.duration for task in self.list_tasks) * (self.rect_width + 1) * 1.05
+        drawingarea_width = sum(task.duration for task in self.list_tasks) * (self.rect_width + self.rect_gap_x) * 1.05
         drawingarea_height = len(self.list_tasks) * self.lines_dist_y * 1.1
 
         self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
@@ -357,7 +362,6 @@ class Window(Gtk.Window):
     def _on_click_edit(self, widget):
         self.app.scheduler.edit_file()
 
-
     def _on_click_outside_popover(self, widget, event):
         # Hides the task popover if a click occurs anywhere else on the window
         if (self.is_popover_task_active == True and
@@ -393,32 +397,34 @@ class Window(Gtk.Window):
         about.connect("response", lambda dialog, response: dialog.destroy())
         about.present()
 
-    def _on_draw_axes(self, widget, cr: cairo.Context):
+    def _draw_axes(self, widget, cr: cairo.Context):
         # Draws the x and y axis
         
         cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
 
-        y_pos = None
+        # Y-axis (tasks id)
+        y_pos = 0
         for task_num, _ in enumerate(self.list_tasks, 1):
-            y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
             x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
+            y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
 
             # Draw the text
             cr.move_to(x_pos, y_pos)
             cr.show_text(str(task_num))
 
+        # X-axis (time)
         for time in range(self.app.scheduler.time + 1):
-            cr.move_to(self.rect_x0-2 + (time-1)*(self.rect_width + 1), y_pos + 2*self.rect_height)
+            cr.move_to(self.rect_x0-2 + (time-1)*(self.rect_width + self.rect_gap_x), y_pos + 2*self.rect_height)
             cr.show_text(str(time))
 
-    def _on_draw_task_rects(self, widget, cr: cairo.Context):
+    def _draw_task_rects(self, widget, cr: cairo.Context):
         for rect in self.list_task_rects:
             cr.set_source_rgba(*rect.color)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
             cr.fill()
 
-    def _on_draw_info(self, widget, cr: cairo.Context):
+    def _draw_info(self, widget, cr: cairo.Context):
         # Draws the statistics below the diagram
 
         cr.set_source_rgb(0.7, 0.7, 0.7)
@@ -426,7 +432,7 @@ class Window(Gtk.Window):
 
         # Starting position
         y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 40
-        x_offset = self.rect_x0
+        self.info_x_offset = self.rect_x0
         spacing = 20
 
         # Statistics to display
@@ -443,12 +449,12 @@ class Window(Gtk.Window):
 
         # Draw each piece of text, advancing horizontally
         for text in texts:
-            cr.move_to(x_offset, y)
+            cr.move_to(self.info_x_offset, y)
             cr.show_text(text)
 
             # Measure text to calculate position for the next item
             extents = cr.text_extents(text)
-            x_offset += (extents.width + spacing)
+            self.info_x_offset += (extents.width + spacing)
 
     def _show_task_popover(self, rect, widget, event):
         self.label_task.set_markup(f"<b>task id:</b> {rect.task_record.task.id}\n"
@@ -513,19 +519,21 @@ class Window(Gtk.Window):
             ))
 
         # Advance the horizontal drawing position for the next tick
-        self.rect_offset_x += (self.rect_width + 1)
+        self.rect_offset_x += (self.rect_width + self.rect_gap_x)
 
         # Draw
         self.drawingarea_diagram.queue_draw()
 
     def _save_diagram_to_png(self, filename):
+    
         # Calculate the bounds of the diagram
-        max_x = max(rect.x + rect.width  for rect in self.list_task_rects) if self.list_task_rects else 100
-        max_y = max(rect.y + rect.height for rect in self.list_task_rects) if self.list_task_rects else 100
+        max_x = max(rect.x + rect.width for rect in self.list_task_rects) if self.list_task_rects else 100
+        max_x = max_x if max_x >= self.info_x_offset else self.info_x_offset
+        max_y = self.rect_y0 + self.lines_dist_y * (len(self.list_tasks) - 1) + self.rect_height
 
         # Add padding
         surface_width  = int(max_x + self.rect_x0)
-        surface_height = int(max_y + self.rect_y0)
+        surface_height = int(max_y + self.rect_y0 + 30)
 
         # Create Cairo surface
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, surface_width, surface_height)
@@ -535,11 +543,10 @@ class Window(Gtk.Window):
         cr.set_source_rgb(1, 1, 1)
         cr.paint()
 
-        # Draw all the rectangles onto the surface
-        for rect in self.list_task_rects:
-            cr.set_source_rgba(*rect.color)
-            cr.rectangle(rect.x, rect.y, rect.width, rect.height)
-            cr.fill()
+        # Draw
+        self._draw_info(widget=None, cr=cr)
+        self._draw_task_rects(widget=None, cr=cr)
+        self._draw_axes(widget=None, cr=cr)
 
         # Write the surface to a PNG file
         try:
