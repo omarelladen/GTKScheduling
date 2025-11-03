@@ -186,8 +186,8 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
 
         # Diagram Drawing Parameters
-        self.rect_length = 25                     # width of a rectangle
-        self.rect_x0 = 20 + self.rect_length      # initial x
+        self.rect_width = 25                      # width of a rectangle
+        self.rect_x0 = 20 + self.rect_width       # initial x
         self.rect_y0 = 20                         # initial y
         self.rect_height = 10                     # height of a task rectangle
         self.lines_dist_y = self.rect_height + 2  # vertical distance between task lines
@@ -202,9 +202,9 @@ class Window(Gtk.Window):
 
         # Diagram Tab (Stack Page 1)
         self.drawingarea_diagram = Gtk.DrawingArea()
-        self.drawingarea_diagram.connect("draw", self._on_draw_task_lines_text)  # draws task numbers
-        self.drawingarea_diagram.connect("draw", self._on_draw_task_rects)       # draws the rectangles
-        self.drawingarea_diagram.connect("draw", self._on_draw_info)             # draws info below the diagram
+        self.drawingarea_diagram.connect("draw", self._on_draw_axes)
+        self.drawingarea_diagram.connect("draw", self._on_draw_task_rects)
+        self.drawingarea_diagram.connect("draw", self._on_draw_info)
         self.drawingarea_diagram.connect("button-press-event", self._on_click_task_rect)
         self.drawingarea_diagram.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
@@ -284,7 +284,7 @@ class Window(Gtk.Window):
 
     def update_diagram_size(self):
         # Recalculates and sets the size of the drawing area based on task data
-        drawingarea_width = sum(task.duration for task in self.list_tasks) * (self.rect_length + 1) * 1.05
+        drawingarea_width = sum(task.duration for task in self.list_tasks) * (self.rect_width + 1) * 1.05
         drawingarea_height = len(self.list_tasks) * self.lines_dist_y * 1.1
 
         self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
@@ -393,8 +393,8 @@ class Window(Gtk.Window):
         about.connect("response", lambda dialog, response: dialog.destroy())
         about.present()
 
-    def _on_draw_task_lines_text(self, widget, cr: cairo.Context):
-        # Draws the task id numbers on the left side
+    def _on_draw_axes(self, widget, cr: cairo.Context):
+        # Draws the x and y axis
         
         cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
@@ -409,7 +409,7 @@ class Window(Gtk.Window):
             cr.show_text(str(task_num))
 
         for time in range(self.app.scheduler.time + 1):
-            cr.move_to(self.rect_x0-2 + (time-1)*(self.rect_length + 1), y_pos + 2*self.rect_height)
+            cr.move_to(self.rect_x0-2 + (time-1)*(self.rect_width + 1), y_pos + 2*self.rect_height)
             cr.show_text(str(time))
 
     def _on_draw_task_rects(self, widget, cr: cairo.Context):
@@ -425,7 +425,7 @@ class Window(Gtk.Window):
         cr.set_font_size(10)
 
         # Starting position
-        y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 30
+        y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 40
         x_offset = self.rect_x0
         spacing = 20
 
@@ -493,9 +493,9 @@ class Window(Gtk.Window):
                 task.start_time < self.app.scheduler.time and
                 task.state == "ready"):
                 self.list_task_rects.append(TaskRectangle(
-                    self.rect_offset_x - self.rect_length,
+                    self.rect_offset_x - self.rect_width,
                     self.rect_y0 + self.lines_dist_y*(task.id-1),
-                    self.rect_length,
+                    self.rect_width,
                     self.rect_height,
                     (0.5, 0.5, 0.5, 0.5),
                     TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.scheduler.time)
@@ -504,16 +504,16 @@ class Window(Gtk.Window):
         # Create the colored rectangle for the currently executing task
         if current_task:
             self.list_task_rects.append(TaskRectangle(
-                self.rect_offset_x - self.rect_length,
+                self.rect_offset_x - self.rect_width,
                 self.rect_y0 + self.lines_dist_y*(current_task.id-1),
-                self.rect_length,
+                self.rect_width,
                 self.rect_height,
                 self.dict_colors[(current_task.color_num % 20)],
                 TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.scheduler.time) # data
             ))
 
         # Advance the horizontal drawing position for the next tick
-        self.rect_offset_x += (self.rect_length + 1)
+        self.rect_offset_x += (self.rect_width + 1)
 
         # Draw
         self.drawingarea_diagram.queue_draw()
