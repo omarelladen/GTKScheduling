@@ -431,8 +431,8 @@ class Window(Gtk.Window):
             f"Terminated tasks: {self.app.scheduler.num_term_tasks}",
             f"CLK period: {self.app.timer.interval_ms:.0f} ms",
             f"Quantum: {self.app.scheduler.quantum}",
-            f"Turnaround time: {sum(t.turnaround_time for t in self.list_tasks) / len(self.list_tasks)}",
-            f"Average waiting time: {sum(t.waiting_time for t in self.list_tasks) / len(self.list_tasks)}",
+            f"Turnaround time: {round(sum(t.turnaround_time for t in self.list_tasks) / len(self.list_tasks), 2)}",
+            f"Average waiting time: {round(sum(t.waiting_time for t in self.list_tasks) / len(self.list_tasks), 2)}",
             f"Time: {self.app.scheduler.time}",
         ]
 
@@ -503,7 +503,7 @@ class Window(Gtk.Window):
                 self.rect_y0 + self.lines_dist_y*(current_task.id-1),
                 self.rect_length,
                 self.rect_height,
-                self.dict_colors[current_task.color_num],
+                self.dict_colors[(current_task.color_num % 20)],
                 TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.scheduler.time) # data
             ))
 

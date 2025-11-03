@@ -18,10 +18,10 @@ class Scheduler():
         self.num_tasks = len(self.list_tasks)
 
         # Initial simulation state
-        self.time = 0             # global simulation time
-        self.used_quantum = 0     # time elapsed for the current quantum slice for FIFO/Round Robin algorithm
-        self.num_term_tasks = 0   # count of completed tasks
-        self.current_task = None  # the task currently running
+        self.time = 0                     # global simulation time
+        self.used_quantum = 0             # time elapsed for the current quantum slice for FIFO/Round Robin algorithm
+        self.num_term_tasks = 0           # count of completed tasks
+        self.current_task = None          # the task currently running
         self.queue_tasks = queue.Queue()  # queue for FIFO/Round Robin algorithm
 
         self.execute()  # run the scheduler for time 0
@@ -53,7 +53,7 @@ class Scheduler():
             task.turnaround_time += 1
 
     def _exe_fifo(self):
-        # Round Robin (RR)
+        # FIFO/Round Robin (RR)
 
         # 1. Enqueue new tasks
         for task in self.list_tasks:
