@@ -186,7 +186,7 @@ class Window(Gtk.Window):
         stack = Gtk.Stack()
 
         # Diagram Drawing Parameters
-        self.rect_length = 10                     # width of a rectangle
+        self.rect_length = 25                     # width of a rectangle
         self.rect_x0 = 20 + self.rect_length      # initial x
         self.rect_y0 = 20                         # initial y
         self.rect_height = 10                     # height of a task rectangle
@@ -398,7 +398,8 @@ class Window(Gtk.Window):
         
         cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
-        
+
+        y_pos = None
         for task_num, _ in enumerate(self.list_tasks, 1):
             y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
             x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
@@ -406,6 +407,10 @@ class Window(Gtk.Window):
             # Draw the text
             cr.move_to(x_pos, y_pos)
             cr.show_text(str(task_num))
+
+        for time in range(self.app.scheduler.time + 1):
+            cr.move_to(self.rect_x0-2 + (time-1)*(self.rect_length + 1), y_pos + 2*self.rect_height)
+            cr.show_text(str(time))
 
     def _on_draw_task_rects(self, widget, cr: cairo.Context):
         for rect in self.list_task_rects:
