@@ -284,7 +284,7 @@ class Window(Gtk.Window):
 
     def update_diagram_size(self):
         # Recalculates and sets the size of the drawing area based on task data
-        drawingarea_width = sum(task.duration for task in self.list_tasks) * self.rect_length * 1.05
+        drawingarea_width = sum(task.duration for task in self.list_tasks) * (self.rect_length + 1) * 1.05
         drawingarea_height = len(self.list_tasks) * self.lines_dist_y * 1.1
 
         self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
