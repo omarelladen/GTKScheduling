@@ -26,23 +26,28 @@ class App():
         self.timer = Timer(interval_ms=300, callback=self.tick)
 
         # Scheduler
-        self.scheduler = Scheduler(os.path.expanduser(TASKS_FILE))
+        self.scheduler = Scheduler(self, os.path.expanduser(TASKS_FILE))
+        result = self.scheduler.reset()
 
         # Window
-        self.win = Window(self,
-                          self.scheduler.list_tasks,
-                          APP_ICON_FILE,
-                          PLAY_ICON,
-                          PAUSE_ICON,
-                          NEXT_ICON,
-                          SKIP_ICON,
-                          RESTART_ICON,
-                          MENU_ICON,
-                          SAVE_ICON,
-                          EDIT_ICON
+        self.window = Window(
+            self,
+            APP_ICON_FILE,
+            PLAY_ICON,
+            PAUSE_ICON,
+            NEXT_ICON,
+            SKIP_ICON,
+            RESTART_ICON,
+            MENU_ICON,
+            SAVE_ICON,
+            EDIT_ICON
         )
-        self.win.connect("destroy", self._on_destroy)
-        self.win.show_all()
+        self.window.connect("destroy", self._on_destroy)
+        self.window.show_all()
+
+        if result != 0:
+            self.window.open_error_dialog(result)
+
 
     def _on_destroy(self, window):
         self.quit()
@@ -57,11 +62,11 @@ class App():
         if self.scheduler.has_tasks():
             self.scheduler.update_current_task()
             self.scheduler.update_ready_tasks()
-            self.win.draw_new_rect(self.scheduler.current_task)
+            self.window.draw_new_rect(self.scheduler.current_task)
             self.scheduler.execute()
-            self.win.refresh_info_label()
+            self.window.refresh_info_label()
         else:
-            self.win.set_play_icon_on_finish()
+            self.window.set_play_icon_on_finish()
 
     def skip(self):
         while self.scheduler.has_tasks():

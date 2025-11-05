@@ -6,17 +6,13 @@ from .task import Task
 
 class Scheduler():
     def __init__(self,
+        app,
         tasks_path
     ):
+        self.app = app
         self.tasks_path = tasks_path
 
-        self.reset()  # initialize the scheduler state
-
     def reset(self):
-        # Load Scheduling parameters from file
-        self.alg_scheduling, self.quantum, self.list_tasks = self._setup_from_file(self.tasks_path)
-        self.num_tasks = len(self.list_tasks)
-
         # Initial simulation state
         self.time = 0                     # global simulation time
         self.used_quantum = 0             # time elapsed for the current quantum slice for FIFO/Round Robin algorithm
@@ -24,7 +20,25 @@ class Scheduler():
         self.current_task = None          # the task currently running
         self.queue_tasks = queue.Queue()  # queue for FIFO/Round Robin algorithm
 
-        self.execute()  # run the scheduler for time 0
+
+        # Load Scheduling parameters from file
+        self.list_tasks = []
+        result = self._setup_from_file(self.tasks_path)
+        if result != 0:
+            # Default parameters
+            self.alg_scheduling = "fifo"
+            self.quantum = 2
+            self.list_tasks = [
+                Task(1,1,0,5,2),
+                Task(2,2,0,2,3),
+                Task(3,3,1,4,1),
+                Task(4,4,3,1,4),
+                Task(5,5,5,2,5),
+            ]
+
+        self.num_tasks = len(self.list_tasks)
+
+        return result
 
     def has_tasks(self):
         # Check if there are still tasks left to run
@@ -34,7 +48,6 @@ class Scheduler():
         # Open the tasks file with the default editor
         cmd = ["xdg-open", self.tasks_path]
         result = subprocess.run(cmd)
-
         if result.returncode != 0:
             print(f'Error executing "{cmd}"')
 
@@ -170,63 +183,98 @@ class Scheduler():
             self._exe_priop()
 
     def _setup_from_file(self, file_path):
-        # Default parameters
-        default_alg_scheduling = "fifo"
-        default_quantum = 2
-        default_list_tasks = [Task(1,1,0,5,2),
-                              Task(2,2,0,4,3),
-                              Task(3,3,3,5,5),
-                              Task(4,4,5,6,9),
-                              Task(5,5,7,4,6)]
 
         # Check if file exists
         if not os.path.isfile(file_path):
-            print(f'Could not find file "{file_path}". Using default scheduling parameters')
-            return default_alg_scheduling, \
-                   default_quantum, \
-                   default_list_tasks
+            return f'Could not find file "{file_path}". Using default scheduling parameters'
 
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
         # Check for minimum file length
         if len(lines) < 2:
-            print(f'Not enough lines in file "{file_path}". Using default scheduling parameters')
-            return default_alg_scheduling, \
-                   default_quantum, \
-                   default_list_tasks
+            return f'Not enough lines in file. Using default scheduling parameters'
+
+
+        # Check first line size
+        parts = lines[0].strip().split(";")
+        parts = [p for p in parts if p != '']
+        if len(parts) != 2:
+            return f"Wrong number of parameters in line 1. Using default parameters"
 
 
         # Extract parameters from file
         
-        # Validate algorithm
-        alg_scheduling = lines[0].split(";")[0].lower()
-        if alg_scheduling not in ["fifo", "srtf", "priop"]:
-            print(f'Invalid algorithm "{alg_scheduling}" in file "{file_path}". Using default {default_alg_scheduling}')
-            alg_scheduling = default_alg_scheduling
+        # Algorithm
+        alg_scheduling = lines[0].split(";")[0].lower().strip()
+        if alg_scheduling in ["fifo", "srtf", "priop"]:
+            self.alg_scheduling = alg_scheduling
+        else:
+            return f'Invalid algorithm "{alg_scheduling}" in line 1. Using default parameters'
 
-        # Validate quantum
-        quantum = int(lines[0].split(";")[1])
-        if quantum <= 0:
-            print(f'Invalid quantum "{quantum}" in file "{file_path}". Using default {default_quantum}')
-            quantum = default_quantum
+        # Quantum
+        quantum = lines[0].split(";")[1].strip()
+        if quantum.isdigit() and int(quantum) != 0:
+            self.quantum = int(quantum)
+        else:
+            return f'Invalid quantum in line 1. Using default parameters'
 
         # Tasks
+        line_num = 2
         list_tasks = []
         for line in lines[1:]:
-            task_id         = int(line.split(";")[0])
-            task_color_num  = int(line.split(";")[1])
-            task_start_time = int(line.split(";")[2])
-            task_duration   = int(line.split(";")[3])
-            task_priority   = int(line.split(";")[4])
 
-            task = Task(task_id,
-                        task_color_num,
-                        task_start_time,
-                        task_duration,
-                        task_priority)
+            # Check line size
+            parts = line.strip().split(";")
+            parts = [p for p in parts if p != '']
+            if len(parts) < 5:
+                return f"Not enough task parameters in line {line_num}. Using default parameters"
 
-            list_tasks.append(task)
+            # Task id
+            task_id = parts[0].strip()
+            if task_id.isdigit() and int(task_id) != 0:
+                task_id = int(task_id)
+            else:
+                return f"Invalid task id in line {line_num}. Using default parameters"
 
-        return alg_scheduling, quantum, list_tasks
+            # Color number
+            task_color_num = parts[1].strip()
+            if task_color_num.isdigit():
+                task_color_num = int(task_color_num)
+            else:
+                return f"Invalid task color number in line {line_num}. Using default parameters"
 
+            # Start time
+            task_start_time = parts[2].strip()
+            if task_start_time.isdigit():
+                task_start_time = int(task_start_time)
+            else:
+                return f"Invalid task start time in line {line_num}. Using default parameters"
+
+            # Duration
+            task_duration = parts[3].strip()
+            if task_duration.isdigit() and int(task_duration) != 0:
+                task_duration = int(task_duration)
+            else:
+                return f"Invalid task duration in line {line_num}. Using default parameters"
+
+            # Priority
+            task_priority = parts[4].strip()
+            if task_priority.isdigit() and int(task_priority) != 0:
+                task_priority = int(task_priority)
+            else:
+                return f"Invalid task priority in line {line_num}. Using default parameters"
+
+            
+            task = Task(
+                task_id,
+                task_color_num,
+                task_start_time,
+                task_duration,
+                task_priority
+            )
+            self.list_tasks.append(task)
+
+            line_num += 1
+
+        return 0

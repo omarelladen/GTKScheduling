@@ -12,7 +12,6 @@ from .task_record import TaskRecord
 class Window(Gtk.Window):
     def __init__(self,
         app,
-        list_tasks,
         app_icon_path = None,
         play_icon = None,
         pause_icon = None,
@@ -25,10 +24,7 @@ class Window(Gtk.Window):
     ):
         super().__init__()
 
-        # References the main application and task list
         self.app = app
-        self.list_tasks = list_tasks
-        
         self.app_icon_path = app_icon_path
 
         # Icon names
@@ -199,7 +195,7 @@ class Window(Gtk.Window):
         self.info_x_offset = None  # max x position of diagram infos for drawing on image
 
         # Window initial size
-        win_width = 900
+        win_width = 940
         win_height = 300
         self.set_size_request(win_width, win_height)
         self.set_resizable(True)
@@ -256,6 +252,19 @@ class Window(Gtk.Window):
     def _on_click_save(self, widget):
         self._open_save_dialog()
 
+    def open_error_dialog(self, msg):
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            flags=0,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            text="Error",
+        )
+        dialog.format_secondary_text(msg)
+        dialog.run()
+
+        dialog.destroy()
+
     def _open_save_dialog(self):
         dialog = Gtk.FileChooserDialog(title="Save Diagram", parent=self, action=Gtk.FileChooserAction.SAVE)
         dialog.set_do_overwrite_confirmation(True)
@@ -289,8 +298,8 @@ class Window(Gtk.Window):
 
     def update_diagram_size(self):
         # Recalculates and sets the size of the drawing area based on task data
-        drawingarea_width = sum(task.duration for task in self.list_tasks) * (self.rect_width + self.rect_gap_x) * 1.05
-        drawingarea_height = len(self.list_tasks) * self.lines_dist_y * 1.1
+        drawingarea_width = sum(task.duration for task in self.app.scheduler.list_tasks) * (self.rect_width + self.rect_gap_x) * 1.05
+        drawingarea_height = len(self.app.scheduler.list_tasks) * self.lines_dist_y * 1.1
 
         self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
 
@@ -356,8 +365,9 @@ class Window(Gtk.Window):
         self.rect_offset_x = self.rect_x0  # reset drawing position
         self.drawingarea_diagram.queue_draw() # redraw the empty diagram
 
-        self.app.scheduler.reset()
-        self.list_tasks = self.app.scheduler.list_tasks
+        result = self.app.scheduler.reset()
+        if result != 0:
+            self.open_error_dialog(result)
 
     def _on_click_edit(self, widget):
         self.app.scheduler.edit_file()
@@ -405,7 +415,7 @@ class Window(Gtk.Window):
 
         # Y-axis (tasks id)
         y_pos = 0
-        for task_num, _ in enumerate(self.list_tasks, 1):
+        for task_num, _ in enumerate(self.app.scheduler.list_tasks, 1):
             x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
             y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
 
@@ -431,19 +441,19 @@ class Window(Gtk.Window):
         cr.set_font_size(10)
 
         # Starting position
-        y = self.rect_y0 + self.lines_dist_y * len(self.list_tasks) + 40
+        y = self.rect_y0 + self.lines_dist_y * len(self.app.scheduler.list_tasks) + 40
         self.info_x_offset = self.rect_x0
         spacing = 20
 
         # Statistics to display
         texts = [
             f"Algorithm: {self.app.scheduler.alg_scheduling}",
-            f"Total tasks: {len(self.list_tasks)}",
+            f"Total tasks: {len(self.app.scheduler.list_tasks)}",
             f"Terminated tasks: {self.app.scheduler.num_term_tasks}",
             f"CLK period: {self.app.timer.interval_ms:.0f} ms",
             f"Quantum: {self.app.scheduler.quantum}",
-            f"Turnaround time: {round(sum(t.turnaround_time for t in self.list_tasks) / len(self.list_tasks), 2)}",
-            f"Average waiting time: {round(sum(t.waiting_time for t in self.list_tasks) / len(self.list_tasks), 2)}",
+            f"Turnaround time: {round(sum(t.turnaround_time for t in self.app.scheduler.list_tasks) / len(self.app.scheduler.list_tasks), 2) if len(self.app.scheduler.list_tasks) != 0 else 0}",
+            f"Average waiting time: {round(sum(t.waiting_time for t in self.app.scheduler.list_tasks) / len(self.app.scheduler.list_tasks), 2) if len(self.app.scheduler.list_tasks) != 0 else 0}",
             f"Time: {self.app.scheduler.time}",
         ]
 
@@ -483,18 +493,18 @@ class Window(Gtk.Window):
         # Updates the text on the Info tab
         self.label_info.set_markup(
             f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
-            f"<big><b>Total tasks:</b> {len(self.list_tasks)}</big>\n"
+            f"<big><b>Total tasks:</b> {len(self.app.scheduler.list_tasks)}</big>\n"
             f"<big><b>Terminated tasks:</b> {self.app.scheduler.num_term_tasks}</big>\n"
             f"<big><b>CLK period:</b> {self.app.timer.interval_ms:.0f} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.scheduler.quantum}</big>\n"
-            f"<big><b>Turnaround time:</b> {sum(t.turnaround_time for t in self.list_tasks) / len(self.list_tasks)}</big>\n"
-            f"<big><b>Average waiting time:</b> {sum(t.waiting_time for t in self.list_tasks) / len(self.list_tasks)}</big>\n"
+            f"<big><b>Turnaround time:</b> {round(sum(t.turnaround_time for t in self.app.scheduler.list_tasks) / len(self.app.scheduler.list_tasks), 2) if len(self.app.scheduler.list_tasks) != 0 else 0}</big>\n"
+            f"<big><b>Average waiting time:</b> {round(sum(t.waiting_time for t in self.app.scheduler.list_tasks) / len(self.app.scheduler.list_tasks), 2) if len(self.app.scheduler.list_tasks) != 0 else 0}</big>\n"
             f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
         )
 
     def draw_new_rect(self, current_task):
         # Create semi-transparent grey task rectangles
-        for task in self.list_tasks:
+        for task in self.app.scheduler.list_tasks:
             if (task != current_task and
                 task.start_time < self.app.scheduler.time and
                 task.state == "ready"):
@@ -529,7 +539,7 @@ class Window(Gtk.Window):
         # Calculate the bounds of the diagram
         max_x = max(rect.x + rect.width for rect in self.list_task_rects) if self.list_task_rects else 100
         max_x = max_x if max_x >= self.info_x_offset else self.info_x_offset
-        max_y = self.rect_y0 + self.lines_dist_y * (len(self.list_tasks) - 1) + self.rect_height
+        max_y = self.rect_y0 + self.lines_dist_y * (len(self.app.scheduler.list_tasks) - 1) + self.rect_height
 
         # Add padding
         surface_width  = int(max_x + self.rect_x0)
