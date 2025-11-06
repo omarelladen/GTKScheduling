@@ -60,10 +60,10 @@ class App():
 
     def tick(self):
         if self.scheduler.has_tasks():
+            self.scheduler.execute()
             self.scheduler.update_current_task()
             self.scheduler.update_ready_tasks()
             self.window.draw_new_rect(self.scheduler.current_task)
-            self.scheduler.execute()
             self.window.refresh_info_label()
         else:
             self.window.set_play_icon_on_finish()

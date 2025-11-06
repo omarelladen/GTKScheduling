@@ -424,7 +424,7 @@ class Window(Gtk.Window):
             cr.show_text(str(task_num))
 
         # X-axis (time)
-        for time in range(self.app.scheduler.time + 1):
+        for time in range(self.app.scheduler.time):
             cr.move_to(self.rect_x0-2 + (time-1)*(self.rect_width + self.rect_gap_x), y_pos + 2*self.rect_height)
             cr.show_text(str(time))
 
