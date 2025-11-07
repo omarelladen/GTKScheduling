@@ -52,8 +52,8 @@ class Scheduler():
             print(f'Error executing "{cmd}"')
 
     def update_current_task(self):
-        self.time += 1
         if self.current_task:
+            self.time += 1
             self.current_task.progress += 1
             self.current_task.turnaround_time += 1
             self.used_quantum += 1
