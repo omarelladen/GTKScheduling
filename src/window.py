@@ -183,7 +183,7 @@ class Window(Gtk.Window):
 
         # Diagram Drawing Parameters
         self.rect_width = 25                 # width of a rectangle
-        self.rect_x0 = 20 + self.rect_width  # initial x
+        self.rect_x0 = 30 + self.rect_width  # initial x
         self.rect_y0 = 20                    # initial y
         self.rect_height = 10                # height of a task rectangle
         self.rect_gap_x = 1  # x distance between rectangles
