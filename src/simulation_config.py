@@ -5,9 +5,11 @@ from .task import Task
 
 class SimulationConfig():
     def __init__(self,
-        tasks_path
+        tasks_path,
+        alg_dir_path
     ):
         self.tasks_path = tasks_path
+        self.alg_dir_path = alg_dir_path
 
     def edit_file(self):
         # Open the tasks file with the default editor
@@ -15,6 +17,22 @@ class SimulationConfig():
         result = subprocess.run(cmd)
         if result.returncode != 0:
             print(f'Error executing "{cmd}"')
+
+    def find_algorithms(self):
+        list_scheduler = []
+        list_monitor = []
+
+        for filename in os.listdir(self.alg_dir_path):
+            if os.path.isfile(os.path.join(self.alg_dir_path, filename)):
+                if filename.startswith("scheduler_") and filename.endswith(".py"):
+                    alg_name = filename[len("scheduler_"):-len(".py")]
+                    list_scheduler.append(alg_name)
+
+                elif filename.startswith("monitor_") and filename.endswith(".py"):
+                    alg_name = filename[len("monitor_"):-len(".py")]
+                    list_monitor.append(alg_name)
+
+        return [alg for alg in list_scheduler if alg in list_monitor]
 
     def get_params_from_file(self):
 
@@ -41,8 +59,9 @@ class SimulationConfig():
         
         # Algorithm
         alg_scheduling = lines[0].split(";")[0].lower().strip()
-        if not alg_scheduling in ["rr", "srtf", "priop"]:
-            return f'Invalid algorithm "{alg_scheduling}" in line 1. Using default parameters', None, None, None
+        list_alg = self.find_algorithms()
+        if not alg_scheduling in list_alg:
+            return f'Invalid algorithm "{alg_scheduling}" in line 1. Options are {list_alg}. Using default parameters', None, None, None
 
         # Quantum
         quantum = lines[0].split(";")[1].strip()

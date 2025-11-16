@@ -29,7 +29,10 @@ class App():
         self.copyright = COPYRIGHT
 
 
-        self.simulation_config = SimulationConfig(os.path.expanduser(TASKS_FILE))
+        self.simulation_config = SimulationConfig(
+            os.path.expanduser(TASKS_FILE),
+            PYTHON_PKG_DIR
+        )
 
         self.simulator = Simulator(self)
         result = self.reset()
