@@ -341,7 +341,7 @@ class Window(Gtk.Window):
         if self.app.simulator.timer.is_running:
             icon_name = self.play_icon
             self.app.simulator.timer.stop()
-        elif self.app.simulator.has_tasks():
+        elif not self.app.simulator.finished():
             icon_name = self.pause_icon
             self.app.simulator.timer.start()
         else:

@@ -20,3 +20,7 @@ class Task():
         self.progress = progress
         self.turnaround_time = turnaround_time
         self.waiting_time = waiting_time
+
+    def execute(self):
+        self.progress += 1
+        self.turnaround_time += 1

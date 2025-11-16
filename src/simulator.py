@@ -18,12 +18,12 @@ class Simulator():
         # Scheduler
         self.scheduler = Scheduler(self)
 
-    def has_tasks(self):
+    def finished(self):
         # Check if there are still tasks left to run
-        return True if self.num_term_tasks < len(self.list_tasks) else False
+        return False if self.num_term_tasks < len(self.list_tasks) else True
 
     def skip(self):
-        while self.has_tasks():
+        while not self.finished():
             self.tick()
 
     def reset(self, alg_scheduling, quantum, list_tasks):
@@ -39,14 +39,7 @@ class Simulator():
 
         self.num_tasks = len(self.list_tasks)
 
-        self.scheduler.current_task = None
-
-    def update_current_task(self):
-        if self.scheduler.current_task:
-            self.time += 1
-            self.scheduler.current_task.progress += 1
-            self.scheduler.current_task.turnaround_time += 1
-            self.used_quantum += 1
+        self.current_task = None
 
     def update_ready_tasks(self):
         list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
@@ -54,28 +47,39 @@ class Simulator():
             task.waiting_time += 1
             task.turnaround_time += 1
 
+    def execute_monitor(self):
+        if self.alg_scheduling == "rr":
+            return self.scheduler.monitor_rr()
+        elif self.alg_scheduling == "srtf":
+            return self.scheduler.monitor_srtf()
+        elif self.alg_scheduling == "priop":
+            return self.scheduler.monitor_priop()
+
     def execute_scheduler(self):
         if self.alg_scheduling == "rr":
-            self.scheduler.monitor_rr()
-            if self.scheduler.interrupt:
-                self.scheduler.exe_rr()
+            self.scheduler.exe_rr()
         elif self.alg_scheduling == "srtf":
-            self.scheduler.monitor_srtf()
-            if self.scheduler.interrupt:
-                self.scheduler.exe_srtf()
+            self.scheduler.exe_srtf()
         elif self.alg_scheduling == "priop":
-            self.scheduler.monitor_priop()
-            if self.scheduler.interrupt:
-                self.scheduler.exe_priop()
-
-        self.scheduler.interrupt = False
+            self.scheduler.exe_priop()
 
     def tick(self):
-        if self.has_tasks():
-            self.execute_scheduler()
-            self.update_current_task()
+        if not self.finished():
+
+            # Monitor tasks
+            interrupt = self.execute_monitor()
+
+            # Call scheduler if needed
+            if interrupt:
+                self.execute_scheduler()
+            if self.current_task:
+                self.current_task.execute()
+                self.time += 1
+                self.used_quantum += 1
+
             self.update_ready_tasks()
-            self.app.window.draw_new_rect(self.scheduler.current_task)
+
+            self.app.window.draw_new_rect(self.current_task)
             self.app.window.refresh_info_label()
         else:
             self.app.window.set_play_icon_on_finish()
@@ -83,18 +87,18 @@ class Simulator():
     def terminate_task(self, task):
         task.state = "terminated"
         self.num_term_tasks += 1
-        self.scheduler.current_task = None
         self.used_quantum = 0
+        self.current_task = None
 
     def preempt_task(self, task):
-        self.scheduler.current_task.state = "ready"
+        self.current_task.state = "ready"
         self.used_quantum = 0
 
     def load_new_task(self, task):
         task.state = "ready"
 
     def schedule_task(self, task):
-        self.scheduler.current_task = task
+        self.current_task = task
         task.state = "running"
      
     def suspend_task(self, task):

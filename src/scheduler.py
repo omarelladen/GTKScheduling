@@ -5,13 +5,13 @@ class Scheduler():
         simulator
     ):
         self.simulator = simulator
-        self.current_task = None
-        self.interrupt = False
         self.list_tasks_new = []
         self.list_tasks_existing = []
 
     def monitor_rr(self):
         # Round Robin (RR)
+
+        interrupt = False
 
         # 1. Enqueue new tasks
         for task in self.simulator.list_tasks:
@@ -20,16 +20,18 @@ class Scheduler():
                 self.simulator.queue_tasks.put(task)
 
         # 2. Check if current task finished
-        if self.current_task and self.current_task.progress == self.current_task.duration:
-            self.simulator.terminate_task(self.current_task)
-            self.interrupt = True
+        if self.simulator.current_task and self.simulator.current_task.progress == self.simulator.current_task.duration:
+            self.simulator.terminate_task(self.simulator.current_task)
+            interrupt = True
 
         # 3. Check if quantum expired
         if self.simulator.used_quantum % self.simulator.quantum == 0:
-            if self.current_task:
-                self.simulator.preempt_task(self.current_task)
-                self.simulator.queue_tasks.put(self.current_task)
-            self.interrupt = True
+            if self.simulator.current_task:
+                self.simulator.preempt_task(self.simulator.current_task)
+                self.simulator.queue_tasks.put(self.simulator.current_task)
+            interrupt = True
+
+        return interrupt
 
     def exe_rr(self):
         # Get next task from the queue
@@ -39,10 +41,12 @@ class Scheduler():
     def monitor_srtf(self):
         # Shortest Remaining Time First (SRTF)
 
+        interrupt = False
+
         # 1. Check if the current task finished
-        if self.current_task and self.current_task.progress == self.current_task.duration:
-            self.simulator.terminate_task(self.current_task)
-            self.interrupt = True
+        if self.simulator.current_task and self.simulator.current_task.progress == self.simulator.current_task.duration:
+            self.simulator.terminate_task(self.simulator.current_task)
+            interrupt = True
                 
         # 2. Get all tasks that are waiting or currently running
         self.list_tasks_existing = [
@@ -56,7 +60,9 @@ class Scheduler():
             if not task.state and task.start_time <= self.simulator.time:
                 self.simulator.load_new_task(task)
                 self.list_tasks_new.append(task)
-                self.interrupt = True
+                interrupt = True
+
+        return interrupt
 
     def exe_srtf(self):
         # Find the one with the minimum (duration - progress)
@@ -71,20 +77,22 @@ class Scheduler():
             not shortest_task)
         ):
             # A new task has arrived that is shorter than the remaining time of the shortest waiting task
-            if self.current_task:
-                self.simulator.preempt_task(self.current_task)
+            if self.simulator.current_task:
+                self.simulator.preempt_task(self.simulator.current_task)
             self.simulator.schedule_task(shortest_task_new)
-        elif shortest_task and not self.current_task:
+        elif shortest_task and not self.simulator.current_task:
             # No new tasks, just run the shortest ready task
             self.simulator.schedule_task(shortest_task)
 
     def monitor_priop(self):
         # Preemptive Priority (PRIOp)
-        
+
+        interrupt = False
+
         # 1. Check if the current task finished
-        if self.current_task and self.current_task.progress == self.current_task.duration:
-            self.simulator.terminate_task(self.current_task)
-            self.interrupt = True
+        if self.simulator.current_task and self.simulator.current_task.progress == self.simulator.current_task.duration:
+            self.simulator.terminate_task(self.simulator.current_task)
+            interrupt = True
         
         # 2. Get all tasks that are waiting or currently running
         self.list_tasks_existing = [
@@ -98,7 +106,9 @@ class Scheduler():
             if not task.state and task.start_time <= self.simulator.time:
                 self.simulator.load_new_task(task)
                 self.list_tasks_new.append(task)
-                self.interrupt = True
+                interrupt = True
+
+        return interrupt
 
     def exe_priop(self):
         # Find the one with the maximum priority value
@@ -113,9 +123,9 @@ class Scheduler():
             not priority_task)
         ):
             # A new task has arrived with a higher priority
-            if self.current_task:
-                self.simulator.preempt_task(self.current_task)
+            if self.simulator.current_task:
+                self.simulator.preempt_task(self.simulator.current_task)
             self.simulator.schedule_task(priority_task_new)
-        elif priority_task and not self.current_task:
+        elif priority_task and not self.simulator.current_task:
             # No new tasks, just run the highest priority "ready" task
             self.simulator.schedule_task(priority_task)
