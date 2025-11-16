@@ -16,57 +16,46 @@ class Scheduler():
         # 1. Enqueue new tasks
         for task in self.simulator.list_tasks:
             if not task.state and task.start_time <= self.simulator.time:
-                task.state = "ready"
+                self.simulator.load_new_task(task)
                 self.simulator.queue_tasks.put(task)
 
         # 2. Check if current task finished
         if self.current_task and self.current_task.progress == self.current_task.duration:
-            self.current_task.state = "terminated"
-            self.simulator.num_term_tasks += 1
-            self.current_task = None
-            self.simulator.used_quantum = 0
-
+            self.simulator.terminate_task(self.current_task)
             self.interrupt = True
 
         # 3. Check if quantum expired
         if self.simulator.used_quantum % self.simulator.quantum == 0:
             if self.current_task:
-                self.current_task.state = "ready"
+                self.simulator.preempt_task(self.current_task)
                 self.simulator.queue_tasks.put(self.current_task)
-                self.simulator.used_quantum = 0
-
             self.interrupt = True
 
     def exe_rr(self):
         # Get next task from the queue
         if not self.simulator.queue_tasks.empty():
-            self.current_task = self.simulator.queue_tasks.get()
-            self.current_task.state = "running"
+            self.simulator.schedule_task(self.simulator.queue_tasks.get())
 
     def monitor_srtf(self):
         # Shortest Remaining Time First (SRTF)
 
         # 1. Check if the current task finished
         if self.current_task and self.current_task.progress == self.current_task.duration:
-            self.current_task.state = "terminated"
-            self.simulator.num_term_tasks += 1
-            self.current_task = None
-
+            self.simulator.terminate_task(self.current_task)
             self.interrupt = True
                 
         # 2. Get all tasks that are waiting or currently running
         self.list_tasks_existing = [
             t for t in self.simulator.list_tasks
-            if (t.state == "ready" or t.state == "running") and t.duration != t.progress
+            if t.state == "ready" or t.state == "running"
         ]
 
         # 3. Check for newly arriving tasks
         self.list_tasks_new = []
         for task in self.simulator.list_tasks:
             if not task.state and task.start_time <= self.simulator.time:
-                task.state = "ready"
+                self.simulator.load_new_task(task)
                 self.list_tasks_new.append(task)
-
                 self.interrupt = True
 
     def exe_srtf(self):
@@ -83,38 +72,32 @@ class Scheduler():
         ):
             # A new task has arrived that is shorter than the remaining time of the shortest waiting task
             if self.current_task:
-                self.current_task.state = "ready"  # preempt
-            self.current_task = shortest_task_new
-            self.current_task.state = "running"
+                self.simulator.preempt_task(self.current_task)
+            self.simulator.schedule_task(shortest_task_new)
         elif shortest_task and not self.current_task:
             # No new tasks, just run the shortest ready task
-            self.current_task = shortest_task
-            self.current_task.state = "running"
+            self.simulator.schedule_task(shortest_task)
 
     def monitor_priop(self):
         # Preemptive Priority (PRIOp)
         
         # 1. Check if the current task finished
         if self.current_task and self.current_task.progress == self.current_task.duration:
-            self.current_task.state = "terminated"
-            self.simulator.num_term_tasks += 1
-            self.current_task = None
-
+            self.simulator.terminate_task(self.current_task)
             self.interrupt = True
         
         # 2. Get all tasks that are waiting or currently running
         self.list_tasks_existing = [
             t for t in self.simulator.list_tasks
-            if (t.state == "ready" or t.state == "running") and t.duration != t.progress
+            if t.state == "ready" or t.state == "running"
         ]
 
         # 3. Check for newly arriving tasks
         self.list_tasks_new = []
         for task in self.simulator.list_tasks:
             if not task.state and task.start_time <= self.simulator.time:
-                task.state = "ready"
+                self.simulator.load_new_task(task)
                 self.list_tasks_new.append(task)
-
                 self.interrupt = True
 
     def exe_priop(self):
@@ -131,10 +114,8 @@ class Scheduler():
         ):
             # A new task has arrived with a higher priority
             if self.current_task:
-                self.current_task.state = "ready"  # Preempt
-            self.current_task = priority_task_new
-            self.current_task.state = "running"
+                self.simulator.preempt_task(self.current_task)
+            self.simulator.schedule_task(priority_task_new)
         elif priority_task and not self.current_task:
             # No new tasks, just run the highest priority "ready" task
-            self.current_task = priority_task
-            self.current_task.state = "running"
+            self.simulator.schedule_task(priority_task)

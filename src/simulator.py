@@ -79,3 +79,23 @@ class Simulator():
             self.app.window.refresh_info_label()
         else:
             self.app.window.set_play_icon_on_finish()
+
+    def terminate_task(self, task):
+        task.state = "terminated"
+        self.num_term_tasks += 1
+        self.scheduler.current_task = None
+        self.used_quantum = 0
+
+    def preempt_task(self, task):
+        self.scheduler.current_task.state = "ready"
+        self.used_quantum = 0
+
+    def load_new_task(self, task):
+        task.state = "ready"
+
+    def schedule_task(self, task):
+        self.scheduler.current_task = task
+        task.state = "running"
+     
+    def suspend_task(self, task):
+        pass
