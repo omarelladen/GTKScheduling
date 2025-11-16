@@ -133,7 +133,7 @@ class Window(Gtk.Window):
 
         # Play/Pause Button
         bt = Gtk.Button()
-        icon_name = self.pause_icon if self.app.timer.is_running else self.play_icon  # set initial icon based on timer state
+        icon_name = self.play_icon  # set initial icon based on timer state
         icon = Gio.ThemedIcon(name=icon_name)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
         bt.set_tooltip_text("Play/Pause")
@@ -173,7 +173,7 @@ class Window(Gtk.Window):
         slider = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, min=10, max=300, step=1)
         slider.set_draw_value(False)
         slider.set_size_request(120, -1)
-        slider.set_value(self.app.timer.interval_ms)
+        slider.set_value(self.app.simulator.timer.interval_ms)
         slider.connect("value-changed", self._on_slider_value_changed)
         slider.set_tooltip_text("Change Speed")
         headerbar.pack_start(slider)
@@ -298,14 +298,14 @@ class Window(Gtk.Window):
 
     def update_diagram_size(self):
         # Recalculates and sets the size of the drawing area based on task data
-        drawingarea_width = sum(task.duration for task in self.app.scheduler.list_tasks) * (self.rect_width + self.rect_gap_x) * 1.05
-        drawingarea_height = len(self.app.scheduler.list_tasks) * self.lines_dist_y * 1.1
+        drawingarea_width = sum(task.duration for task in self.app.simulator.list_tasks) * (self.rect_width + self.rect_gap_x) * 1.05
+        drawingarea_height = len(self.app.simulator.list_tasks) * self.lines_dist_y * 1.1
 
         self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
 
     def set_play_icon_on_finish(self):
         # Called when the simulation ends to force the Play/Pause button to show the Play icon
-        self.app.timer.stop()
+        self.app.simulator.timer.stop()
         button = self.bt_play_pause
 
         # Remove the current icon
@@ -321,7 +321,7 @@ class Window(Gtk.Window):
         button.show_all()
 
     def _on_slider_value_changed(self, scale):
-        self.app.timer.change_interval_ms(scale.get_value())
+        self.app.simulator.timer.change_interval_ms(scale.get_value())
         self.refresh_info_label()
         self.drawingarea_diagram.queue_draw()  # redraw to update info text
 
@@ -331,16 +331,16 @@ class Window(Gtk.Window):
             button.remove(bt_child)
 
         # Toggle the timer and determine the new icon
-        if self.app.timer.is_running:
+        if self.app.simulator.timer.is_running:
             icon_name = self.play_icon
-            self.app.timer.stop()
-        elif self.app.scheduler.has_tasks():
+            self.app.simulator.timer.stop()
+        elif self.app.simulator.has_tasks():
             icon_name = self.pause_icon
-            self.app.timer.start()
+            self.app.simulator.timer.start()
         else:
             # No tasks left, keep Play icon
             icon_name = self.play_icon
-            self.app.timer.stop()
+            self.app.simulator.timer.stop()
 
         # Add the new icon
         icon = Gio.ThemedIcon(name=icon_name)
@@ -349,10 +349,10 @@ class Window(Gtk.Window):
         button.show_all()
 
     def _on_click_next(self, button):
-        self.app.tick()
+        self.app.simulator.tick()
 
     def _on_click_skip(self, button):
-        self.app.skip()
+        self.app.simulator.skip()
 
     def _on_click_restart(self, widget):
         self._restart_rects()
@@ -365,12 +365,12 @@ class Window(Gtk.Window):
         self.rect_offset_x = self.rect_x0  # reset drawing position
         self.drawingarea_diagram.queue_draw() # redraw the empty diagram
 
-        result = self.app.scheduler.reset()
+        result = self.app.reset()
         if result != 0:
             self.open_error_dialog(result)
 
     def _on_click_edit(self, widget):
-        self.app.scheduler.edit_file()
+        self.app.simulation_config.edit_file()
 
     def _on_click_outside_popover(self, widget, event):
         # Hides the task popover if a click occurs anywhere else on the window
@@ -415,7 +415,7 @@ class Window(Gtk.Window):
 
         # Y-axis (tasks id)
         y_pos = 0
-        for task_num, _ in enumerate(self.app.scheduler.list_tasks, 1):
+        for task_num, _ in enumerate(self.app.simulator.list_tasks, 1):
             x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
             y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
 
@@ -424,7 +424,7 @@ class Window(Gtk.Window):
             cr.show_text(str(task_num))
 
         # X-axis (time)
-        for time in range(self.app.scheduler.time + 1):
+        for time in range(self.app.simulator.time + 1):
             cr.move_to(self.rect_x0-2 + (time-1)*(self.rect_width + self.rect_gap_x), y_pos + 2*self.rect_height)
             cr.show_text(str(time))
 
@@ -441,20 +441,20 @@ class Window(Gtk.Window):
         cr.set_font_size(10)
 
         # Starting position
-        y = self.rect_y0 + self.lines_dist_y * len(self.app.scheduler.list_tasks) + 40
+        y = self.rect_y0 + self.lines_dist_y * len(self.app.simulator.list_tasks) + 40
         self.info_x_offset = self.rect_x0
         spacing = 20
 
         # Statistics to display
         texts = [
-            f"Algorithm: {self.app.scheduler.alg_scheduling}",
-            f"Total tasks: {len(self.app.scheduler.list_tasks)}",
-            f"Terminated tasks: {self.app.scheduler.num_term_tasks}",
-            f"CLK period: {self.app.timer.interval_ms:.0f} ms",
-            f"Quantum: {self.app.scheduler.quantum}",
-            f"Turnaround time: {round(sum(t.turnaround_time for t in self.app.scheduler.list_tasks) / len(self.app.scheduler.list_tasks), 2) if len(self.app.scheduler.list_tasks) != 0 else 0}",
-            f"Average waiting time: {round(sum(t.waiting_time for t in self.app.scheduler.list_tasks) / len(self.app.scheduler.list_tasks), 2) if len(self.app.scheduler.list_tasks) != 0 else 0}",
-            f"Time: {self.app.scheduler.time}",
+            f"Algorithm: {self.app.simulator.alg_scheduling}",
+            f"Total tasks: {len(self.app.simulator.list_tasks)}",
+            f"Terminated tasks: {self.app.simulator.num_term_tasks}",
+            f"CLK period: {self.app.simulator.timer.interval_ms:.0f} ms",
+            f"Quantum: {self.app.simulator.quantum}",
+            f"Turnaround time: {round(sum(t.turnaround_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}",
+            f"Average waiting time: {round(sum(t.waiting_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}",
+            f"Time: {self.app.simulator.time}",
         ]
 
         # Draw each piece of text, advancing horizontally
@@ -492,21 +492,21 @@ class Window(Gtk.Window):
     def refresh_info_label(self):
         # Updates the text on the Info tab
         self.label_info.set_markup(
-            f"<big><b>Algorithm:</b> {self.app.scheduler.alg_scheduling}</big>\n"
-            f"<big><b>Total tasks:</b> {len(self.app.scheduler.list_tasks)}</big>\n"
-            f"<big><b>Terminated tasks:</b> {self.app.scheduler.num_term_tasks}</big>\n"
-            f"<big><b>CLK period:</b> {self.app.timer.interval_ms:.0f} ms</big>\n"
-            f"<big><b>Quantum:</b> {self.app.scheduler.quantum}</big>\n"
-            f"<big><b>Turnaround time:</b> {round(sum(t.turnaround_time for t in self.app.scheduler.list_tasks) / len(self.app.scheduler.list_tasks), 2) if len(self.app.scheduler.list_tasks) != 0 else 0}</big>\n"
-            f"<big><b>Average waiting time:</b> {round(sum(t.waiting_time for t in self.app.scheduler.list_tasks) / len(self.app.scheduler.list_tasks), 2) if len(self.app.scheduler.list_tasks) != 0 else 0}</big>\n"
-            f"<big><b>Time:</b> {self.app.scheduler.time}</big>"
+            f"<big><b>Algorithm:</b> {self.app.simulator.alg_scheduling}</big>\n"
+            f"<big><b>Total tasks:</b> {len(self.app.simulator.list_tasks)}</big>\n"
+            f"<big><b>Terminated tasks:</b> {self.app.simulator.num_term_tasks}</big>\n"
+            f"<big><b>CLK period:</b> {self.app.simulator.timer.interval_ms:.0f} ms</big>\n"
+            f"<big><b>Quantum:</b> {self.app.simulator.quantum}</big>\n"
+            f"<big><b>Turnaround time:</b> {round(sum(t.turnaround_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}</big>\n"
+            f"<big><b>Average waiting time:</b> {round(sum(t.waiting_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}</big>\n"
+            f"<big><b>Time:</b> {self.app.simulator.time}</big>"
         )
 
     def draw_new_rect(self, current_task):
         # Create semi-transparent grey task rectangles
-        for task in self.app.scheduler.list_tasks:
+        for task in self.app.simulator.list_tasks:
             if (task != current_task and
-                task.start_time < self.app.scheduler.time and
+                task.start_time < self.app.simulator.time and
                 task.state == "ready"):
                 self.list_task_rects.append(TaskRectangle(
                     self.rect_offset_x - self.rect_width,
@@ -514,7 +514,7 @@ class Window(Gtk.Window):
                     self.rect_width,
                     self.rect_height,
                     (0.5, 0.5, 0.5, 0.5),
-                    TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.scheduler.time)
+                    TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.simulator.time)
                 ))
 
         # Create the colored rectangle for the currently executing task
@@ -525,7 +525,7 @@ class Window(Gtk.Window):
                 self.rect_width,
                 self.rect_height,
                 self.dict_colors[(current_task.color_num % 20)],
-                TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.scheduler.time) # data
+                TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.simulator.time) # data
             ))
 
         # Advance the horizontal drawing position for the next tick
@@ -539,7 +539,7 @@ class Window(Gtk.Window):
         # Calculate the bounds of the diagram
         max_x = max(rect.x + rect.width for rect in self.list_task_rects) if self.list_task_rects else 100
         max_x = max_x if max_x >= self.info_x_offset else self.info_x_offset
-        max_y = self.rect_y0 + self.lines_dist_y * (len(self.app.scheduler.list_tasks) - 1) + self.rect_height
+        max_y = self.rect_y0 + self.lines_dist_y * (len(self.app.simulator.list_tasks) - 1) + self.rect_height
 
         # Add padding
         surface_width  = int(max_x + self.rect_x0)

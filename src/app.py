@@ -4,15 +4,18 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-from .timer import Timer
+from .task import Task
 from .window import Window
-from .scheduler import Scheduler
+from .simulator import Simulator
+from .simulation_config import SimulationConfig
 
 # Include config variables
 exec(open("/usr/local/share/gtkscheduling/config").read())
 
 class App():
     def __init__(self):
+
+        # Metadata
         self.name = APP_NAME
         self.name_lower = APP_NAME_LOWER
         self.description = APP_DESCRIPTION
@@ -22,14 +25,15 @@ class App():
         self.authors = AUTHORS.split(",")
         self.copyright = COPYRIGHT
 
-        # Timer
-        self.timer = Timer(interval_ms=300, callback=self.tick)
 
-        # Scheduler
-        self.scheduler = Scheduler(self, os.path.expanduser(TASKS_FILE))
-        result = self.scheduler.reset()
+        self.simulation_config = SimulationConfig(
+            self,
+            os.path.expanduser(TASKS_FILE)
+        )
 
-        # Window
+        self.simulator = Simulator(self)
+        result = self.reset()
+    
         self.window = Window(
             self,
             APP_ICON_FILE,
@@ -48,7 +52,29 @@ class App():
         if result != 0:
             self.window.open_error_dialog(result)
 
+    def reset(self):
+        result, alg_scheduling, quantum, list_tasks = self.simulation_config.get_params_from_file()
 
+        if result != 0:
+            # Default parameters
+            alg_scheduling = "rr"
+            quantum = 2
+            list_tasks = [
+                Task(1,1,0,5,2),
+                Task(2,2,0,2,3),
+                Task(3,3,1,4,1),
+                Task(4,4,3,1,4),
+                Task(5,5,5,2,5),
+            ]
+
+        self.simulator.reset(
+            alg_scheduling,
+            quantum,
+            list_tasks
+        )
+
+        return result
+        
     def _on_destroy(self, window):
         self.quit()
 
@@ -57,17 +83,3 @@ class App():
 
     def run(self):
         Gtk.main()
-
-    def tick(self):
-        if self.scheduler.has_tasks():
-            self.scheduler.execute()
-            self.scheduler.update_current_task()
-            self.scheduler.update_ready_tasks()
-            self.window.draw_new_rect(self.scheduler.current_task)
-            self.window.refresh_info_label()
-        else:
-            self.window.set_play_icon_on_finish()
-
-    def skip(self):
-        while self.scheduler.has_tasks():
-            self.tick()
