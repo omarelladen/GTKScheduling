@@ -26,10 +26,7 @@ class App():
         self.copyright = COPYRIGHT
 
 
-        self.simulation_config = SimulationConfig(
-            self,
-            os.path.expanduser(TASKS_FILE)
-        )
+        self.simulation_config = SimulationConfig(os.path.expanduser(TASKS_FILE))
 
         self.simulator = Simulator(self)
         result = self.reset()

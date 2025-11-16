@@ -5,10 +5,8 @@ from .task import Task
 
 class SimulationConfig():
     def __init__(self,
-        app,
         tasks_path
     ):
-        self.app = app
         self.tasks_path = tasks_path
 
     def edit_file(self):
