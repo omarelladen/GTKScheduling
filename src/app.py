@@ -1,4 +1,5 @@
 import os
+import sys
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -14,6 +15,8 @@ exec(open("/usr/local/share/gtkscheduling/config").read())
 
 class App():
     def __init__(self):
+
+        self.args = sys.argv[1:]  # excluding the name of the script
 
         # Metadata
         self.name = APP_NAME
@@ -48,6 +51,27 @@ class App():
 
         if result != 0:
             self.window.open_error_dialog(result)
+
+    def parse_args(self):
+        if "--help" in self.args or "-h" in self.args:
+            self.show_help()
+            sys.exit(0)
+        elif "--version" in self.args or "-v" in self.args:
+            self.show_version()
+            sys.exit(0)
+
+    def show_help(self):
+        print("Usage:")
+        print(f"  {self.name_lower} [OPTION…]")
+        print("")
+        print("Help Options:")
+        print("  -h, --help                 Show help options")
+        print("")
+        print("Application Options:")
+        print("  -v, --version              Print version information and exit")
+
+    def show_version(self):
+        print(f"{self.name} {self.version}")
 
     def reset(self):
         result, alg_scheduling, quantum, list_tasks = self.simulation_config.get_params_from_file()
