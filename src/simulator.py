@@ -54,17 +54,25 @@ class Simulator():
             task.waiting_time += 1
             task.turnaround_time += 1
 
-    def execute(self):
+    def execute_scheduler(self):
         if self.alg_scheduling == "rr":
-            self.scheduler._exe_rr()
+            self.scheduler.monitor_rr()
+            if self.scheduler.interrupt:
+                self.scheduler.exe_rr()
         elif self.alg_scheduling == "srtf":
-            self.scheduler._exe_srtf()
+            self.scheduler.monitor_srtf()
+            if self.scheduler.interrupt:
+                self.scheduler.exe_srtf()
         elif self.alg_scheduling == "priop":
-            self.scheduler._exe_priop()
+            self.scheduler.monitor_priop()
+            if self.scheduler.interrupt:
+                self.scheduler.exe_priop()
+
+        self.scheduler.interrupt = False
 
     def tick(self):
         if self.has_tasks():
-            self.execute()
+            self.execute_scheduler()
             self.update_current_task()
             self.update_ready_tasks()
             self.app.window.draw_new_rect(self.scheduler.current_task)
