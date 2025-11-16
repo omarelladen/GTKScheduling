@@ -2,7 +2,7 @@
 class Task():
     def __init__(self,
         id,
-        color_num,
+        color_hex,
         start_time,
         duration,
         priority,
@@ -12,7 +12,7 @@ class Task():
         waiting_time = 0
     ):
         self.id = id
-        self.color_num = color_num
+        self.color_hex = color_hex
         self.start_time = start_time
         self.duration = duration
         self.priority = priority

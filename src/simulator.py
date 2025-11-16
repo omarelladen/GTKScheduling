@@ -1,8 +1,7 @@
 import queue
+import importlib
 
 from .timer import Timer
-from .scheduler import Scheduler
-from .monitor import Monitor
 
 class Simulator():
     def __init__(self,
@@ -16,11 +15,27 @@ class Simulator():
             callback=self.tick
         )
 
-        # Scheduler
-        self.scheduler = Scheduler(self)
+    def import_monitor(self, alg):
+        try:
+            module_name = f"{__package__}.monitor_{alg}"
+            class_name = "Monitor"
+            module = importlib.import_module(module_name)
+            cls = getattr(module, class_name)
+            return cls
+        except (ModuleNotFoundError, AttributeError) as e:
+            print(f"Error importing class '{class_name}' from module '{module_name}': {e}")
+            return None
 
-        # Monitor
-        self.monitor = Monitor(self)
+    def import_scheduler(self, alg):
+        try:
+            module_name = f"{__package__}.scheduler_{alg}"
+            class_name = "Scheduler"
+            module = importlib.import_module(module_name)
+            cls = getattr(module, class_name)
+            return cls
+        except (ModuleNotFoundError, AttributeError) as e:
+            print(f"Error importing class '{class_name}' from module '{module_name}': {e}")
+            return None
 
     def finished(self):
         # Check if there are still tasks left to run
@@ -34,6 +49,18 @@ class Simulator():
         self.alg_scheduling = alg_scheduling
         self.quantum = quantum
         self.list_tasks = list_tasks
+
+        # Scheduler
+        # self.scheduler = Scheduler(self)
+        scheduler_class = self.import_scheduler(alg_scheduling)
+        if scheduler_class:
+            self.scheduler = scheduler_class(self)
+
+        # Monitor
+        # self.monitor = Monitor(self)
+        monitor_class = self.import_monitor(alg_scheduling)
+        if monitor_class:
+            self.monitor = monitor_class(self)
 
         # Initial simulation state
         self.time = 0                     # global simulation time
@@ -55,20 +82,10 @@ class Simulator():
             task.turnaround_time += 1
 
     def execute_monitor(self):
-        if self.alg_scheduling == "rr":
-            return self.monitor.monitor_rr()
-        elif self.alg_scheduling == "srtf":
-            return self.monitor.monitor_srtf()
-        elif self.alg_scheduling == "priop":
-            return self.monitor.monitor_priop()
+        return self.monitor.execute()
 
     def execute_scheduler(self):
-        if self.alg_scheduling == "rr":
-            self.scheduler.exe_rr()
-        elif self.alg_scheduling == "srtf":
-            self.scheduler.exe_srtf()
-        elif self.alg_scheduling == "priop":
-            self.scheduler.exe_priop()
+        self.scheduler.execute()
 
     def tick(self):
         if not self.finished():

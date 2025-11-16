@@ -49,30 +49,6 @@ class Window(Gtk.Window):
                 self.pixbuf = None
                 print(f'Failed to load icon from "{self.app_icon_path}": {e}')
 
-        # Task Colors
-        self.dict_colors = {
-            0:  (0.0, 0.8, 0.8, 1),  # turquoise
-            1:  (1.0, 0.0, 0.0, 1),  # red
-            2:  (0.0, 0.0, 1.0, 1),  # blue
-            3:  (0.0, 1.0, 0.0, 1),  # green
-            4:  (1.0, 1.0, 0.0, 1),  # yellow
-            5:  (0.5, 0.0, 1.0, 1),  # purple
-            6:  (1.0, 0.5, 0.0, 1),  # orange
-            7:  (0.0, 1.0, 1.0, 1),  # cyan
-            8:  (1.0, 0.0, 1.0, 1),  # magenta
-            9:  (0.6, 0.3, 0.0, 1),  # brown
-            10: (0.0, 0.5, 0.5, 1),  # teal
-            11: (0.3, 0.3, 0.3, 1),  # dark grey
-            12: (0.7, 0.7, 0.7, 1),  # light grey
-            13: (0.8, 0.2, 0.4, 1),  # dark pink
-            14: (0.2, 0.8, 0.2, 1),  # light green
-            15: (0.2, 0.2, 0.8, 1),  # dark blue
-            16: (0.9, 0.6, 0.2, 1),  # gold
-            17: (0.6, 0.0, 0.6, 1),  # purple
-            18: (0.0, 0.4, 0.8, 1),  # medium blue
-            19: (0.8, 0.4, 0.6, 1),  # pastel pink
-        }
-
         # Keyboard Shortcuts (Accelerators)
         self.accel_group = Gtk.AccelGroup()
         self.add_accel_group(self.accel_group)
@@ -242,6 +218,14 @@ class Window(Gtk.Window):
         # Add the stack switcher and the stack itself to the main window box
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
+
+    def hex_to_rgba(self, hex_color, alpha=1.0):
+        
+        r = int(hex_color[0:2], 16) / 255.0
+        g = int(hex_color[2:4], 16) / 255.0
+        b = int(hex_color[4:6], 16) / 255.0
+        
+        return (r, g, b, alpha)
 
     def _on_ctrl_q(self, accel_group, window, key, modifier):
         self.app.quit()
@@ -439,7 +423,7 @@ class Window(Gtk.Window):
 
     def _draw_task_rects(self, widget, cr: cairo.Context):
         for rect in self.list_task_rects:
-            cr.set_source_rgba(*rect.color)
+            cr.set_source_rgba(*rect.color_rgba)
             cr.rectangle(rect.x, rect.y, rect.width, rect.height)
             cr.fill()
 
@@ -538,7 +522,7 @@ class Window(Gtk.Window):
                     self.rect_y0 + self.lines_dist_y*(current_task.id-1),
                     self.rect_width,
                     self.rect_height,
-                    self.dict_colors[(current_task.color_num % 20)],
+                    self.hex_to_rgba(current_task.color_hex),
                     TaskRecord(
                         current_task,
                         current_task.state,

@@ -69,12 +69,10 @@ class SimulationConfig():
             else:
                 return f"Invalid task id in line {line_num}. Using default parameters", None, None, None
 
-            # Color number
-            task_color_num = parts[1].strip()
-            if task_color_num.isdigit():
-                task_color_num = int(task_color_num)
-            else:
-                return f"Invalid task color number in line {line_num}. Using default parameters", None, None, None
+            # Color code
+            task_color_hex = parts[1].strip()
+            if len(task_color_hex) != 6:
+                return f"Invalid task color code in line {line_num}. Using default parameters", None, None, None
 
             # Start time
             task_start_time = parts[2].strip()
@@ -100,7 +98,7 @@ class SimulationConfig():
             
             task = Task(
                 task_id,
-                task_color_num,
+                task_color_hex,
                 task_start_time,
                 task_duration,
                 task_priority

@@ -1,0 +1,11 @@
+
+class Scheduler():
+    def __init__(self,
+        simulator
+    ):
+        self.simulator = simulator
+
+    def execute(self):
+        # Get next task from the queue
+        if not self.simulator.queue_tasks.empty():
+            self.simulator.schedule_task(self.simulator.queue_tasks.get())

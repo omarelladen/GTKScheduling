@@ -81,11 +81,11 @@ class App():
             alg_scheduling = "rr"
             quantum = 2
             list_tasks = [
-                Task(1,1,0,5,2),
-                Task(2,2,0,2,3),
-                Task(3,3,1,4,1),
-                Task(4,4,3,1,4),
-                Task(5,5,5,2,5),
+                Task(1,"316AD0",0,5,2),
+                Task(2,"E4E32B",0,2,3),
+                Task(3,"9650CB",1,4,1),
+                Task(4,"4BDA3D",3,1,4),
+                Task(5,"E0323C",5,2,5),
             ]
 
         self.simulator.reset(
