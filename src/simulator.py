@@ -2,6 +2,7 @@ import queue
 
 from .timer import Timer
 from .scheduler import Scheduler
+from .monitor import Monitor
 
 class Simulator():
     def __init__(self,
@@ -17,6 +18,9 @@ class Simulator():
 
         # Scheduler
         self.scheduler = Scheduler(self)
+
+        # Monitor
+        self.monitor = Monitor(self)
 
     def finished(self):
         # Check if there are still tasks left to run
@@ -41,6 +45,9 @@ class Simulator():
 
         self.current_task = None
 
+        self.list_tasks_new = []
+        self.list_tasks_existing = []
+
     def update_ready_tasks(self):
         list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
         for task in list_tasks_ready:
@@ -49,11 +56,11 @@ class Simulator():
 
     def execute_monitor(self):
         if self.alg_scheduling == "rr":
-            return self.scheduler.monitor_rr()
+            return self.monitor.monitor_rr()
         elif self.alg_scheduling == "srtf":
-            return self.scheduler.monitor_srtf()
+            return self.monitor.monitor_srtf()
         elif self.alg_scheduling == "priop":
-            return self.scheduler.monitor_priop()
+            return self.monitor.monitor_priop()
 
     def execute_scheduler(self):
         if self.alg_scheduling == "rr":
