@@ -12,13 +12,15 @@ class Scheduler():
 
         # 1. Enqueue new tasks
         for task in self.simulator.list_tasks:
-            if task.state == None and task.start_time <= self.simulator.time:
+            if not task.state and task.start_time <= self.simulator.time:
                 task.state = "ready"
                 self.simulator.queue_tasks.put(task)
 
         # 2. Check for preemption or task completion
         # This happens if the quantum is used up OR the current task finished
-        if self.simulator.used_quantum % self.simulator.quantum == 0 or (self.current_task and self.current_task.progress == self.current_task.duration):
+        if (self.simulator.used_quantum % self.simulator.quantum == 0 or 
+            self.current_task and self.current_task.progress == self.current_task.duration
+        ):
             if self.current_task:
                 if self.current_task.progress == self.current_task.duration:
                     # Task finished
@@ -51,14 +53,17 @@ class Scheduler():
         
         # 2. Find the shortest ready task
         # Get all tasks that are waiting or currently running
-        list_tasks_ready = [t for t in self.simulator.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
+        list_tasks_ready = [
+            t for t in self.simulator.list_tasks
+            if (t.state == "ready" or t.state == "running") and t.duration != t.progress
+        ]
         # Find the one with the minimum (duration - progress)
         shortest_task = min(list_tasks_ready, key=lambda t: t.duration - t.progress, default=None)
 
         list_tasks_new = []
         # 3. Check for newly arriving tasks
         for task in self.simulator.list_tasks:
-            if task.state == None and task.start_time <= self.simulator.time:
+            if not task.state and task.start_time <= self.simulator.time:
                 task.state = "ready"
                 list_tasks_new.append(task)
         # Find the shortest new task (based on total duration)
@@ -66,13 +71,14 @@ class Scheduler():
 
         # 4. Decide whether to preempt
         if ((shortest_task_new and shortest_task and shortest_task_new.duration < shortest_task.duration - shortest_task.progress) or
-            (shortest_task_new and shortest_task == None)):
+            (shortest_task_new and not shortest_task)
+        ):
             # A new task has arrived that is shorter than the remaining time of the shortest waiting task
             if self.current_task:
                 self.current_task.state = "ready"  # preempt
             self.current_task = shortest_task_new
             self.current_task.state = "running"
-        elif shortest_task and self.current_task == None:
+        elif shortest_task and not self.current_task:
             # No new tasks, just run the shortest ready task
             self.current_task = shortest_task
             self.current_task.state = "running"
@@ -89,28 +95,33 @@ class Scheduler():
         
         # 2. Find the highest priority ready task
         # Get all tasks that are waiting or currently running
-        list_tasks_ready = [t for t in self.simulator.list_tasks if (t.state == "ready" or t.state == "running") and t.duration != t.progress]
+        list_tasks_ready = [
+            t for t in self.simulator.list_tasks
+            if (t.state == "ready" or t.state == "running") and t.duration != t.progress
+        ]
         # Find the one with the maximum priority value
         shortest_task = max(list_tasks_ready, key=lambda t: t.priority, default=None)
 
         list_tasks_new = []
         # 3. Check for newly arriving tasks
         for task in self.simulator.list_tasks:
-            if task.state == None and task.start_time <= self.simulator.time:
+            if not task.state and task.start_time <= self.simulator.time:
                 task.state = "ready"
                 list_tasks_new.append(task)
         # Find the highest priority new task
         shortest_task_new = max(list_tasks_new, key=lambda t: t.priority, default=None)
 
         # 4. Decide whether to preempt
-        if ((shortest_task_new and shortest_task and shortest_task_new.priority > shortest_task.priority) or
-            (shortest_task_new and shortest_task == None)):
+        if (shortest_task_new and
+            (shortest_task and shortest_task_new.priority > shortest_task.priority or
+            not shortest_task)
+        ):
             # A new task has arrived with a higher priority
             if self.current_task:
                 self.current_task.state = "ready"  # Preempt
             self.current_task = shortest_task_new
             self.current_task.state = "running"
-        elif shortest_task and self.current_task == None:
+        elif shortest_task and not self.current_task:
             # No new tasks, just run the highest priority "ready" task
             self.current_task = shortest_task
             self.current_task.state = "running"

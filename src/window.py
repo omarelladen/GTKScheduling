@@ -266,7 +266,11 @@ class Window(Gtk.Window):
         dialog.destroy()
 
     def _open_save_dialog(self):
-        dialog = Gtk.FileChooserDialog(title="Save Diagram", parent=self, action=Gtk.FileChooserAction.SAVE)
+        dialog = Gtk.FileChooserDialog(
+            title="Save Diagram",
+            parent=self,
+            action=Gtk.FileChooserAction.SAVE
+        )
         dialog.set_do_overwrite_confirmation(True)
         dialog.set_current_folder(os.path.expanduser("~"))  # start in home dir
         dialog.set_current_name("diagram.png")
@@ -298,7 +302,10 @@ class Window(Gtk.Window):
 
     def update_diagram_size(self):
         # Recalculates and sets the size of the drawing area based on task data
-        drawingarea_width = sum(task.duration for task in self.app.simulator.list_tasks) * (self.rect_width + self.rect_gap_x) * 1.05
+        drawingarea_width = sum(
+            task.duration
+            for task in self.app.simulator.list_tasks
+        ) * (self.rect_width + self.rect_gap_x) * 1.05
         drawingarea_height = len(self.app.simulator.list_tasks) * self.lines_dist_y * 1.1
 
         self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
@@ -361,9 +368,9 @@ class Window(Gtk.Window):
 
     def _restart_rects(self):
         # Resets the diagram and simulation state
-        self.list_task_rects = [] # clear all drawn rectangles
-        self.rect_offset_x = self.rect_x0  # reset drawing position
-        self.drawingarea_diagram.queue_draw() # redraw the empty diagram
+        self.list_task_rects = []  # clear all drawn rectangles
+        self.rect_offset_x = self.rect_x0   # reset drawing position
+        self.drawingarea_diagram.queue_draw()  # redraw the empty diagram
 
         result = self.app.reset()
         if result != 0:
@@ -376,14 +383,16 @@ class Window(Gtk.Window):
         # Hides the task popover if a click occurs anywhere else on the window
         if (self.is_popover_task_active == True and
             event.x != self.cursor_x_at_popover and
-            event.y != self.cursor_y_at_popover):
+            event.y != self.cursor_y_at_popover
+        ):
             self.is_popover_task_active = False
             self.popover_task.hide()
 
     def _on_click_task_rect(self, widget, event):
         # Check if the click was on a task rectangle
         if (event.type == Gdk.EventType.BUTTON_PRESS and
-            event.button == Gdk.BUTTON_PRIMARY):
+            event.button == Gdk.BUTTON_PRIMARY
+        ):
             for rect in self.list_task_rects:
                 if (rect.x <= event.x <= rect.x + rect.width and
                     rect.y <= event.y <= rect.y + rect.height):
@@ -467,15 +476,16 @@ class Window(Gtk.Window):
             self.info_x_offset += (extents.width + spacing)
 
     def _show_task_popover(self, rect, widget, event):
-        self.label_task.set_markup(f"<b>task id:</b> {rect.task_record.task.id}\n"
-                                   f"<b>start time:</b> {rect.task_record.task.start_time}\n"
-                                   f"<b>duration:</b> {rect.task_record.task.duration}\n"
-                                   f"<b>priority:</b> {rect.task_record.task.priority}\n"
-                                   f"<b>progress:</b> {rect.task_record.progress}\n"
-                                   f"<b>state:</b> {rect.task_record.state}\n"
-                                   f"<b>turnaround time:</b> {rect.task_record.turnaround_time}\n"
-                                   f"<b>waiting time:</b> {rect.task_record.waiting_time}\n"
-                                   f"<b>time:</b> {rect.task_record.time}"
+        self.label_task.set_markup(
+            f"<b>task id:</b> {rect.task_record.task.id}\n"
+            f"<b>start time:</b> {rect.task_record.task.start_time}\n"
+            f"<b>duration:</b> {rect.task_record.task.duration}\n"
+            f"<b>priority:</b> {rect.task_record.task.priority}\n"
+            f"<b>progress:</b> {rect.task_record.progress}\n"
+            f"<b>state:</b> {rect.task_record.state}\n"
+            f"<b>turnaround time:</b> {rect.task_record.turnaround_time}\n"
+            f"<b>waiting time:</b> {rect.task_record.waiting_time}\n"
+            f"<b>time:</b> {rect.task_record.time}"
         )
         
         # Store click coordinates to help hiding the popover
@@ -507,26 +517,38 @@ class Window(Gtk.Window):
         for task in self.app.simulator.list_tasks:
             if (task != current_task and
                 task.start_time < self.app.simulator.time and
-                task.state == "ready"):
-                self.list_task_rects.append(TaskRectangle(
-                    self.rect_offset_x - self.rect_width,
-                    self.rect_y0 + self.lines_dist_y*(task.id-1),
-                    self.rect_width,
-                    self.rect_height,
-                    (0.5, 0.5, 0.5, 0.5),
-                    TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.simulator.time)
-                ))
+                task.state == "ready"
+            ):
+                self.list_task_rects.append(
+                    TaskRectangle(
+                        self.rect_offset_x - self.rect_width,
+                        self.rect_y0 + self.lines_dist_y*(task.id-1),
+                        self.rect_width,
+                        self.rect_height,
+                        (0.5, 0.5, 0.5, 0.5),
+                        TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.simulator.time)
+                    )
+                )
 
         # Create the colored rectangle for the currently executing task
         if current_task:
-            self.list_task_rects.append(TaskRectangle(
-                self.rect_offset_x - self.rect_width,
-                self.rect_y0 + self.lines_dist_y*(current_task.id-1),
-                self.rect_width,
-                self.rect_height,
-                self.dict_colors[(current_task.color_num % 20)],
-                TaskRecord(current_task, current_task.state, current_task.progress, current_task.turnaround_time, current_task.waiting_time, self.app.simulator.time) # data
-            ))
+            self.list_task_rects.append(
+                TaskRectangle(
+                    self.rect_offset_x - self.rect_width,
+                    self.rect_y0 + self.lines_dist_y*(current_task.id-1),
+                    self.rect_width,
+                    self.rect_height,
+                    self.dict_colors[(current_task.color_num % 20)],
+                    TaskRecord(
+                        current_task,
+                        current_task.state,
+                        current_task.progress,
+                        current_task.turnaround_time,
+                        current_task.waiting_time,
+                        self.app.simulator.time
+                    )
+                )
+            )
 
         # Advance the horizontal drawing position for the next tick
         self.rect_offset_x += (self.rect_width + self.rect_gap_x)
