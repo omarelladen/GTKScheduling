@@ -37,6 +37,7 @@ Name=$APP_NAME
 Comment=$APP_DESCRIPTION
 Exec=$BIN_FILE
 Type=Application
+Categories=Education
 Icon=$APP_ICON_FILE" > "$DESKTOP_FILE"
 
 
