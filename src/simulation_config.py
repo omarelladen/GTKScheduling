@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 
 from .task import Task
@@ -48,11 +49,13 @@ class SimulationConfig():
             return f'Not enough lines in file. Using default scheduling parameters', None, None, None
 
 
+        line_num = 1
+
         # Check first line size
         parts = lines[0].strip().split(";")
         parts = [p for p in parts if p != '']
         if len(parts) != 2:
-            return f"Wrong number of parameters in line 1. Using default parameters", None, None, None
+            return f"Wrong number of parameters in line {line_num}. Using default parameters", None, None, None
 
 
         # Extract parameters from file
@@ -61,17 +64,19 @@ class SimulationConfig():
         alg_scheduling = lines[0].split(";")[0].lower().strip()
         list_alg = self.find_algorithms()
         if not alg_scheduling in list_alg:
-            return f'Invalid algorithm "{alg_scheduling}" in line 1. Options are {list_alg}. Using default parameters', None, None, None
+            return f'Invalid algorithm "{alg_scheduling}" in line {line_num}. Options are {list_alg}. Using default parameters', None, None, None
 
         # Quantum
         quantum = lines[0].split(";")[1].strip()
         if quantum.isdigit() and int(quantum) != 0:
             quantum = int(quantum)
         else:
-            return f'Invalid quantum in line 1. Using default parameters', None, None, None
+            return f'Invalid quantum in line {line_num}. Using default parameters', None, None, None
+
+
+        line_num += 1
 
         # Tasks
-        line_num = 2
         list_tasks = []
         for line in lines[1:]:
 
@@ -89,8 +94,8 @@ class SimulationConfig():
                 return f"Invalid task id in line {line_num}. Using default parameters", None, None, None
 
             # Color code
-            task_color_hex = parts[1].strip()
-            if len(task_color_hex) != 6:
+            task_color_hex = parts[1].strip().lstrip('#').lower()
+            if not re.fullmatch(r"[0-9a-f]{6}", task_color_hex):
                 return f"Invalid task color code in line {line_num}. Using default parameters", None, None, None
 
             # Start time
