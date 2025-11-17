@@ -51,13 +51,11 @@ class Simulator():
         self.list_tasks = list_tasks
 
         # Scheduler
-        # self.scheduler = Scheduler(self)
         scheduler_class = self.import_scheduler(alg_scheduling)
         if scheduler_class:
             self.scheduler = scheduler_class(self)
 
         # Monitor
-        # self.monitor = Monitor(self)
         monitor_class = self.import_monitor(alg_scheduling)
         if monitor_class:
             self.monitor = monitor_class(self)
@@ -73,7 +71,7 @@ class Simulator():
         self.current_task = None
 
         self.list_tasks_new = []
-        self.list_tasks_existing = []
+        self.list_tasks_previous = []
 
     def update_ready_tasks(self):
         list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]

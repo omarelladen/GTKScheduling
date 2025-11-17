@@ -16,7 +16,7 @@ class Monitor():
             interrupt = True
                 
         # 2. Get all tasks that are waiting or currently running
-        self.simulator.list_tasks_existing = [
+        self.simulator.list_tasks_previous = [
             t for t in self.simulator.list_tasks
             if t.state == "ready" or t.state == "running"
         ]
