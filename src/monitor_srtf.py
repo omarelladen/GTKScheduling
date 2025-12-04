@@ -25,7 +25,7 @@ class Monitor():
         self.simulator.list_tasks_new = []
         for task in self.simulator.list_tasks:
             if not task.state and task.start_time <= self.simulator.time:
-                self.simulator.load_new_task(task)
+                self.simulator.load_task(task)
                 self.simulator.list_tasks_new.append(task)
                 interrupt = True
 

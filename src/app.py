@@ -34,7 +34,7 @@ class App():
             PYTHON_PKG_DIR
         )
 
-        self.simulator = Simulator(self)
+        self.simulator = Simulator(self, self.simulation_config)
         result = self.reset()
     
         self.window = Window(

@@ -1,5 +1,6 @@
 import os
 import re
+import importlib
 import subprocess
 
 from .task import Task
@@ -34,6 +35,38 @@ class SimulationConfig():
                     list_monitor.append(alg_name)
 
         return [alg for alg in list_scheduler if alg in list_monitor]
+
+    def import_monitor(self, alg):
+        try:
+            module_name = f"{__package__}.monitor_{alg}"
+            class_name = "Monitor"
+            module = importlib.import_module(module_name)
+            cls = getattr(module, class_name)
+            return cls
+        except (ModuleNotFoundError, AttributeError) as e:
+            print(f"Error importing class '{class_name}' from module '{module_name}': {e}")
+            return None
+
+    def import_scheduler(self, alg):
+        try:
+            module_name = f"{__package__}.scheduler_{alg}"
+            class_name = "Scheduler"
+            module = importlib.import_module(module_name)
+            cls = getattr(module, class_name)
+            return cls
+        except (ModuleNotFoundError, AttributeError) as e:
+            print(f"Error importing class '{class_name}' from module '{module_name}': {e}")
+            return None
+
+    def import_task(self, alg):
+        try:
+            module_name = f"{__package__}.task_{alg}"
+            class_name = "Task"
+            module = importlib.import_module(module_name)
+            cls = getattr(module, class_name)
+            return cls
+        except (ModuleNotFoundError, AttributeError) as e:
+            return Task
 
     def get_params_from_file(self):
 
@@ -119,8 +152,8 @@ class SimulationConfig():
             else:
                 return f"Invalid task priority in line {line_num}. Using default parameters", None, None, None
 
-            
-            task = Task(
+            class_task = self.import_task(alg_scheduling)
+            task = class_task(
                 task_id,
                 task_color_hex,
                 task_start_time,

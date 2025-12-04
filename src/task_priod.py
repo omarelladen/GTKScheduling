@@ -21,11 +21,14 @@ class Task():
         self.turnaround_time = turnaround_time
         self.waiting_time = waiting_time
 
+        self.dynamic_priority = self.priority
+
     def terminate(self):
         self.state = "terminated"
 
     def preempt(self):
         self.state = "ready"
+        self.dynamic_priority = self.priority  #######
 
     def load(self):
         self.state = "ready"
@@ -36,6 +39,7 @@ class Task():
     def update_ready(self):
         self.waiting_time += 1
         self.turnaround_time += 1
+        self.dynamic_priority += 1
 
     def execute(self):
         self.progress += 1

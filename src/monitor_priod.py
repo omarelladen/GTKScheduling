@@ -6,7 +6,7 @@ class Monitor():
         self.simulator = simulator
 
     def execute(self):
-        # Preemptive Priority (PRIOp)
+        # Dynamic Priority (PRIOd)
 
         interrupt = False
 

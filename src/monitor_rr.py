@@ -13,7 +13,7 @@ class Monitor():
         # 1. Enqueue new tasks
         for task in self.simulator.list_tasks:
             if not task.state and task.start_time <= self.simulator.time:
-                self.simulator.load_new_task(task)
+                self.simulator.load_task(task)
                 self.simulator.queue_tasks.put(task)
 
         # 2. Check if current task finished
