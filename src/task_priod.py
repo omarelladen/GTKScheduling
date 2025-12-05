@@ -28,7 +28,7 @@ class Task():
 
     def preempt(self):
         self.state = "ready"
-        self.dynamic_priority = self.priority  #######
+        self.dynamic_priority = self.priority
 
     def load(self):
         self.state = "ready"
