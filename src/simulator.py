@@ -24,9 +24,10 @@ class Simulator():
         while not self.finished():
             self.tick()
 
-    def reset(self, alg_scheduling, quantum, list_tasks):
+    def reset(self, alg_scheduling, quantum, alpha, list_tasks):
         self.alg_scheduling = alg_scheduling
         self.quantum = quantum
+        self.alpha = alpha
         self.list_tasks = list_tasks
 
         # Scheduler
@@ -83,7 +84,7 @@ class Simulator():
     def update_ready_tasks_when_scheduling(self):
         list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
         for task in list_tasks_ready:
-            task.update_ready_when_scheduling()
+            task.update_ready_when_scheduling(self.alpha)
 
     def terminate_task(self, task):
         task.terminate()

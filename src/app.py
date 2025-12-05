@@ -77,12 +77,13 @@ class App():
         print(f"{self.name} {self.version}")
 
     def reset(self):
-        result, alg_scheduling, quantum, list_tasks = self.simulation_config.get_params_from_file()
+        result, alg_scheduling, quantum, alpha, list_tasks = self.simulation_config.get_params_from_file()
 
         if result != 0:
             # Default parameters
             alg_scheduling = "rr"
             quantum = 2
+            alpha = 1
             list_tasks = [
                 Task(1,"316AD0",0,5,2),
                 Task(2,"E4E32B",0,2,3),
@@ -94,6 +95,7 @@ class App():
         self.simulator.reset(
             alg_scheduling,
             quantum,
+            alpha,
             list_tasks
         )
 

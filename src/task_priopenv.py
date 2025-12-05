@@ -5,21 +5,17 @@ class Task():
         color_hex,
         start_time,
         duration,
-        priority,
-        state = None,
-        progress = 0,
-        turnaround_time = 0,
-        waiting_time = 0
+        priority
     ):
         self.id = id
         self.color_hex = color_hex
         self.start_time = start_time
         self.duration = duration
         self.priority = priority
-        self.state = state
-        self.progress = progress
-        self.turnaround_time = turnaround_time
-        self.waiting_time = waiting_time
+        self.state = None
+        self.progress = 0
+        self.turnaround_time = 0
+        self.waiting_time = 0
 
         self.dynamic_priority = self.priority
 
@@ -40,8 +36,8 @@ class Task():
         self.waiting_time += 1
         self.turnaround_time += 1
 
-    def update_ready_when_scheduling(self):
-        self.dynamic_priority += 1
+    def update_ready_when_scheduling(self, alpha):
+        self.dynamic_priority += alpha
 
     def execute(self):
         self.progress += 1

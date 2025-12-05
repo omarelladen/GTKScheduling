@@ -16,10 +16,10 @@ class Task():
         self.start_time = start_time
         self.duration = duration
         self.priority = priority
-        self.state = state
-        self.progress = progress
-        self.turnaround_time = turnaround_time
-        self.waiting_time = waiting_time
+        self.state = None
+        self.progress = 0
+        self.turnaround_time = 0
+        self.waiting_time = 0
 
     def terminate(self):
         self.state = "terminated"
@@ -37,8 +37,8 @@ class Task():
         self.waiting_time += 1
         self.turnaround_time += 1
 
-    def update_ready_when_scheduling(self):
-        pass
+    def update_ready_when_scheduling(self, alpha):
+        a = alpha
 
     def execute(self):
         self.progress += 1

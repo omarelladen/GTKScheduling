@@ -23,7 +23,6 @@ class SimulationConfig():
     def find_algorithms(self):
         list_scheduler = []
         list_monitor = []
-
         for filename in os.listdir(self.alg_dir_path):
             if os.path.isfile(os.path.join(self.alg_dir_path, filename)):
                 if filename.startswith("scheduler_") and filename.endswith(".py"):
@@ -44,7 +43,7 @@ class SimulationConfig():
             cls = getattr(module, class_name)
             return cls
         except (ModuleNotFoundError, AttributeError) as e:
-            print(f"Error importing class '{class_name}' from module '{module_name}': {e}")
+            print(f'Error importing class "{class_name}" from module "{module_name}": {e}')
             return None
 
     def import_scheduler(self, alg):
@@ -55,7 +54,7 @@ class SimulationConfig():
             cls = getattr(module, class_name)
             return cls
         except (ModuleNotFoundError, AttributeError) as e:
-            print(f"Error importing class '{class_name}' from module '{module_name}': {e}")
+            print(f'Error importing class "{class_name}" from module "{module_name}": {e}')
             return None
 
     def import_task(self, alg):
@@ -66,6 +65,7 @@ class SimulationConfig():
             cls = getattr(module, class_name)
             return cls
         except (ModuleNotFoundError, AttributeError) as e:
+            print("not found", module_name)
             return Task
 
     def get_params_from_file(self):
@@ -86,8 +86,8 @@ class SimulationConfig():
 
         # Check first line size
         parts = lines[0].strip().split(";")
-        parts = [p for p in parts if p != '']
-        if len(parts) != 2:
+        parts = [p for p in parts if p != ""]
+        if len(parts) != 3:
             return f"Wrong number of parameters in line {line_num}. Using default parameters", None, None, None
 
 
@@ -104,7 +104,14 @@ class SimulationConfig():
         if quantum.isdigit() and int(quantum) != 0:
             quantum = int(quantum)
         else:
-            return f'Invalid quantum in line {line_num}. Using default parameters', None, None, None
+            return f"Invalid quantum in line {line_num}. Using default parameters", None, None, None
+
+        # Alpha
+        alpha = lines[0].split(";")[2].strip()
+        if alpha.isdigit() and int(alpha) != 0:
+            alpha = int(alpha)
+        else:
+            return f"Invalid alpha in line {line_num}. Using default parameters", None, None, None
 
 
         line_num += 1
@@ -115,19 +122,19 @@ class SimulationConfig():
 
             # Check line size
             parts = line.strip().split(";")
-            parts = [p for p in parts if p != '']
+            parts = [p for p in parts if p != ""]
             if len(parts) < 5:
                 return f"Not enough task parameters in line {line_num}. Using default parameters", None, None, None
 
             # Task id
-            task_id = parts[0].strip()
+            task_id = parts[0].replace("t", "").strip()
             if task_id.isdigit() and int(task_id) != 0:
                 task_id = int(task_id)
             else:
                 return f"Invalid task id in line {line_num}. Using default parameters", None, None, None
 
             # Color code
-            task_color_hex = parts[1].strip().lstrip('#').lower()
+            task_color_hex = parts[1].strip().lstrip("#").lower()
             if not re.fullmatch(r"[0-9a-f]{6}", task_color_hex):
                 return f"Invalid task color code in line {line_num}. Using default parameters", None, None, None
 
@@ -164,4 +171,4 @@ class SimulationConfig():
 
             line_num += 1
 
-        return 0, alg_scheduling, quantum, list_tasks
+        return 0, alg_scheduling, quantum, alpha, list_tasks
