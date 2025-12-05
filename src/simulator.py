@@ -52,11 +52,6 @@ class Simulator():
         self.list_tasks_new = []
         self.list_tasks_previous = []
 
-    def update_ready_tasks(self):
-        list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
-        for task in list_tasks_ready:
-            task.update_ready()
-
     def tick(self):
         if not self.finished():
 
@@ -66,6 +61,7 @@ class Simulator():
             # Call scheduler if needed
             if interrupt:
                 self.scheduler.execute()
+                self.update_ready_tasks_when_scheduling()
 
             self.update_ready_tasks()
                 
@@ -78,6 +74,16 @@ class Simulator():
             self.app.window.refresh_info_label()
         else:
             self.app.window.set_play_icon_on_finish()
+
+    def update_ready_tasks(self):
+        list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
+        for task in list_tasks_ready:
+            task.update_ready()
+
+    def update_ready_tasks_when_scheduling(self):
+        list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
+        for task in list_tasks_ready:
+            task.update_ready_when_scheduling()
 
     def terminate_task(self, task):
         task.terminate()

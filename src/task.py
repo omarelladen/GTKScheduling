@@ -37,6 +37,9 @@ class Task():
         self.waiting_time += 1
         self.turnaround_time += 1
 
+    def update_ready_when_scheduling(self):
+        pass
+
     def execute(self):
         self.progress += 1
         self.turnaround_time += 1

@@ -17,10 +17,11 @@ class Monitor():
                 self.simulator.queue_tasks.put(task)
 
         # 2. Check if current task finished
-        if self.simulator.current_task and self.simulator.current_task.progress == self.simulator.current_task.duration:
+        if (self.simulator.current_task and
+            self.simulator.current_task.progress == self.simulator.current_task.duration
+        ):
             self.simulator.terminate_task(self.simulator.current_task)
             interrupt = True
-
         # 3. Check if quantum expired
         if self.simulator.used_quantum % self.simulator.quantum == 0:
             if self.simulator.current_task:

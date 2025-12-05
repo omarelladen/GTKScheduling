@@ -39,6 +39,8 @@ class Task():
     def update_ready(self):
         self.waiting_time += 1
         self.turnaround_time += 1
+
+    def update_ready_when_scheduling(self):
         self.dynamic_priority += 1
 
     def execute(self):

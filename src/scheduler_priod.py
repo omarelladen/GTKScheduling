@@ -7,14 +7,22 @@ class Scheduler():
 
     def execute(self):
         # Find the one with the maximum priority value
-        priority_task = max(self.simulator.list_tasks_previous, key=lambda t: t.dynamic_priority, default=None)
+        priority_task = max(
+            self.simulator.list_tasks_previous,
+            key=lambda t: (t.dynamic_priority, t.priority),
+            default=None
+        )
             
         # Find the highest priority new task
-        priority_task_new = max(self.simulator.list_tasks_new, key=lambda t: t.dynamic_priority, default=None)
+        priority_task_new = max(
+            self.simulator.list_tasks_new,
+            key=lambda t: (t.dynamic_priority, t.priority),
+            default=None
+        )
         
-        # Ne task has arrived with higher priority than the previous ones
+        # New task has arrived with higher priority than the previous ones
         if (priority_task_new and
-            (priority_task and priority_task_new.priority > priority_task.priority or
+            (priority_task and priority_task_new.dynamic_priority > priority_task.dynamic_priority or
             not priority_task)
         ):
             # Preempt the current task if it exists
@@ -24,5 +32,5 @@ class Scheduler():
             self.simulator.schedule_task(priority_task_new)
 
         # No new tasks, run the highest priority between the previous ones
-        elif priority_task and not self.simulator.current_task:
+        elif priority_task:
             self.simulator.schedule_task(priority_task)
