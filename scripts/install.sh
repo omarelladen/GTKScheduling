@@ -3,6 +3,7 @@
 # Include config variables
 . "$PWD"/config
 
+scripts/uninstall.sh
 
 expand_home()
 {
