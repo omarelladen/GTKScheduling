@@ -196,8 +196,6 @@ class SimulationConfig():
                     if not valid_event:
                         return f"Invalid task event in line {line_num}. Using default parameters", None, None, None, None
 
-                print("")
-
 
             class_task = self.import_task(alg_scheduling)
             task = class_task(

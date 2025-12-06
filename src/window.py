@@ -53,13 +53,17 @@ class Window(Gtk.Window):
         self.accel_group = Gtk.AccelGroup()
         self.add_accel_group(self.accel_group)
 
-        # Ctrl+Q to quit
+        # Ctrl+q
         key, mod = Gtk.accelerator_parse("<Control>q")
         self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_q)
 
-        # Ctrl+S to save image
+        # Ctrl+s
         key, mod = Gtk.accelerator_parse("<Control>s")
         self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_s)
+
+        # Ctrl+e
+        key, mod = Gtk.accelerator_parse("<Control>e")
+        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_e)
 
         # Vertical Box
         outerbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -233,6 +237,9 @@ class Window(Gtk.Window):
     def _on_ctrl_s(self, accel_group, window, key, modifier):
         self._open_save_dialog()
 
+    def _on_ctrl_e(self, accel_group, window, key, modifier):
+        self._open_edit_file()
+
     def _on_click_save(self, widget):
         self._open_save_dialog()
 
@@ -272,6 +279,9 @@ class Window(Gtk.Window):
             self._save_diagram_to_png(dialog.get_filename())
 
         dialog.destroy()
+
+    def _open_edit_file(self):
+        self.app.simulation_config.edit_file()
 
     def _add_file_filters(self, dialog):
         file_filter = Gtk.FileFilter()
@@ -361,7 +371,7 @@ class Window(Gtk.Window):
             self.open_error_dialog(result)
 
     def _on_click_edit(self, widget):
-        self.app.simulation_config.edit_file()
+        self._open_edit_file()
 
     def _on_click_outside_popover(self, widget, event):
         # Hides the task popover if a click occurs anywhere else on the window
@@ -501,7 +511,7 @@ class Window(Gtk.Window):
         for task in self.app.simulator.list_tasks:
             if (task != current_task and
                 task.start_time < self.app.simulator.time and
-                task.state == "ready"
+                (task.state == "ready" or task.state == "suspended")
             ):
                 self.list_task_rects.append(
                     TaskRectangle(

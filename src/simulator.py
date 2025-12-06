@@ -56,30 +56,56 @@ class Simulator():
     def tick(self):
         if not self.finished():
 
+            self.check_io_finish()
+
             # Monitor tasks
-            interrupt = self.monitor.execute()
+            self.interrupt = self.monitor.execute()
 
             # Call scheduler if needed
-            if interrupt:
-                self.scheduler.execute()
-                self.update_ready_tasks_when_scheduling()
+            if self.interrupt or self.io_interrupt:
+                self._schedule()
 
             self.update_ready_tasks()
-                
+            self.update_suspended_tasks()
+
+            # Execute scheduled task
             if self.current_task:
-                self.current_task.execute()
-                self.time += 1
-                self.used_quantum += 1
+                self.current_task.execute(self)
+
+            while self.io_interrupt:  # self.current_task and self.current_task.state == "suspended":
+                self.monitor.execute()
+                self._schedule()
+                if self.current_task:
+                    self.current_task.execute(self)
+
+
+            self.time += 1
+            
+            for task in self.list_tasks:
+                task.turnaround_time += 1
 
             self.app.window.draw_new_rect(self.current_task)
             self.app.window.refresh_info_label()
+
         else:
             self.app.window.set_play_icon_on_finish()
+
+    def _schedule(self):
+        print("schedule")
+        self.scheduler.execute()
+        self.update_ready_tasks_when_scheduling()
+        self.io_interrupt = False
+        self.interrupt = False
 
     def update_ready_tasks(self):
         list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
         for task in list_tasks_ready:
             task.update_ready()
+
+    def update_suspended_tasks(self):
+        list_tasks_suspended = [t for t in self.list_tasks if t.state == "suspended"]
+        for task in list_tasks_suspended:
+            task.update_suspended()
 
     def update_ready_tasks_when_scheduling(self):
         list_tasks_ready = [t for t in self.list_tasks if t.state == "ready"]
@@ -102,6 +128,26 @@ class Simulator():
     def schedule_task(self, task):
         self.current_task = task
         task.schedule()
-     
-    def suspend_task(self, task):
+
+    def io_req(self):
+        self.current_task.suspend()
+        self.used_quantum = 0
+        self.current_task = None
+        self.io_interrupt = True
+
+    def ml_req(self):
         pass
+
+    def mu_req(self):
+        pass
+
+    def check_io_finish(self):
+        self.io_interrupt = False
+        list_tasks_suspended = [t for t in self.list_tasks if t.state == "suspended"]
+        for task in list_tasks_suspended:
+            for event in task.list_ongoing_events.copy():  # copy - bc events can be removed inside the loop
+                if event[0] == "io" and event[2] == task.io_progress:
+                    print("io finish")
+                    task.unsuspend()
+                    task.list_ongoing_events.remove(event)
+                    self.io_interrupt = True

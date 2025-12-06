@@ -19,4 +19,5 @@ class Task(Task):
         self.dynamic_priority = self.priority
 
     def update_ready_when_scheduling(self, alpha):
+        # print(f"id:{self.id}, state:{self.state}, progress:{self.progress}, update_ready_when_scheduling")
         self.dynamic_priority += alpha
