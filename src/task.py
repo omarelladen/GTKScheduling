@@ -6,16 +6,14 @@ class Task():
         start_time,
         duration,
         priority,
-        state = None,
-        progress = 0,
-        turnaround_time = 0,
-        waiting_time = 0
+        list_events = []
     ):
         self.id = id
         self.color_hex = color_hex
         self.start_time = start_time
         self.duration = duration
         self.priority = priority
+        self.list_events = list_events
         self.state = None
         self.progress = 0
         self.turnaround_time = 0

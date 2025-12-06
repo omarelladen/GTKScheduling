@@ -7,18 +7,10 @@ class Task(Task):
         color_hex,
         start_time,
         duration,
-        priority
+        priority,
+        list_events = []
     ):
-        # Inherited:
-        self.id = id
-        self.color_hex = color_hex
-        self.start_time = start_time
-        self.duration = duration
-        self.priority = priority
-        self.state = None
-        self.progress = 0
-        self.turnaround_time = 0
-        self.waiting_time = 0
+        super().__init__(id, color_hex, start_time, duration, priority, list_events)
 
         self.dynamic_priority = self.priority
 

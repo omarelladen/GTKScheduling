@@ -159,13 +159,54 @@ class SimulationConfig():
                 return f"Invalid task priority in line {line_num}. Using default parameters", None, None, None, None
 
 
+            # Events
+            list_task_events = []
+            if len(parts) > 5:
+                for i in range(5, len(parts)):
+                    event = parts[i].lower().strip()
+
+                    valid_event = False
+
+                    # I/O
+                    re_match = re.match(r"io:(\d)+-(\d+)", event)
+                    if re_match:
+                        io_time     = int(re_match.group(1))
+                        io_duration = int(re_match.group(2))
+                        if io_duration == 0:
+                            return f"Invalid task event duration '0' in line {line_num}. Using default parameters", None, None, None, None
+                        list_task_events.append(("io", io_time, io_duration))
+                        valid_event = True
+
+                    # Mutex Lock
+                    re_match = re.match(r"ml(\d)+:(\d+)", event)
+                    if re_match:
+                        ml_id   = int(re_match.group(1))
+                        ml_time = int(re_match.group(2))
+                        list_task_events.append(("ml", ml_id, ml_time))
+                        valid_event = True
+
+                    # Mutex Unlock
+                    re_match = re.match(r"mu(\d)+:(\d+)", event)
+                    if re_match:
+                        mu_id   = int(re_match.group(1))
+                        mu_time = int(re_match.group(2))
+                        list_task_events.append(("mu", mu_id, mu_time))
+                        valid_event = True
+                    
+                    if not valid_event:
+                        return f"Invalid task event in line {line_num}. Using default parameters", None, None, None, None
+
+                print("")
+
+
             class_task = self.import_task(alg_scheduling)
             task = class_task(
                 task_id,
                 task_color_hex,
                 task_start_time,
                 task_duration,
-                task_priority
+                task_priority,
+                list_task_events
             )
             list_tasks.append(task)
 
