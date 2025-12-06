@@ -38,7 +38,7 @@ class Task():
         self.turnaround_time += 1
 
     def update_ready_when_scheduling(self, alpha):
-        a = alpha
+        pass
 
     def execute(self):
         self.progress += 1
