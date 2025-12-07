@@ -6,7 +6,6 @@ class Monitor():
         self.simulator = simulator
 
     def execute(self):
-        # Dynamic Priority (PRIOd)
 
         interrupt = False
 

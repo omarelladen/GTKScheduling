@@ -6,12 +6,13 @@ class Monitor():
         self.simulator = simulator
 
     def execute(self):
-        # Shortest Remaining Time First (SRTF)
 
         interrupt = False
 
         # 1. Check if the current task finished
-        if self.simulator.current_task and self.simulator.current_task.progress == self.simulator.current_task.duration:
+        if (self.simulator.current_task and
+            self.simulator.current_task.progress == self.simulator.current_task.duration
+        ):
             self.simulator.terminate_task(self.simulator.current_task)
             interrupt = True
                 

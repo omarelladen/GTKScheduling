@@ -6,7 +6,6 @@ class Monitor():
         self.simulator = simulator
 
     def execute(self):
-        # Round Robin (RR)
 
         interrupt = False
 
@@ -22,6 +21,7 @@ class Monitor():
         ):
             self.simulator.terminate_task(self.simulator.current_task)
             interrupt = True
+
         # 3. Check if quantum expired
         if self.simulator.used_quantum % self.simulator.quantum == 0:
             if self.simulator.current_task:
