@@ -19,7 +19,9 @@ class Mutex():
 
     def unlock(self, task):
         if task == self.owner:
-            self.owner = None
             if not self.queue_tasks.empty():
                 task_to_awake = self.queue_tasks.get()
+                self.owner = task_to_awake
                 self.simulator.unsuspend_task(task_to_awake)
+            else:
+                self.owner = None
