@@ -26,7 +26,6 @@ class Task():
 
     def preempt(self):
         self.state = "ready"
-        print("preempted", self.id)
 
     def suspend(self):
         self.state = "suspended"
@@ -42,11 +41,9 @@ class Task():
 
     def update_ready(self):
         self.waiting_time += 1
-        print("update_ready-waiting_time++")
 
     def update_suspended(self):
         self.waiting_time += 1
-        print("update_suspended-waiting_time++")
         self.io_progress += 1
 
     def update_ready_when_scheduling(self, alpha):
