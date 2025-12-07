@@ -25,14 +25,14 @@ class Scheduler():
         )
 
 
-        def is_tiebreak_random(task, max_task):
-            return (
-                task.dynamic_priority == max_task.dynamic_priority and
-                task.priority == max_task.priority and
-                len(task.state) == len(max_task.state) and
-                task.start_time == max_task.start_time and
-                task.duration == max_task.duration
-            )
+        # def is_tiebreak_random(task, max_task):
+        #     return (
+        #         task.dynamic_priority == max_task.dynamic_priority and
+        #         task.priority == max_task.priority and
+        #         len(task.state) == len(max_task.state) and
+        #         task.start_time == max_task.start_time and
+        #         task.duration == max_task.duration
+        #     )
         
 #         if priority_task:
 #             list_tasks_tied = [t for t in list_all_tasks if is_tiebreak_random(t, priority_task)]
