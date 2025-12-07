@@ -10,6 +10,7 @@ COPYRIGHT="Copyright © 2025 Omar El Laden, Gabriel Martines";
 PLAY_ICON="media-playback-start-symbolic";
 PAUSE_ICON="media-playback-pause-symbolic";
 NEXT_ICON="go-next-symbolic";
+BACK_ICON="go-next-symbolic-rtl";
 SKIP_ICON="media-skip-forward-symbolic";
 RESTART_ICON="view-refresh-symbolic";
 MENU_ICON="open-menu-symbolic";

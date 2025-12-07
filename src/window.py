@@ -16,6 +16,7 @@ class Window(Gtk.Window):
         play_icon = None,
         pause_icon = None,
         next_icon = None,
+        back_icon = None,
         skip_icon = None,
         restart_icon = None,
         menu_icon = None,
@@ -31,6 +32,7 @@ class Window(Gtk.Window):
         self.play_icon = play_icon
         self.pause_icon = pause_icon
         self.next_icon = next_icon
+        self.back_icon = back_icon
         self.skip_icon = skip_icon
         self.restart_icon = restart_icon
         self.menu_icon = menu_icon
@@ -39,6 +41,8 @@ class Window(Gtk.Window):
 
         # List of TaskRectangle objects for drawing
         self.list_task_rects = []
+
+        self.list_task_rects_back = []
 
         # Set the app icon from file
         if self.app_icon_path:
@@ -121,6 +125,15 @@ class Window(Gtk.Window):
         bt.connect("clicked", self._on_click_play_pause)
         headerbar.pack_start(bt)
         self.bt_play_pause = bt  # save a reference to toggle its icon
+
+        # Back Button
+        bt = Gtk.Button()
+        icon = Gio.ThemedIcon(name=self.back_icon)
+        img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        bt.set_tooltip_text("Back")
+        bt.add(img_icon)
+        bt.connect("clicked", self._on_click_back)
+        headerbar.pack_start(bt)
 
         # Next Button
         bt = Gtk.Button()
@@ -349,13 +362,37 @@ class Window(Gtk.Window):
         button.add(img_icon)
         button.show_all()
 
-    def _on_click_next(self, button):
-        self.app.simulator.tick()
+    def _on_click_back(self, button):
+        for rect in self.list_task_rects.copy():
+            if rect.task_record.time == self.app.simulator.time:
+                self.list_task_rects_back.append(rect)
+                self.list_task_rects.remove(rect)
+                self.drawingarea_diagram.queue_draw()
 
+        if self.app.simulator.time > 0:
+            self.app.simulator.time -= 1
+
+    def _on_click_next(self, button):
+        self.advance()
+
+    def advance(self):
+        if not self.list_task_rects_back:
+            self.app.simulator.tick()
+        else:
+            for rect in self.list_task_rects_back.copy():
+                if rect.task_record.time == self.app.simulator.time + 1:
+                    self.list_task_rects.append(rect)
+                    self.list_task_rects_back.remove(rect)
+                    self.drawingarea_diagram.queue_draw()
+            self.app.simulator.time += 1
+ 
     def _on_click_skip(self, button):
-        self.app.simulator.skip()
+        # self.app.simulator.skip()
+        while not self.app.simulator.finished():
+            self._on_click_next(None)
 
     def _on_click_restart(self, widget):
+        self.list_task_rects_back = []
         self._restart_rects()
         self.update_diagram_size()
         self.refresh_info_label()
@@ -476,7 +513,6 @@ class Window(Gtk.Window):
             f"<b>start time:</b> {rect.task_record.task.start_time}\n"
             f"<b>duration:</b> {rect.task_record.task.duration}\n"
             f"<b>priority:</b> {rect.task_record.task.priority}\n"
-            f"<b>dyn priority:</b> {rect.task_record.task.dynamic_priority}\n"
             f"<b>progress:</b> {rect.task_record.progress}\n"
             f"<b>state:</b> {rect.task_record.state}\n"
             f"<b>turnaround time:</b> {rect.task_record.turnaround_time}\n"

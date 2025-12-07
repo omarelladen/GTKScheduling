@@ -8,4 +8,5 @@ class Scheduler():
     def execute(self):
         # Get next task from the queue
         if not self.simulator.queue_tasks.empty():
-            self.simulator.schedule_task(self.simulator.queue_tasks.get())
+            next_task = self.simulator.queue_tasks.get()
+            self.simulator.schedule_task(next_task)

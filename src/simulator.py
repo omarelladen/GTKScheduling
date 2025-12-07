@@ -21,9 +21,9 @@ class Simulator():
         # Check if there are still tasks left to run
         return False if self.num_term_tasks < len(self.list_tasks) else True
 
-    def skip(self):
-        while not self.finished():
-            self.tick()
+    # def skip(self):
+    #     while not self.finished():
+    #         self.tick()
 
     def reset(self, alg_scheduling, quantum, alpha, list_tasks):
         self.alg_scheduling = alg_scheduling
@@ -57,7 +57,10 @@ class Simulator():
         self.list_mutexes = []
 
     def tick(self):
-        if not self.finished():
+        if self.app.window.list_task_rects_back:
+            self.app.window.advance()
+
+        elif not self.finished():
 
             self.check_io_finish()
 

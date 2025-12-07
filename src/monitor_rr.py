@@ -1,3 +1,4 @@
+import random
 
 class Monitor():
     def __init__(self,
@@ -9,11 +10,24 @@ class Monitor():
 
         interrupt = False
 
+        # Sort new tasks
+        list_tasks_ready = [
+            t for t in self.simulator.list_tasks
+            if not t.state and t.start_time <= self.simulator.time
+        ]
+
+        list_tasks_ready.sort(
+            key=lambda t: (
+                (-1)*t.duration,  # lower duration
+                random.random()   # random tiebreaker
+            ),
+            reverse=False
+        )
+
         # 1. Enqueue new tasks
-        for task in self.simulator.list_tasks:
-            if not task.state and task.start_time <= self.simulator.time:
-                self.simulator.load_task(task)
-                self.simulator.queue_tasks.put(task)
+        for task in list_tasks_ready:
+            self.simulator.load_task(task)
+            self.simulator.queue_tasks.put(task)
 
         # 2. Check if current task finished
         if (self.simulator.current_task and

@@ -43,6 +43,7 @@ class App():
             PLAY_ICON,
             PAUSE_ICON,
             NEXT_ICON,
+            BACK_ICON,
             SKIP_ICON,
             RESTART_ICON,
             MENU_ICON,
