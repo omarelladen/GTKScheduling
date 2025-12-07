@@ -6,14 +6,14 @@ class Task():
         start_time,
         duration,
         priority,
-        list_io = []
+        list_events = []
     ):
         self.id = id
         self.color_hex = color_hex
         self.start_time = start_time
         self.duration = duration
         self.priority = priority
-        self.list_io = list_io
+        self.list_events = list_events
         self.list_ongoing_io = []
         self.state = None
         self.progress = 0
@@ -44,7 +44,7 @@ class Task():
 
     def update_suspended(self):
         self.waiting_time += 1
-        if self.list_ongoing_io:
+        if self.list_ongoing_io:  #######
             self.io_progress += 1
 
     def update_ready_when_scheduling(self, alpha):
@@ -52,23 +52,30 @@ class Task():
 
     def execute(self, simulator):
         io_execution = False
-        for event in self.list_io.copy():  # copy - bc events can be removed inside the loop
+        for event in self.list_events.copy():  # copy bc events can be removed inside the loop
             if event[0] == "io" and self.progress == event[1]:
                 print("io", self.id, event[1], event[2])
                 io_execution = True
                 self.list_ongoing_io.append(event)
-                self.list_io.remove(event)
+                self.list_events.remove(event)
                 simulator.io_req()
-            elif event[0] == "ml" and self.progress == event[2]:
+                break
+            elif event[0] == "ml" and self.progress == event[2]:  #######
                 print("ml", event[1])
                 simulator.ml_req(event[1])
+                self.list_events.remove(event)
+                io_execution = True
+                break
             elif event[0] == "mu" and self.progress == event[2]:
                 print("mu", event[1])
                 simulator.mu_req(event[1])
+                self.list_events.remove(event)
+                io_execution = True
+                break
 
         if not io_execution:
-            self.progress += 1
+            self.progress += 1  #######
             simulator.used_quantum += 1
-        else:
+        elif self.list_ongoing_io:  #######
             self.io_progress += 1
 

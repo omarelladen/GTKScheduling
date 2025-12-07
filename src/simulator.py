@@ -95,8 +95,10 @@ class Simulator():
             self.app.window.set_play_icon_on_finish()
 
     def _schedule(self):
-        print("schedule")
         self.scheduler.execute()
+        print("scheduler call")
+        if self.current_task:
+            print("schedule", self.current_task.id)
         self.update_ready_tasks_when_scheduling()
         self.event_interrupt = False
         self.interrupt = False
@@ -148,25 +150,28 @@ class Simulator():
 
     def ml_req(self, mutex_id):
         if not any(mutex.id == mutex_id for mutex in self.list_mutexes):
-            print("Create Mutex")
+            print("Create Mutex", mutex_id)
             mutex = Mutex(mutex_id, self)
             self.list_mutexes.append(mutex)
 
         mutex = next((m for m in self.list_mutexes if m.id == mutex_id))
-
         mutex.lock(self.current_task)
+
+        self.event_interrupt = True  #######
 
     def mu_req(self, mutex_id):
         mutex = next((m for m in self.list_mutexes if m.id == mutex_id))
-
         mutex.unlock(self.current_task)
+
+        self.event_interrupt = True  #######
 
     def check_io_finish(self):
         self.event_interrupt = False
         list_tasks_suspended = [t for t in self.list_tasks if t.state == "suspended"]
         for task in list_tasks_suspended:
-            for event in task.list_ongoing_io.copy():  # copy - bc events can be removed inside the loop
+            for event in task.list_ongoing_io.copy():  # copy bc events can be removed inside the loop
                 if event[0] == "io" and event[2] == task.io_progress:
                     print("io finish")
                     self.unsuspend_task(task)
+                    task.io_progress = 0
                     task.list_ongoing_io.remove(event)

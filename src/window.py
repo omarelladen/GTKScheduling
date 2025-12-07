@@ -455,6 +455,7 @@ class Window(Gtk.Window):
             f"Terminated tasks: {self.app.simulator.num_term_tasks}",
             f"CLK period: {self.app.simulator.timer.interval_ms:.0f} ms",
             f"Quantum: {self.app.simulator.quantum}",
+            f"Used quantum: {self.app.simulator.used_quantum}",            
             f"Turnaround time: {round(sum(t.turnaround_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}",
             f"Average waiting time: {round(sum(t.waiting_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}",
             f"Time: {self.app.simulator.time}",
@@ -502,6 +503,7 @@ class Window(Gtk.Window):
             f"<big><b>Terminated tasks:</b> {self.app.simulator.num_term_tasks}</big>\n"
             f"<big><b>CLK period:</b> {self.app.simulator.timer.interval_ms:.0f} ms</big>\n"
             f"<big><b>Quantum:</b> {self.app.simulator.quantum}</big>\n"
+            f"<big><b>Used quantum:</b> {self.app.simulator.used_quantum}</big>\n"
             f"<big><b>Turnaround time:</b> {round(sum(t.turnaround_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}</big>\n"
             f"<big><b>Average waiting time:</b> {round(sum(t.waiting_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}</big>\n"
             f"<big><b>Time:</b> {self.app.simulator.time}</big>"
@@ -512,7 +514,7 @@ class Window(Gtk.Window):
         for task in self.app.simulator.list_tasks:
             if (task != current_task and
                 task.start_time < self.app.simulator.time and
-                (task.state == "ready" or task.state == "suspended")
+                task.state == "ready"
             ):
                 self.list_task_rects.append(
                     TaskRectangle(
@@ -520,10 +522,28 @@ class Window(Gtk.Window):
                         self.rect_y0 + self.lines_dist_y*(task.id-1),
                         self.rect_width,
                         self.rect_height,
-                        (0.5, 0.5, 0.5, 0.5),
+                        (0.4, 0.4, 0.4, 0.5),
                         TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.simulator.time)
                     )
                 )
+
+        # Create semi-transparent grey task rectangles
+        for task in self.app.simulator.list_tasks:
+            if (task != current_task and
+                task.start_time < self.app.simulator.time and
+                task.state == "suspended"
+            ):
+                self.list_task_rects.append(
+                    TaskRectangle(
+                        self.rect_offset_x - self.rect_width,
+                        self.rect_y0 + self.lines_dist_y*(task.id-1),
+                        self.rect_width,
+                        self.rect_height,
+                        (0.7, 0.7, 0.7, 0.5),
+                        TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.simulator.time)
+                    )
+                )
+
 
         # Create the colored rectangle for the currently executing task
         if current_task:
