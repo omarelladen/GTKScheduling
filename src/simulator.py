@@ -165,8 +165,8 @@ class Simulator():
         self.event_interrupt = False
         list_tasks_suspended = [t for t in self.list_tasks if t.state == "suspended"]
         for task in list_tasks_suspended:
-            for event in task.list_ongoing_events.copy():  # copy - bc events can be removed inside the loop
+            for event in task.list_ongoing_io.copy():  # copy - bc events can be removed inside the loop
                 if event[0] == "io" and event[2] == task.io_progress:
                     print("io finish")
                     self.unsuspend_task(task)
-                    task.list_ongoing_events.remove(event)
+                    task.list_ongoing_io.remove(event)

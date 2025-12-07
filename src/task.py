@@ -44,7 +44,8 @@ class Task():
 
     def update_suspended(self):
         self.waiting_time += 1
-        self.io_progress += 1
+        if self.list_ongoing_io:
+            self.io_progress += 1
 
     def update_ready_when_scheduling(self, alpha):
         pass
