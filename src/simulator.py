@@ -1,6 +1,7 @@
 import queue
 
 from .timer import Timer
+from .mutex import Mutex
 
 class Simulator():
     def __init__(self,
@@ -53,6 +54,8 @@ class Simulator():
         self.list_tasks_new = []
         self.list_tasks_previous = []
 
+        self.list_mutexes = []
+
     def tick(self):
         if not self.finished():
 
@@ -62,7 +65,7 @@ class Simulator():
             self.interrupt = self.monitor.execute()
 
             # Call scheduler if needed
-            if self.interrupt or self.io_interrupt:
+            if self.interrupt or self.event_interrupt:
                 self._schedule()
 
             self.update_ready_tasks()
@@ -72,7 +75,7 @@ class Simulator():
             if self.current_task:
                 self.current_task.execute(self)
 
-            while self.io_interrupt:  # self.current_task and self.current_task.state == "suspended":
+            while self.event_interrupt:
                 self.monitor.execute()
                 self._schedule()
                 if self.current_task:
@@ -80,9 +83,10 @@ class Simulator():
 
 
             self.time += 1
-            
+
             for task in self.list_tasks:
-                task.turnaround_time += 1
+                if task.state in ["ready", "suspended", "running"]:
+                    task.turnaround_time += 1
 
             self.app.window.draw_new_rect(self.current_task)
             self.app.window.refresh_info_label()
@@ -94,7 +98,7 @@ class Simulator():
         print("schedule")
         self.scheduler.execute()
         self.update_ready_tasks_when_scheduling()
-        self.io_interrupt = False
+        self.event_interrupt = False
         self.interrupt = False
 
     def update_ready_tasks(self):
@@ -130,24 +134,39 @@ class Simulator():
         task.schedule()
 
     def io_req(self):
+        self.suspend_task()
+        self.event_interrupt = True
+
+    def suspend_task(self):
         self.current_task.suspend()
         self.used_quantum = 0
         self.current_task = None
-        self.io_interrupt = True
 
-    def ml_req(self):
-        pass
+    def unsuspend_task(self, task):
+        task.unsuspend()
+        self.event_interrupt = True
 
-    def mu_req(self):
-        pass
+    def ml_req(self, mutex_id):
+        if not any(mutex.id == mutex_id for mutex in self.list_mutexes):
+            print("Create Mutex")
+            mutex = Mutex(mutex_id, self)
+            self.list_mutexes.append(mutex)
+
+        mutex = next((m for m in self.list_mutexes if m.id == mutex_id))
+
+        mutex.lock(self.current_task)
+
+    def mu_req(self, mutex_id):
+        mutex = next((m for m in self.list_mutexes if m.id == mutex_id))
+
+        mutex.unlock(self.current_task)
 
     def check_io_finish(self):
-        self.io_interrupt = False
+        self.event_interrupt = False
         list_tasks_suspended = [t for t in self.list_tasks if t.state == "suspended"]
         for task in list_tasks_suspended:
             for event in task.list_ongoing_events.copy():  # copy - bc events can be removed inside the loop
                 if event[0] == "io" and event[2] == task.io_progress:
                     print("io finish")
-                    task.unsuspend()
+                    self.unsuspend_task(task)
                     task.list_ongoing_events.remove(event)
-                    self.io_interrupt = True

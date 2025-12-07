@@ -33,8 +33,6 @@ class Monitor():
 
         # 4. Check if quantum expired
         if self.simulator.used_quantum % self.simulator.quantum == 0:
-            if self.simulator.current_task:
-                self.simulator.preempt_task(self.simulator.current_task)
             interrupt = True
 
         return interrupt

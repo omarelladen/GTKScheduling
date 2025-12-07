@@ -42,7 +42,7 @@ class Scheduler():
 #                 print("Random")
 #             else:
 #                 print("No random")
-        
+
 
         if priority_task:  # there is a task in the system
             if self.simulator.current_task and priority_task != self.simulator.current_task:

@@ -8,9 +8,9 @@ class Task(Task):
         start_time,
         duration,
         priority,
-        list_events = []
+        list_io = []
     ):
-        super().__init__(id, color_hex, start_time, duration, priority, list_events)
+        super().__init__(id, color_hex, start_time, duration, priority, list_io)
 
         self.dynamic_priority = self.priority
 
