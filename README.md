@@ -15,17 +15,12 @@ This GTK 3 based app uses [PyGObject](https://pygobject.gnome.org/), which is a 
 
 The dependencies usually come pre-installed on popular Linux distributions, however some do not come with the package 'python3-gi-cairo' installed by default.
 
-To install it on Debian-based distributions:
-```sh
-sudo apt install python3-gi-cairo
-```
-
 If you wish to configure on other operating systems, including Windows, follow the instructions on the [PyGObject website](https://pygobject.gnome.org/getting_started.html), making sure to replace 'GTK4' with 'GTK3' when instaling packages.
 
 ## Configure scheduling parameters
 The scheduling parameters can be changed by editing the data/tasks.
 
-## Install app
+## Install the app on Linux
 ```sh
 cd GTKScheduling
 sudo scripts/install.sh
