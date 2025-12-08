@@ -340,9 +340,11 @@ class Window(Gtk.Window):
         self.drawingarea_diagram.queue_draw()  # redraw to update info text
 
     def _on_click_play_pause(self, button):
-        bt_child = button.get_child()
-        if bt_child:
-            button.remove(bt_child)
+
+        if button: 
+            bt_child = button.get_child()
+            if bt_child:
+                button.remove(bt_child)
 
         # Toggle the timer and determine the new icon
         if self.app.simulator.timer.is_running:
@@ -388,7 +390,7 @@ class Window(Gtk.Window):
  
     def _on_click_skip(self, button):
         # self.app.simulator.skip()
-        while not self.app.simulator.finished():
+        while not self.app.simulator.finished() and not self.app.simulator.deadlock:
             self._on_click_next(None)
 
     def _on_click_restart(self, widget):
@@ -513,6 +515,7 @@ class Window(Gtk.Window):
             f"<b>start time:</b> {rect.task_record.task.start_time}\n"
             f"<b>duration:</b> {rect.task_record.task.duration}\n"
             f"<b>priority:</b> {rect.task_record.task.priority}\n"
+            # f"<b>dyn priority:</b> {rect.task_record.task.dynamic_priority}\n"
             f"<b>progress:</b> {rect.task_record.progress}\n"
             f"<b>state:</b> {rect.task_record.state}\n"
             f"<b>turnaround time:</b> {rect.task_record.turnaround_time}\n"

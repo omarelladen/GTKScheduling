@@ -21,10 +21,6 @@ class Simulator():
         # Check if there are still tasks left to run
         return False if self.num_term_tasks < len(self.list_tasks) else True
 
-    # def skip(self):
-    #     while not self.finished():
-    #         self.tick()
-
     def reset(self, alg_scheduling, quantum, alpha, list_tasks):
         self.alg_scheduling = alg_scheduling
         self.quantum = quantum
@@ -55,6 +51,8 @@ class Simulator():
         self.list_tasks_previous = []
 
         self.list_mutexes = []
+
+        self.deadlock = False
 
     def tick(self):
         if self.app.window.list_task_rects_back:
@@ -94,6 +92,13 @@ class Simulator():
             self.app.window.draw_new_rect(self.current_task)
             self.app.window.refresh_info_label()
 
+            if self.detect_deadlock():
+                print("deadlock")
+                self.deadlock = True
+                self.app.window.open_error_dialog("deadlock")
+                self.app.simulator.timer.stop()
+                self.app.window.set_play_icon_on_finish()
+            
         else:
             self.app.window.set_play_icon_on_finish()
 
@@ -160,13 +165,25 @@ class Simulator():
         mutex = next((m for m in self.list_mutexes if m.id == mutex_id))
         mutex.lock(self.current_task)
 
-        self.event_interrupt = True  #######
+        self.event_interrupt = True
+
+    def detect_deadlock(self):
+        for mutex_1 in self.list_mutexes:
+            owner_1 = mutex_1.owner
+            if owner_1:
+                for mutex_2 in self.list_mutexes:
+                    if mutex_2 != mutex_1:
+                        owner_2 = mutex_2.owner
+                        if owner_2:
+                            if owner_1 in mutex_2.queue_tasks.queue and owner_2 in mutex_1.queue_tasks.queue:
+                                return True
+        return False
 
     def mu_req(self, mutex_id):
         mutex = next((m for m in self.list_mutexes if m.id == mutex_id))
         mutex.unlock(self.current_task)
 
-        self.event_interrupt = True  #######
+        self.event_interrupt = True
 
     def check_io_finish(self):
         self.event_interrupt = False
