@@ -11,7 +11,7 @@ class Mutex():
         self.queue_tasks = queue.Queue()
 
     def lock(self, task):
-        if self.owner:  # and self.owner != task:
+        if self.owner:
             self.queue_tasks.put(task)
             self.simulator.suspend_task()
         else:

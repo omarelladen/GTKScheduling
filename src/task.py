@@ -44,7 +44,7 @@ class Task():
 
     def update_suspended(self):
         self.waiting_time += 1
-        if self.list_ongoing_io:  #######
+        if self.list_ongoing_io:
             self.io_progress += 1
 
     def update_ready_when_scheduling(self, alpha):
@@ -60,7 +60,7 @@ class Task():
                 self.list_events.remove(event)
                 simulator.io_req()
                 break
-            elif event[0] == "ml" and self.progress == event[2]:  #######
+            elif event[0] == "ml" and self.progress == event[2]:
                 print("ml", event[1])
                 simulator.ml_req(event[1])
                 self.list_events.remove(event)
@@ -74,8 +74,8 @@ class Task():
                 break
 
         if not io_execution:
-            self.progress += 1  #######
+            self.progress += 1
             simulator.used_quantum += 1
-        elif self.list_ongoing_io:  #######
+        elif self.list_ongoing_io:
             self.io_progress += 1
 

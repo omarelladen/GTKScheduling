@@ -24,26 +24,6 @@ class Scheduler():
             default=None
         )
 
-
-        # def is_tiebreak_random(task, max_task):
-        #     return (
-        #         task.dynamic_priority == max_task.dynamic_priority and
-        #         task.priority == max_task.priority and
-        #         len(task.state) == len(max_task.state) and
-        #         task.start_time == max_task.start_time and
-        #         task.duration == max_task.duration
-        #     )
-        
-#         if priority_task:
-#             list_tasks_tied = [t for t in list_all_tasks if is_tiebreak_random(t, priority_task)]
-#             print(list_tasks_tied)
-# 
-#             if len(list_all_tasks) > 1:
-#                 print("Random")
-#             else:
-#                 print("No random")
-
-
         if priority_task:  # there is a task in the system
             if self.simulator.current_task and priority_task != self.simulator.current_task:
                 self.simulator.preempt_task(self.simulator.current_task)

@@ -515,12 +515,11 @@ class Window(Gtk.Window):
             f"<b>start time:</b> {rect.task_record.task.start_time}\n"
             f"<b>duration:</b> {rect.task_record.task.duration}\n"
             f"<b>priority:</b> {rect.task_record.task.priority}\n"
-            # f"<b>dyn priority:</b> {rect.task_record.task.dynamic_priority}\n"
             f"<b>progress:</b> {rect.task_record.progress}\n"
             f"<b>state:</b> {rect.task_record.state}\n"
             f"<b>turnaround time:</b> {rect.task_record.turnaround_time}\n"
             f"<b>waiting time:</b> {rect.task_record.waiting_time}\n"
-            f"<b>time:</b> {rect.task_record.time}"
+            f"<b>time:</b> {rect.task_record.time}\n"
         )
         
         # Store click coordinates to help hiding the popover
