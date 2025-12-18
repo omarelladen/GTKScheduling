@@ -53,15 +53,17 @@ class Window(Gtk.Window):
         popover_menu = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
+        padding_menu = 2
+
         # Keyboard Shortcurts Button
         bt = Gtk.ModelButton(label="Keyboard Shortcuts")
         bt.connect("clicked", self._on_click_shortcuts)
-        vbox.pack_start(bt, False, True, 10)
+        vbox.pack_start(bt, False, True, padding_menu)
 
         # About Button
         bt = Gtk.ModelButton(label=f"About {self.app.name}")
         bt.connect("clicked", self._on_click_about)
-        vbox.pack_start(bt, False, True, 10)
+        vbox.pack_start(bt, False, True, padding_menu)
 
         vbox.show_all()
         popover_menu.add(vbox)
