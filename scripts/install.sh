@@ -21,14 +21,13 @@ TASKS_DIR=$(expand_home "$TASKS_DIR")
 TASKS_FILE=$(expand_home "$TASKS_FILE")
 
 
-mkdir -pv "$BIN_DIR" "$DATA_DIR" "$ICONS_DIR" "$PYTHON_PKG_DIR" "$DESKTOP_DIR" "$TASKS_DIR"
+mkdir -pv "$BIN_DIR" "$DATA_DIR" "$ICONS_DIR" "$PYTHON_PKG_DIR" "$DESKTOP_DIR"
+sudo -u "$SUDO_USER" mkdir -pv "$TASKS_DIR"
 
 cp -v "$ORIG_SRC_DIR"/* "$PYTHON_PKG_DIR"
 cp -v "$ORIG_ICONS_DIR"/* "$ICONS_DIR"
 cp -v config "$DATA_DIR"
-cp -v "$ORIG_TASKS_FILE" "$TASKS_FILE"
-
-chown -R "$SUDO_USER":"$SUDO_USER" "$TASKS_DIR"
+sudo -u "$SUDO_USER" cp -v "$ORIG_TASKS_FILE" "$TASKS_FILE"
 
 echo "# This directory is a Python package." > "$PYTHON_PKG_DIR"/__init__.py
 
