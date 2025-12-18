@@ -15,8 +15,7 @@ exec(open("/usr/local/share/gtkscheduling/config").read())
 
 class App():
     def __init__(self):
-
-        self.args = sys.argv[1:]  # excluding the name of the script
+        self.args = sys.argv[1:]
 
         # Metadata
         self.name = APP_NAME
@@ -39,16 +38,7 @@ class App():
     
         self.window = Window(
             self,
-            APP_ICON_FILE,
-            PLAY_ICON,
-            PAUSE_ICON,
-            NEXT_ICON,
-            BACK_ICON,
-            SKIP_ICON,
-            RESTART_ICON,
-            MENU_ICON,
-            SAVE_ICON,
-            EDIT_ICON
+            APP_ICON_FILE
         )
         self.window.connect("destroy", self._on_destroy)
         self.window.show_all()

@@ -3,7 +3,6 @@ import csv
 import cairo
 import gi
 
-gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gio, Gdk, GdkPixbuf
 
 from .task_rectangle import TaskRectangle
@@ -12,37 +11,17 @@ from .task_record import TaskRecord
 class Window(Gtk.Window):
     def __init__(self,
         app,
-        app_icon_path = None,
-        play_icon = None,
-        pause_icon = None,
-        next_icon = None,
-        back_icon = None,
-        skip_icon = None,
-        restart_icon = None,
-        menu_icon = None,
-        save_icon = None,
-        edit_icon = None,
+        app_icon_path = None
     ):
         super().__init__()
 
         self.app = app
         self.app_icon_path = app_icon_path
 
-        # Icon names
-        self.play_icon = play_icon
-        self.pause_icon = pause_icon
-        self.next_icon = next_icon
-        self.back_icon = back_icon
-        self.skip_icon = skip_icon
-        self.restart_icon = restart_icon
-        self.menu_icon = menu_icon
-        self.save_icon = save_icon
-        self.edit_icon = edit_icon
-
         # List of TaskRectangle objects for drawing
         self.list_task_rects = []
-
         self.list_task_rects_back = []
+
 
         # Set the app icon from file
         if self.app_icon_path:
@@ -53,35 +32,41 @@ class Window(Gtk.Window):
                 self.pixbuf = None
                 print(f'Failed to load icon from "{self.app_icon_path}": {e}')
 
+
         # Keyboard Shortcuts (Accelerators)
-        self.accel_group = Gtk.AccelGroup()
-        self.add_accel_group(self.accel_group)
+        accel_group = Gtk.AccelGroup()
+        self.add_accel_group(accel_group)
 
-        # Ctrl+q
-        key, mod = Gtk.accelerator_parse("<Control>q")
-        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_q)
+        self.list_shortcuts = []
 
-        # Ctrl+s
-        key, mod = Gtk.accelerator_parse("<Control>s")
-        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_s)
+        self._add_shortcut(accel_group, "Quit",            "<control>Q", self._on_ctrl_q)
+        self._add_shortcut(accel_group, "Save Diagram",    "<control>S", self._on_ctrl_s)
+        self._add_shortcut(accel_group, "Edit Parameters", "<control>E", self._on_ctrl_e)
 
-        # Ctrl+e
-        key, mod = Gtk.accelerator_parse("<Control>e")
-        self.accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, self._on_ctrl_e)
 
         # Vertical Box
         outerbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.add(outerbox)
 
+
         # Popover for Main Menu
         popover_menu = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+
+        # Keyboard Shortcurts Button
+        bt = Gtk.ModelButton(label="Keyboard Shortcuts")
+        bt.connect("clicked", self._on_click_shortcuts)
+        vbox.pack_start(bt, False, True, 10)
+
+        # About Button
         bt = Gtk.ModelButton(label=f"About {self.app.name}")
         bt.connect("clicked", self._on_click_about)
         vbox.pack_start(bt, False, True, 10)
+
         vbox.show_all()
         popover_menu.add(vbox)
         popover_menu.set_position(Gtk.PositionType.BOTTOM)
+
 
         # Header Bar
         headerbar = Gtk.HeaderBar()
@@ -89,76 +74,80 @@ class Window(Gtk.Window):
         headerbar.props.title = self.app.name
         self.set_titlebar(headerbar)
 
+
         # Menu Button
         bt = Gtk.MenuButton(popover=popover_menu)
-        icon = Gio.ThemedIcon(name=self.menu_icon)
+        icon = Gio.ThemedIcon(name="open-menu-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Main Menu")
         bt.add(img_icon)
+        bt.set_tooltip_text("Main Menu")
         headerbar.pack_end(bt)
 
         # Save Button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name=self.save_icon)
+        icon = Gio.ThemedIcon(name="document-save-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Save Diagram")
         bt.add(img_icon)
+        bt.set_tooltip_text("Save Diagram")
         bt.connect("clicked", self._on_click_save)
         headerbar.pack_end(bt)
 
-        # Edit button
+        # Edit Button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name=self.edit_icon)
+        icon = Gio.ThemedIcon(name="document-edit-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Edit Parameters")
         bt.add(img_icon)
+        bt.set_tooltip_text("Edit Parameters")
         bt.connect("clicked", self._on_click_edit)
         headerbar.pack_end(bt)
 
         # Play/Pause Button
+        self.play_icon  = "media-playback-start-symbolic"
+        self.pause_icon = "media-playback-pause-symbolic"
+
         bt = Gtk.Button()
-        icon_name = self.play_icon  # set initial icon based on timer state
-        icon = Gio.ThemedIcon(name=icon_name)
+        icon = Gio.ThemedIcon(name=self.play_icon)
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Play/Pause")
         bt.add(img_icon)
+        bt.set_tooltip_text("Play/Pause")
         bt.connect("clicked", self._on_click_play_pause)
         headerbar.pack_start(bt)
-        self.bt_play_pause = bt  # save a reference to toggle its icon
+
+        self.bt_play_pause = bt  # keep a reference to toggle its icon
 
         # Back Button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name=self.back_icon)
+        icon = Gio.ThemedIcon(name="go-next-symbolic-rtl")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Back")
         bt.add(img_icon)
+        bt.set_tooltip_text("Back")
         bt.connect("clicked", self._on_click_back)
         headerbar.pack_start(bt)
 
         # Next Button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name=self.next_icon)
+        icon = Gio.ThemedIcon(name="go-next-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Next")
         bt.add(img_icon)
+        bt.set_tooltip_text("Next")
         bt.connect("clicked", self._on_click_next)
         headerbar.pack_start(bt)
 
-        # Skip button
+        # Skip Button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name=self.skip_icon)
+        icon = Gio.ThemedIcon(name="media-skip-forward-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Skip")
         bt.add(img_icon)
+        bt.set_tooltip_text("Skip")
         bt.connect("clicked", self._on_click_skip)
         headerbar.pack_start(bt)
 
-        # Restart button
+        # Restart Button
         bt = Gtk.Button()
-        icon = Gio.ThemedIcon(name=self.restart_icon)
+        icon = Gio.ThemedIcon(name="view-refresh-symbolic")
         img_icon = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
-        bt.set_tooltip_text("Restart")
         bt.add(img_icon)
+        bt.set_tooltip_text("Restart")
         bt.connect("clicked", self._on_click_restart)
         headerbar.pack_start(bt)
 
@@ -167,12 +156,14 @@ class Window(Gtk.Window):
         slider.set_draw_value(False)
         slider.set_size_request(120, -1)
         slider.set_value(self.app.simulator.timer.interval_ms)
-        slider.connect("value-changed", self._on_slider_value_changed)
         slider.set_tooltip_text("Change Speed")
+        slider.connect("value-changed", self._on_slider_value_changed)
         headerbar.pack_start(slider)
 
-        # Stack - holds multiple "pages" (widgets) and shows one at a time
+
+        # Stack - holds multiple tabs and shows one at a time
         stack = Gtk.Stack()
+
 
         # Diagram Drawing Parameters
         self.rect_width = 25                 # width of a rectangle
@@ -194,6 +185,7 @@ class Window(Gtk.Window):
         self.set_resizable(True)
         self.set_border_width(6)
 
+
         # Diagram Tab (Stack Page 1)
         self.drawingarea_diagram = Gtk.DrawingArea()
         self.drawingarea_diagram.connect("draw", self._draw_axes)
@@ -204,17 +196,20 @@ class Window(Gtk.Window):
 
         self.update_diagram_size()  # set initial size of the drawing area
 
+
         # ScrolledWindow to allow scrolling the diagram
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.add(self.drawingarea_diagram)
         stack.add_titled(scrolled_window, "diagram", "Diagram")
+
 
         # Info Tab (Stack Page 2)
         self.label_info = Gtk.Label()
         self.refresh_info_label()  # set the label with initial data
         stack.add_titled(self.label_info, "info", "Info")
 
-        # Task Popover when clicking on  a task rectangle
+
+        # Task Popover when clicking on a task rectangle
         self.popover_task = Gtk.Popover()
         self.label_task = Gtk.Label()
         self.popover_task.add(self.label_task)
@@ -227,14 +222,15 @@ class Window(Gtk.Window):
         # Connect a click event to the whole window to detect clicks outside the popover
         self.connect("button-press-event", self._on_click_outside_popover)
 
+
         # Stack Switcher - creates the tab buttons to switch the stack
         stackswitcher = Gtk.StackSwitcher()
         stackswitcher.set_stack(stack)
         stackswitcher.set_halign(Gtk.Align.CENTER)  # center the buttons
 
-        # Add the stack switcher and the stack itself to the main window box
         outerbox.pack_start(stackswitcher, False, True, 0)
         outerbox.pack_start(stack, True, True, 0)
+
 
     def hex_to_rgba(self, hex_color, alpha=1.0):
         
@@ -243,6 +239,12 @@ class Window(Gtk.Window):
         b = int(hex_color[4:6], 16) / 255.0
         
         return (r, g, b, alpha)
+
+    def _add_shortcut(self, accel_group, action, accelerator, callback):
+        key, mod = Gtk.accelerator_parse(accelerator)
+        accel_group.connect(key, mod, Gtk.AccelFlags.VISIBLE, callback)
+
+        self.list_shortcuts.append((action, key, mod))
 
     def _on_ctrl_q(self, accel_group, window, key, modifier):
         self.app.quit()
@@ -273,6 +275,7 @@ class Window(Gtk.Window):
         dialog = Gtk.FileChooserDialog(
             title="Save Diagram",
             parent=self,
+            transient_for=self,
             action=Gtk.FileChooserAction.SAVE
         )
         dialog.set_do_overwrite_confirmation(True)
@@ -431,6 +434,27 @@ class Window(Gtk.Window):
                     rect.y <= event.y <= rect.y + rect.height):
                     self._show_task_popover(rect, widget, event)
                     break  # stop after finding the first match
+
+    def _on_click_shortcuts(self, button):
+        dialog = Gtk.Dialog("Shortcuts", self, Gtk.DialogFlags.MODAL)
+
+        dialog.set_default_size(300, 70)
+        dialog.set_resizable(False)
+
+        content_area = dialog.get_content_area()
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        
+        for action, key, mod in self.list_shortcuts:
+            accel_label = Gtk.AccelLabel(label=action)
+            accel_label.set_accel(key, mod)
+
+            vbox.pack_start(accel_label, False, True, 0)
+        
+        content_area.add(vbox)
+        dialog.show_all()
+
+        dialog.run()
+        dialog.destroy()
 
     def _on_click_about(self, widget):
         about = Gtk.AboutDialog(transient_for=self, modal=True)

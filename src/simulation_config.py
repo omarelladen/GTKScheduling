@@ -168,7 +168,7 @@ class SimulationConfig():
                     valid_event = False
 
                     # I/O
-                    re_match = re.match(r"io:(\d)+-(\d+)", event)
+                    re_match = re.match(r"io:(\d+)-(\d+)", event)
                     if re_match:
                         io_time     = int(re_match.group(1))
                         io_duration = int(re_match.group(2))
@@ -178,7 +178,7 @@ class SimulationConfig():
                         valid_event = True
 
                     # Mutex Lock
-                    re_match = re.match(r"ml(\d)+:(\d+)", event)
+                    re_match = re.match(r"ml(\d+):(\d+)", event)
                     if re_match:
                         ml_id   = int(re_match.group(1))
                         ml_time = int(re_match.group(2))
@@ -186,7 +186,7 @@ class SimulationConfig():
                         valid_event = True
 
                     # Mutex Unlock
-                    re_match = re.match(r"mu(\d)+:(\d+)", event)
+                    re_match = re.match(r"mu(\d+):(\d+)", event)
                     if re_match:
                         mu_id   = int(re_match.group(1))
                         mu_time = int(re_match.group(2))

@@ -7,21 +7,12 @@ WEBSITE_LABEL="Repository";
 AUTHORS="Omar El Laden,Gabriel Martines";
 COPYRIGHT="Copyright © 2025 Omar El Laden, Gabriel Martines";
 
-PLAY_ICON="media-playback-start-symbolic";
-PAUSE_ICON="media-playback-pause-symbolic";
-NEXT_ICON="go-next-symbolic";
-BACK_ICON="go-next-symbolic-rtl";
-SKIP_ICON="media-skip-forward-symbolic";
-RESTART_ICON="view-refresh-symbolic";
-MENU_ICON="open-menu-symbolic";
-SAVE_ICON="document-save-symbolic";
-EDIT_ICON="document-edit-symbolic";
-
 ORIG_SRC_DIR="src";
 ORIG_ICONS_DIR="data/icons";
 ORIG_TASKS_FILE="data/tasks";
 
 APP_ICON_FILE="/usr/local/share/gtkscheduling/icons/icon.png";
+
 TASKS_DIR="~/.local/share/gtkscheduling";
 TASKS_FILE="~/.local/share/gtkscheduling/tasks";
 
