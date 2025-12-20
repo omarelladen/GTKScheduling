@@ -15,7 +15,7 @@ This GTK 3 based app uses [PyGObject](https://pygobject.gnome.org/), which is a 
 
 The dependencies usually come pre-installed on popular Linux distributions, however some do not come with the package python3-gi-cairo installed by default.
 
-If you wish to configure on other operating systems, including Windows, follow the instructions on the [PyGObject website](https://pygobject.gnome.org/getting_started.html), making sure to replace the GTK 4 packages with the correspondent GTK 3 ones on installation.
+If you wish to configure on other operating systems, including Windows, follow the instructions on the [PyGObject website](https://pygobject.gnome.org/getting_started.html), making sure to replace the GTK 4 packages with the corresponding GTK 3 ones on installation.
 
 ## Configure scheduling parameters
 The scheduling parameters can be changed by editing the data/tasks.
