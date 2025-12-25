@@ -25,7 +25,7 @@ The scheduling parameters can be changed by editing the data/tasks.
 cd GTKScheduling
 sudo scripts/install.sh
 ```
-After the installation you can open the app with the apps menu of your desktop environment or run:
+After installing, you can launch the app from the application menu of your desktop environment or run:
 ```sh
 gtkscheduling
 ```
