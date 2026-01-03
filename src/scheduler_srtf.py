@@ -9,7 +9,7 @@ class Scheduler():
     def execute(self):
 
         list_all_tasks = self.simulator.list_tasks_previous + self.simulator.list_tasks_new
-        
+
         # Find the one with the maximum priority
         priority_task = max(
             list_all_tasks,

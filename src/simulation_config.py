@@ -91,7 +91,7 @@ class SimulationConfig():
 
 
         # Extract parameters from file
-        
+
         # Algorithm
         alg_scheduling = lines[0].split(";")[0].lower().strip()
         list_alg = self.find_algorithms()
@@ -192,7 +192,7 @@ class SimulationConfig():
                         mu_time = int(re_match.group(2))
                         list_task_events.append(("mu", mu_id, mu_time))
                         valid_event = True
-                    
+
                     if not valid_event:
                         return f"Invalid task event in line {line_num}. Using default parameters", None, None, None, None
 

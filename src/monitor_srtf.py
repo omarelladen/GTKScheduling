@@ -15,7 +15,7 @@ class Monitor():
         ):
             self.simulator.terminate_task(self.simulator.current_task)
             interrupt = True
-                
+
         # 2. Get all tasks that are waiting or currently running
         self.simulator.list_tasks_previous = [
             t for t in self.simulator.list_tasks

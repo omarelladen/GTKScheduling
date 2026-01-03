@@ -98,7 +98,7 @@ class Simulator():
                 self.app.window.open_error_dialog("deadlock")
                 self.app.simulator.timer.stop()
                 self.app.window.set_play_icon_on_finish()
-            
+
         else:
             self.app.window.set_play_icon_on_finish()
 

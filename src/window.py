@@ -235,11 +235,11 @@ class Window(Gtk.Window):
 
 
     def hex_to_rgba(self, hex_color, alpha=1.0):
-        
+
         r = int(hex_color[0:2], 16) / 255.0
         g = int(hex_color[2:4], 16) / 255.0
         b = int(hex_color[4:6], 16) / 255.0
-        
+
         return (r, g, b, alpha)
 
     def _add_shortcut(self, accel_group, action, accelerator, callback):
@@ -346,7 +346,7 @@ class Window(Gtk.Window):
 
     def _on_click_play_pause(self, button):
 
-        if button: 
+        if button:
             bt_child = button.get_child()
             if bt_child:
                 button.remove(bt_child)
@@ -392,7 +392,7 @@ class Window(Gtk.Window):
                     self.list_task_rects_back.remove(rect)
                     self.drawingarea_diagram.queue_draw()
             self.app.simulator.time += 1
- 
+
     def _on_click_skip(self, button):
         # self.app.simulator.skip()
         while not self.app.simulator.finished() and not self.app.simulator.deadlock:
@@ -445,13 +445,13 @@ class Window(Gtk.Window):
 
         content_area = dialog.get_content_area()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        
+
         for action, key, mod in self.list_shortcuts:
             accel_label = Gtk.AccelLabel(label=action)
             accel_label.set_accel(key, mod)
 
             vbox.pack_start(accel_label, False, True, 0)
-        
+
         content_area.add(vbox)
         dialog.show_all()
 
@@ -477,7 +477,7 @@ class Window(Gtk.Window):
 
     def _draw_axes(self, widget, cr: cairo.Context):
         # Draws the x and y axis
-        
+
         cr.set_source_rgb(0.7, 0.7, 0.7)
         cr.set_font_size(10)
 
@@ -520,7 +520,7 @@ class Window(Gtk.Window):
             f"Terminated tasks: {self.app.simulator.num_term_tasks}",
             f"CLK period: {self.app.simulator.timer.interval_ms:.0f} ms",
             f"Quantum: {self.app.simulator.quantum}",
-            f"Used quantum: {self.app.simulator.used_quantum}",            
+            f"Used quantum: {self.app.simulator.used_quantum}",
             f"Turnaround time: {round(sum(t.turnaround_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}",
             f"Average waiting time: {round(sum(t.waiting_time for t in self.app.simulator.list_tasks) / len(self.app.simulator.list_tasks), 2) if len(self.app.simulator.list_tasks) != 0 else 0}",
             f"Time: {self.app.simulator.time}",
@@ -547,12 +547,12 @@ class Window(Gtk.Window):
             f"<b>waiting time:</b> {rect.task_record.waiting_time}\n"
             f"<b>time:</b> {rect.task_record.time}\n"
         )
-        
+
         # Store click coordinates to help hiding the popover
         self.cursor_x_at_popover = event.x
         self.cursor_y_at_popover = event.y
         self.is_popover_task_active = True
-        
+
         # Set popover position relative to the clicked rectangle
         self.popover_task.set_relative_to(widget)
         self.popover_task.set_pointing_to(rect)
@@ -636,7 +636,7 @@ class Window(Gtk.Window):
         self.drawingarea_diagram.queue_draw()
 
     def _save_diagram_to_png(self, filename):
-    
+
         # Calculate the bounds of the diagram
         max_x = max(rect.x + rect.width for rect in self.list_task_rects) if self.list_task_rects else 100
         max_x = max_x if max_x >= self.info_x_offset else self.info_x_offset

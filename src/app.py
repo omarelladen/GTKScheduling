@@ -35,7 +35,7 @@ class App():
 
         self.simulator = Simulator(self, self.simulation_config)
         result = self.reset()
-    
+
         self.window = Window(
             self,
             APP_ICON_FILE
@@ -91,7 +91,7 @@ class App():
         )
 
         return result
-        
+
     def _on_destroy(self, window):
         self.quit()
 
