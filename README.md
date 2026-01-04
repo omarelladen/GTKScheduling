@@ -22,7 +22,6 @@ The scheduling parameters can be changed by editing the data/tasks.
 
 ## Install the app on Linux
 ```sh
-cd GTKScheduling
 sudo scripts/install.sh
 ```
 After installing, you can launch the app from the application menu of your desktop environment or run:
@@ -32,6 +31,5 @@ gtkscheduling
 
 ## Uninstall app
 ```sh
-cd GTKScheduling
 sudo scripts/uninstall.sh
 ```
