@@ -55,14 +55,16 @@ class App():
             sys.exit(0)
 
     def show_help(self):
-        print("Usage:")
-        print(f"  {self.name_lower} [OPTION…]")
-        print("")
-        print("Help Options:")
-        print("  -h, --help                 Show help options")
-        print("")
-        print("Application Options:")
-        print("  -v, --version              Print version information and exit")
+        print(
+            "Usage:\n"
+           f"  {self.name_lower} [OPTION…]\n"
+            "\n"
+            "Help Options:\n"
+            "  -h, --help                 Show help options\n"
+            "\n"
+            "Application Options:\n"
+            "  -v, --version              Print version information and exit\n"
+        )
 
     def show_version(self):
         print(f"{self.name} {self.version}")
