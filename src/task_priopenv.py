@@ -2,7 +2,8 @@
 from .task import Task
 
 class Task(Task):
-    def __init__(self,
+    def __init__(
+        self,
         id,
         color_hex,
         start_time,
@@ -10,7 +11,14 @@ class Task(Task):
         priority,
         list_events = []
     ):
-        super().__init__(id, color_hex, start_time, duration, priority, list_events)
+        super().__init__(
+            id,
+            color_hex,
+            start_time,
+            duration,
+            priority,
+            list_events
+        )
 
         self.dynamic_priority = self.priority
 

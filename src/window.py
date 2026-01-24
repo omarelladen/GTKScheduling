@@ -26,7 +26,9 @@ class Window(Gtk.Window):
         # Set the app icon from file
         if self.app_icon_path:
             try:
-                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.app_icon_path, 64, 64, True)
+                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    self.app_icon_path, 64, 64, True
+                )
                 self.set_icon(self.pixbuf)
             except Exception as e:
                 self.pixbuf = None
@@ -154,7 +156,9 @@ class Window(Gtk.Window):
         headerbar.pack_start(bt)
 
         # Speed Slider
-        slider = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, min=10, max=300, step=1)
+        slider = Gtk.Scale.new_with_range(
+            Gtk.Orientation.HORIZONTAL, min=10, max=300, step=1
+        )
         slider.set_draw_value(False)
         slider.set_size_request(120, -1)
         slider.set_value(self.app.simulator.timer.interval_ms)
@@ -314,13 +318,13 @@ class Window(Gtk.Window):
 
     def update_diagram_size(self):
         # Recalculates and sets the size of the drawing area based on task data
-        drawingarea_width = sum(
+        drawingarea_w = sum(
             task.duration
             for task in self.app.simulator.list_tasks
         ) * (self.rect_width + self.rect_gap_x) * 1.05
-        drawingarea_height = len(self.app.simulator.list_tasks) * self.lines_dist_y * 1.1
+        drawingarea_h = len(self.app.simulator.list_tasks) * self.lines_dist_y * 1.1
 
-        self.drawingarea_diagram.set_size_request(drawingarea_width, drawingarea_height)
+        self.drawingarea_diagram.set_size_request(drawingarea_w, drawingarea_h)
 
     def set_play_icon_on_finish(self):
         # Called when the simulation ends to force the Play/Pause button to show the Play icon
@@ -395,7 +399,9 @@ class Window(Gtk.Window):
 
     def _on_click_skip(self, button):
         # self.app.simulator.skip()
-        while not self.app.simulator.finished() and not self.app.simulator.deadlock:
+        while (not self.app.simulator.finished() and
+               not self.app.simulator.deadlock
+        ):
             self._on_click_next(None)
 
     def _on_click_restart(self, widget):
@@ -485,7 +491,11 @@ class Window(Gtk.Window):
         y_pos = 0
         for task_num, _ in enumerate(self.app.simulator.list_tasks, 1):
             x_pos = 0 if task_num >= 10 else self.rect_x0 / 4
-            y_pos = self.rect_y0 + self.lines_dist_y * (task_num - 1) + self.rect_height - 2
+            y_pos = (
+                self.rect_y0
+                + self.lines_dist_y * (task_num - 1)
+                + self.rect_height - 2
+            )
 
             # Draw the text
             cr.move_to(x_pos, y_pos)
@@ -493,7 +503,9 @@ class Window(Gtk.Window):
 
         # X-axis (time)
         for time in range(self.app.simulator.time + 1):
-            cr.move_to(self.rect_x0-2 + (time-1)*(self.rect_width + self.rect_gap_x), y_pos + 2*self.rect_height)
+            cr.move_to(
+                self.rect_x0-2 + (time-1)*(self.rect_width + self.rect_gap_x),
+                y_pos + 2*self.rect_height)
             cr.show_text(str(time))
 
     def _draw_task_rects(self, widget, cr: cairo.Context):
@@ -509,7 +521,11 @@ class Window(Gtk.Window):
         cr.set_font_size(10)
 
         # Starting position
-        y = self.rect_y0 + self.lines_dist_y * len(self.app.simulator.list_tasks) + 40
+        y = (
+            self.rect_y0
+            + self.lines_dist_y * len(self.app.simulator.list_tasks)
+            + 40
+        )
         self.info_x_offset = self.rect_x0
         spacing = 20
 
@@ -587,7 +603,13 @@ class Window(Gtk.Window):
                         self.rect_width,
                         self.rect_height,
                         (0.4, 0.4, 0.4, 0.5),
-                        TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.simulator.time)
+                        TaskRecord(
+                            task,
+                            task.state,
+                            task.progress,
+                            task.turnaround_time,
+                            task.waiting_time,
+                            self.app.simulator.time)
                     )
                 )
 
@@ -604,7 +626,13 @@ class Window(Gtk.Window):
                         self.rect_width,
                         self.rect_height,
                         (0.7, 0.7, 0.7, 0.5),
-                        TaskRecord(task, task.state, task.progress, task.turnaround_time, task.waiting_time, self.app.simulator.time)
+                        TaskRecord(
+                            task,
+                            task.state,
+                            task.progress,
+                            task.turnaround_time,
+                            task.waiting_time,
+                            self.app.simulator.time)
                     )
                 )
 
@@ -640,14 +668,20 @@ class Window(Gtk.Window):
         # Calculate the bounds of the diagram
         max_x = max(rect.x + rect.width for rect in self.list_task_rects) if self.list_task_rects else 100
         max_x = max_x if max_x >= self.info_x_offset else self.info_x_offset
-        max_y = self.rect_y0 + self.lines_dist_y * (len(self.app.simulator.list_tasks) - 1) + self.rect_height
+        max_y = (
+            self.rect_y0
+            + self.lines_dist_y * (len(self.app.simulator.list_tasks) - 1)
+            + self.rect_height
+        )
 
         # Add padding
         surface_width  = int(max_x + self.rect_x0)
         surface_height = int(max_y + self.rect_y0 + 30)
 
         # Create Cairo surface
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, surface_width, surface_height)
+        surface = cairo.ImageSurface(
+            cairo.FORMAT_ARGB32, surface_width, surface_height
+        )
         cr = cairo.Context(surface)
 
         # Set a white background
