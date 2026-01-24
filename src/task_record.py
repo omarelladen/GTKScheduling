@@ -1,6 +1,7 @@
 
 class TaskRecord():
-    def __init__(self,
+    def __init__(
+        self,
         task,
         state,
         progress,

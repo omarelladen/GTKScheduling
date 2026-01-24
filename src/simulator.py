@@ -4,7 +4,8 @@ from .timer import Timer
 from .mutex import Mutex
 
 class Simulator():
-    def __init__(self,
+    def __init__(
+        self,
         app,
         simulation_config
     ):

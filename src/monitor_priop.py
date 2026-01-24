@@ -1,6 +1,7 @@
 
 class Monitor():
-    def __init__(self,
+    def __init__(
+        self,
         simulator
     ):
         self.simulator = simulator

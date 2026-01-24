@@ -1,7 +1,8 @@
 import queue
 
 class Mutex():
-    def __init__(self,
+    def __init__(
+        self,
         id,
         simulator
     ):

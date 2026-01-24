@@ -9,7 +9,8 @@ from .task_rectangle import TaskRectangle
 from .task_record import TaskRecord
 
 class Window(Gtk.Window):
-    def __init__(self,
+    def __init__(
+        self,
         app,
         app_icon_path = None
     ):

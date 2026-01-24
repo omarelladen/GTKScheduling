@@ -1,6 +1,7 @@
 
 class Task():
-    def __init__(self,
+    def __init__(
+        self,
         id,
         color_hex,
         start_time,

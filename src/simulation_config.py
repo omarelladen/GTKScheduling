@@ -6,7 +6,8 @@ import subprocess
 from .task import Task
 
 class SimulationConfig():
-    def __init__(self,
+    def __init__(
+        self,
         tasks_path,
         alg_dir_path
     ):
