@@ -1,5 +1,5 @@
-
 from .task import Task
+
 
 class Task(Task):
     def __init__(

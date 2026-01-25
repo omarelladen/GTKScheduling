@@ -3,6 +3,7 @@ import queue
 from .timer import Timer
 from .mutex import Mutex
 
+
 class Simulator():
     def __init__(
         self,

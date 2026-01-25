@@ -5,6 +5,7 @@ import subprocess
 
 from .task import Task
 
+
 class SimulationConfig():
     def __init__(
         self,

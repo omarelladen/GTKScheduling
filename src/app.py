@@ -10,6 +10,7 @@ from .window import Window
 from .simulator import Simulator
 from .simulation_config import SimulationConfig
 
+
 # Include config variables
 exec(open("/usr/local/share/gtkscheduling/config").read())
 

@@ -1,5 +1,6 @@
 import random
 
+
 class Monitor():
     def __init__(
         self,
