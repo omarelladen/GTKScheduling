@@ -40,3 +40,9 @@ gtkscheduling
 ```sh
 sudo scripts/uninstall.sh
 ```
+
+## License
+[GPLv3](./LICENSE)
+
+Copyright 2025-2026 Omar Zagonel El Laden\
+Copyright 2025      Gabriel Martines
