@@ -1,3 +1,6 @@
+# Copyright 2025-2026 Omar Zagonel El Laden
+# SPDX-License-Identifier: GPL-3.0-only
+
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib

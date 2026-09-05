@@ -1,3 +1,7 @@
+# Copyright 2025-2026 Omar Zagonel El Laden
+# Copyright 2025      Gabriel Martines
+# SPDX-License-Identifier: GPL-3.0-only
+
 import random
 
 
