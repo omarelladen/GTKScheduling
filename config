@@ -5,7 +5,7 @@ APP_VERSION="0.10.0";
 WEBSITE_URL="https://github.com/omarelladen/GTKScheduling";
 WEBSITE_LABEL="Repository";
 AUTHORS="Omar El Laden,Gabriel Martines";
-COPYRIGHT="Copyright © 2025 Omar El Laden, Gabriel Martines";
+COPYRIGHT="Copyright 2025-2026 Omar Zagonel El Laden\nCopyright 2025 Gabriel Martines";
 
 ORIG_SRC_DIR="src";
 ORIG_ICONS_DIR="data/icons";
